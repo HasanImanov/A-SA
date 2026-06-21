@@ -14,7 +14,35 @@ try {
   console.warn('QA data yüklənmədi:', e.message);
 }
 
+const Fuse = require('fuse.js');
+
+function butunSuallariHazirla() {
+  const siyahi = [];
+  for (const kateqoriya in QA_DATA) {
+    for (const item of QA_DATA[kateqoriya]) {
+      siyahi.push({
+        sual: item.sual,
+        cavab: item.cavab,
+        nov: item.nov || '',
+        kateqoriya: kateqoriya
+      });
+    }
+  }
+  return siyahi;
+}
+
+const FUZZY_DATA = butunSuallariHazirla();
+const fuse = new Fuse(FUZZY_DATA, {
+  keys: ['sual'],
+  threshold: 0.4,
+  includeScore: true
+});
+
+console.log('Fuzzy search hazırlandı:', FUZZY_DATA.length, 'sual yükləndi');
+
 const app = express();
+
+
 
 // ----------------------------
 // MIDDLEWARE
@@ -151,73 +179,185 @@ const pdfFiles = loadPDFs();
 // ----------------------------
 // ARAYIŞ PDF - Word şablondan
 // ----------------------------
+// app.post('/api/chat', async (req, res) => {
+//   try {
+//     const { messages } = req.body;
+
+//     const qaText = Object.entries(QA_DATA).map(([sheet, items]) => {
+//       if (!items.length) return '';
+//       return `\n## ${sheet}\n` + items.map(item =>
+//         `Sual: ${item.sual}\nCavab: ${item.cavab}`
+//       ).join('\n\n');
+//     }).filter(Boolean).join('\n');
+
+//     systemPrompt = `
+// Sən "AİSA" adlı süni intellekt sosial assistantsan. 3 saylı Bakı DOST Mərkəzinin əməkdaşlarına kömək edirsən.
+
+// ƏSAS QAYDA: Yalnız aşağıdakı sual-cavab bazasındakı məlumatları ver. Bazada olmayan heç bir məlumat, tövsiyə, qeyd və ya izahat əlavə etmə. Əgər sual bazada yoxdursa, sadəcə "Bu məsələ ilə bağlı bazamda məlumat yoxdur" de.
+
+// Azərbaycan dilində cavab ver. Qısa və konkret ol. Öz fikrini əlavə etmə.
+
+// SUAL-CAVAB BAZASI:
+// ${qaText}
+// `;
+
+//     const lastMessage = messages[messages.length - 1];
+//     const userContent = [];
+
+//     for (const pdf of pdfFiles) {
+//       userContent.push({
+//         type: 'document',
+//         source: {
+//           type: 'base64',
+//           media_type: 'application/pdf',
+//           data: pdf.base64
+//         }
+//       });
+//     }
+
+//     if (typeof lastMessage.content === 'string') {
+//       userContent.push({ type: 'text', text: lastMessage.content });
+//     } else {
+//       userContent.push(...lastMessage.content);
+//     }
+
+//     const updatedMessages = [
+//       ...messages.slice(0, -1),
+//       { role: 'user', content: userContent }
+//     ];
+
+//     const response = await fetch('https://api.anthropic.com/v1/messages', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'x-api-key': process.env.ANTHROPIC_API_KEY,
+//         'anthropic-version': '2023-06-01'
+//       },
+//       body: JSON.stringify({
+//         model: 'claude-sonnet-4-5',
+//         max_tokens: 2048,
+//         system: systemPrompt,
+//         messages: updatedMessages
+//       })
+//     });
+
+//     const data = await response.json();
+//     res.json(data);
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+// ----------------------------
+// CHAT endpoint (Ollama versiyası)
+// ----------------------------
+// app.post('/api/chat', async (req, res) => {
+//   try {
+//     const { messages } = req.body;
+
+//     const lastUserMessage =
+//       messages?.filter(m => m.role === 'user').slice(-1)[0]?.content || '';
+
+//     // QA_DATA text build
+//     const qaText = Object.entries(QA_DATA).map(([sheet, items]) => {
+//       if (!items.length) return '';
+//       return `\n## ${sheet}\n` + items.map(item =>
+//         `Sual: ${item.sual}\nCavab: ${item.cavab}`
+//       ).join('\n\n');
+//     }).filter(Boolean).join('\n');
+
+//     // LIMIT (ÇOX VACİB)
+//     const qaTextShort = qaText.slice(0, 6000);
+
+//     console.log("QA_DATA sheets:", Object.keys(QA_DATA).length);
+
+//     const systemPrompt = `
+// Sən "AİSA" adlı süni intellekt assistantsan. Bakı DOST Mərkəzi əməkdaşlarına kömək edirsən.
+
+// QAYDALAR:
+// 1. Əgər sual bazada varsa, DƏQİQ cavab ver.
+// 2. Yoxdursa, açıq şəkildə bildir ki bazada yoxdur.
+// 3. Azərbaycan dilində qısa cavab ver.
+
+// SUAL-CAVAB BAZASI:
+// ${qaTextShort}
+// `;
+
+//     const ollamaMessages = [
+//       { role: 'system', content: systemPrompt },
+//       ...messages.map(m => ({
+//         role: m.role,
+//         content: typeof m.content === 'string'
+//           ? m.content
+//           : (Array.isArray(m.content)
+//               ? m.content.map(c => c.text || '').join('\n')
+//               : '')
+//       }))
+//     ];
+
+//     const response = await fetch('http://localhost:11434/api/chat', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//         model: 'qwen3:8b',
+//         messages: ollamaMessages,
+//         stream: false
+//       })
+//     });
+
+//     if (!response.ok) {
+//       const errText = await response.text();
+//       console.error("OLLAMA ERROR:", errText);
+//       throw new Error(`Ollama error (${response.status})`);
+//     }
+
+//     const data = await response.json();
+
+//     const replyText =
+//       data?.message?.content || "Cavab tapılmadı";
+
+//     return res.json({
+//       content: [
+//         { type: 'text', text: replyText }
+//       ]
+//     });
+
+//   } catch (error) {
+//     console.error('CHAT ERROR:', error);
+
+//     return res.status(500).json({
+//       error: error.message || "Server error"
+//     });
+//   }
+// });
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages } = req.body;
-
-    const qaText = Object.entries(QA_DATA).map(([sheet, items]) => {
-      if (!items.length) return '';
-      return `\n## ${sheet}\n` + items.map(item =>
-        `Sual: ${item.sual}\nCavab: ${item.cavab}`
-      ).join('\n\n');
-    }).filter(Boolean).join('\n');
-
-    systemPrompt = `
-Sən "AİSA" adlı süni intellekt sosial assistantsan. 3 saylı Bakı DOST Mərkəzinin əməkdaşlarına kömək edirsən.
-
-ƏSAS QAYDA: Yalnız aşağıdakı sual-cavab bazasındakı məlumatları ver. Bazada olmayan heç bir məlumat, tövsiyə, qeyd və ya izahat əlavə etmə. Əgər sual bazada yoxdursa, sadəcə "Bu məsələ ilə bağlı bazamda məlumat yoxdur" de.
-
-Azərbaycan dilində cavab ver. Qısa və konkret ol. Öz fikrini əlavə etmə.
-
-SUAL-CAVAB BAZASI:
-${qaText}
-`;
-
     const lastMessage = messages[messages.length - 1];
-    const userContent = [];
+    const sualMetni = typeof lastMessage.content === 'string'
+      ? lastMessage.content
+      : (Array.isArray(lastMessage.content) ? lastMessage.content.map(c => c.text || '').join(' ') : '');
 
-    for (const pdf of pdfFiles) {
-      userContent.push({
-        type: 'document',
-        source: {
-          type: 'base64',
-          media_type: 'application/pdf',
-          data: pdf.base64
-        }
-      });
-    }
+    const netice = fuse.search(sualMetni);
 
-    if (typeof lastMessage.content === 'string') {
-      userContent.push({ type: 'text', text: lastMessage.content });
+    let cavabMetni;
+    if (netice.length > 0 && netice[0].score < 0.4) {
+      cavabMetni = netice[0].item.cavab;
+    } else if (netice.length > 0) {
+      cavabMetni = 'Dəqiq tapa bilmədim, bəlkə bunlardan birini nəzərdə tutursunuz?\n\n' +
+        netice.slice(0, 3).map((n, i) => (i + 1) + '. ' + n.item.sual).join('\n');
     } else {
-      userContent.push(...lastMessage.content);
+      cavabMetni = 'Bu məsələ ilə bağlı bazamda məlumat yoxdur.';
     }
 
-    const updatedMessages = [
-      ...messages.slice(0, -1),
-      { role: 'user', content: userContent }
-    ];
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages: updatedMessages
-      })
+    res.json({
+      content: [{ type: 'text', text: cavabMetni }]
     });
 
-    const data = await response.json();
-    res.json(data);
-
   } catch (error) {
-    console.error(error);
+    console.error('CHAT ERROR:', error);
     res.status(500).json({ error: error.message });
   }
 });
