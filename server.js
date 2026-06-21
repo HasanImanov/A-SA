@@ -331,7 +331,7 @@ const pdfFiles = loadPDFs();
 //     });
 //   }
 // });
-
+// fuzzy search
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages } = req.body;
