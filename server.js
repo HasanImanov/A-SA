@@ -32,13 +32,91 @@ function butunSuallariHazirla() {
 }
 
 const FUZZY_DATA = butunSuallariHazirla();
+
 const fuse = new Fuse(FUZZY_DATA, {
   keys: ['sual'],
   threshold: 0.4,
-  includeScore: true
+  includeScore: true,
+  ignoreLocation: true,
+  distance: 1000
 });
 
 console.log('Fuzzy search hazırlandı:', FUZZY_DATA.length, 'sual yükləndi');
+
+const DAYANMA_SOZLERI = new Set([
+  've', 'ya', 'ki', 'bu', 'necə', 'hansı', 'üçün', 'ilə', 'də', 'da',
+  'nə', 'olan', 'olur', 'edir', 'var', 'ola', 'bilər', 'görə',
+  'haqqında', 'barədə', 'zaman', 'zamanı', 'şəxs', 'şəxsə', 'şəxsin'
+]);
+
+// Qısaltmalar lüğəti: qısa forma -> tam açıq forma (bir neçə sözlə)
+
+const SINONIM_LUGETI = {
+  'pul': 'məbləğ',
+  'vəsait': 'məbləğ',
+  'mıqdar': 'məbləğ',
+
+  'uşaq': 'övlad',
+  'körpə': 'övlad',
+
+  'ana': 'valideyn',
+  'ata': 'valideyn',
+
+  'yardım': 'müavinət',
+  'kömək': 'müavinət',
+
+  'kağız': 'sənəd',
+  'vərəqə': 'sənəd',
+  'sənədlər': 'sənəd',
+
+  'müraciət': 'ərizə',
+  'müraciəti': 'ərizə',
+
+  'qeydiyyat': 'qeydiyyatı',
+
+  'pensiya': 'pensiyası',
+
+  'müddət': 'vaxt',
+  'müddəti': 'vaxt'
+};
+
+const ABREVIATURALAR = {
+  'üdsy': 'ünvanlı dövlət sosial yardımı',
+  'udsy': 'ünvanlı dövlət sosial yardımı',
+
+  'vemtas': 'vahid elektron məlumat toplama analiz sistemi',
+
+  'şt': 'sosial təminat',
+  'esa': 'əhalinin sosial müdafiəsi',
+};
+
+function sozlereAyir(metn) {
+  const xammSozler = (metn || '')
+    .toLowerCase()
+    .replace(/[^\p{L}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter(s => s.length > 1);
+
+  // Qısaltmaları aç (bir söz -> bir neçə söz ola bilər)
+  const genisleyenSozler = [];
+  for (const soz of xammSozler) {
+    if (ABREVIATURALAR[soz]) {
+      genisleyenSozler.push(...ABREVIATURALAR[soz].split(' '));
+    } else {
+      genisleyenSozler.push(soz);
+    }
+  }
+
+  return genisleyenSozler
+    .filter(s => !DAYANMA_SOZLERI.has(s))
+    .map(s => SINONIM_LUGETI[s] || s);
+}
+
+FUZZY_DATA.forEach(item => {
+  item._sozSet = new Set(sozlereAyir(item.sual));
+});
+
+console.log('Söz sayı axtarışı hazırlandı.');
 
 const app = express();
 
@@ -332,6 +410,17 @@ const pdfFiles = loadPDFs();
 //   }
 // });
 // fuzzy search
+
+
+// ----------------------------
+// CHAT endpoint (Fuzzy + söz sayı axtarışı)
+// ----------------------------
+// ----------------------------
+// CHAT endpoint (söz sayı axtarışı + sinonim + abreviatura + siyahıdan seçim)
+// ----------------------------
+// ----------------------------
+// CHAT endpoint (söz sayı axtarışı + sinonim + abreviatura + siyahı yaddaşı)
+// ----------------------------
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages } = req.body;
@@ -340,16 +429,102 @@ app.post('/api/chat', async (req, res) => {
       ? lastMessage.content
       : (Array.isArray(lastMessage.content) ? lastMessage.content.map(c => c.text || '').join(' ') : '');
 
-    const netice = fuse.search(sualMetni);
+    const temizMetn = sualMetni.trim().toLowerCase();
+
+    // --- 1. İstifadəçi sadəcə rəqəm yazıbsa, ən son siyahı formatındaki AI mesajından həmin nömrəni tap ---
+    const reqemMatch = temizMetn.match(/^(\d+)\.?$/);
+    if (reqemMatch) {
+      const seciliNomre = parseInt(reqemMatch[1], 10);
+      console.log('🔢 Rəqəm aşkar edildi:', seciliNomre, '| ümumi mesaj sayı:', messages.length);
+
+      // Ən son AI mesajını yox, ən son SİYAHI formatında olan AI mesajını axtar
+      const evvelkiAiMesajlar = messages.slice(0, -1).filter(m => m.role === 'assistant').reverse();
+
+      let oncekiMetn = null;
+      for (const aiMesaj of evvelkiAiMesajlar) {
+        const metn = typeof aiMesaj.content === 'string'
+          ? aiMesaj.content
+          : (Array.isArray(aiMesaj.content) ? aiMesaj.content.map(c => c.text || '').join(' ') : '');
+
+        if (/^\d+\.\s/m.test(metn)) {
+          oncekiMetn = metn;
+          break;
+        }
+      }
+
+      if (!oncekiMetn) {
+        console.log('⚠ Heç bir siyahı formatında AI mesajı tapılmadı!');
+      }
+
+      if (oncekiMetn) {
+        const siyahiSatirleri = oncekiMetn.split('\n').filter(s => /^\d+\.\s/.test(s.trim()));
+        console.log('📋 Siyahıdaki sətir sayı:', siyahiSatirleri.length);
+
+        if (siyahiSatirleri.length > 0 && seciliNomre >= 1 && seciliNomre <= siyahiSatirleri.length) {
+          const seciliSualMetni = siyahiSatirleri[seciliNomre - 1].replace(/^\d+\.\s*/, '').trim();
+          console.log('🎯 Axtarılan sual mətni:', JSON.stringify(seciliSualMetni));
+
+          const tapilan = FUZZY_DATA.find(item => item.sual.trim() === seciliSualMetni);
+          console.log('✓ Tapıldımı?', !!tapilan);
+
+          if (tapilan) {
+            return res.json({
+              content: [{ type: 'text', text: tapilan.cavab }]
+            });
+          }
+        }
+      }
+    }
+
+    // --- 2. Salamlaşma yoxlanışı ---
+    const salamlar = ['salam', 'salam necəsən', 'sağol', 'hello', 'hi'];
 
     let cavabMetni;
-    if (netice.length > 0 && netice[0].score < 0.4) {
-      cavabMetni = netice[0].item.cavab;
-    } else if (netice.length > 0) {
-      cavabMetni = 'Dəqiq tapa bilmədim, bəlkə bunlardan birini nəzərdə tutursunuz?\n\n' +
-        netice.slice(0, 3).map((n, i) => (i + 1) + '. ' + n.item.sual).join('\n');
+
+    if (salamlar.some(s => temizMetn === s || temizMetn.startsWith(s + ' ') || temizMetn.startsWith(s + ','))) {
+      cavabMetni = 'Salam! Mən AİSAyam, sizə necə kömək edə bilərəm?';
+
     } else {
-      cavabMetni = 'Bu məsələ ilə bağlı bazamda məlumat yoxdur.';
+
+      // --- 3. Söz sayı əsaslı axtarış ---
+      const sorguSozleri = sozlereAyir(sualMetni);
+
+      const skorlu = FUZZY_DATA
+        .map(item => ({
+          item,
+          skor: sorguSozleri.filter(s => item._sozSet.has(s)).length
+        }))
+        .filter(x => x.skor > 0)
+        .sort((a, b) => b.skor - a.skor);
+
+      if (skorlu.length === 0) {
+        cavabMetni = 'Bu məsələ ilə bağlı bazamda məlumat yoxdur.';
+
+      } else {
+        const maxSkor = skorlu[0].skor;
+        const tepedekiler = skorlu.filter(x => x.skor === maxSkor);
+        const ikinciSkor = skorlu.find(x => x.skor < maxSkor)?.skor || 0;
+        const FERQ_ESIK = 2; // bu qədər və ya az fərq varsa, "yaxın hesab" sayılır
+
+        if (tepedekiler.length === 1 && (maxSkor - ikinciSkor) > FERQ_ESIK) {
+          // Aydın qalib, etibarlı fərq
+          cavabMetni = tepedekiler[0].item.cavab;
+          console.log('✓ Tək qalib (aydın fərq):', tepedekiler[0].item.sual);
+
+        } else if (tepedekiler.length === 1) {
+          // Tək qalib, amma fərq kiçikdir — yaxın namizədi də göstər
+          const yaxinNamizedler = skorlu.filter(x => x.skor >= maxSkor - FERQ_ESIK).slice(0, 5);
+          console.log('⚠ Yaxın hesab, namizədlər:', yaxinNamizedler.map(n => `${n.item.sual} (${n.skor})`));
+          cavabMetni = 'Dəqiq tapa bilmədim, bəlkə bunlardan birini nəzərdə tutursunuz?\n\n' +
+            yaxinNamizedler.map((n, i) => (i + 1) + '. ' + n.item.sual).join('\n');
+
+        } else {
+          // Bərabər skorlu bir neçə namizəd
+          console.log('⚠ Bərabər skor, namizədlər:', tepedekiler.map(n => n.item.sual));
+          cavabMetni = 'Dəqiq tapa bilmədim, bəlkə bunlardan birini nəzərdə tutursunuz?\n\n' +
+            tepedekiler.slice(0, 5).map((n, i) => (i + 1) + '. ' + n.item.sual).join('\n');
+        }
+      }
     }
 
     res.json({
@@ -361,7 +536,6 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 // ----------------------------
 // START
 // ----------------------------
