@@ -922,39 +922,169 @@
   ],
   "Prezident təqaüdləri": [
     {
-      "nov": "",
-      "sual": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edilmiş şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
-      "cavab": "Əgər vətəndaşın gözdən əlilliyi 2019-cu ildə müəyyən edilmiş, lakin, hər hansı səbəbdən cari tarixədək təqaüd təyin edilməmişdirsə, belə olan halda təqaüdün təyinatı hansı qaydada və hansı tarixdən həyata keçirilir?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edilmiş şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Əgər vətəndaşın gözdən əlilliyi 2019-cu ildə müəyyən edilmiş, lakin, hər hansı səbəbdən cari tarixədək təqaüd təyin edilməmişdirsə, belə olan halda təqaüdün təyinatı hansı qaydada və hansı tarixdən həyata keçirilir?",
+      "cavab": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edilmiş şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü 01.01.2021-ci il tarixindən təsis edilmişdir.  01.04.2019-cu il tarixinədək əmək pensiyaçılarına pensiyanın üzərində əlavə, müavinət alan şəxslərə isə Prezident təqaüdü kimi ödənilmişdir. 01.04.2019-cu il tarixindən 01.01.2021-ci il tarixinədək əmək pensiyası alan şəxslərə münasibətdə həm, əmək pensiyasının üzərində əlavə kimi, həm də ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi olan şəxs kimi Prezident təqaüdü, müavinət alan şəxslərə münasibətdə isə ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi olan şəxs kimi Prezident təqaüdü olaraq ödənilmişdir.  Əgər şəxs təqaüdün ötən dövr ödənişlərini almamışdırsa, bu halda şəxsin müraciəti müvafiq sənədlərlə birgə DSMF-nin Sosial Ödənişlərin təyinatı üzrə Mərkəzi Filiala kargüzarlıq edilir."
     },
     {
-      "nov": "",
-      "sual": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə (gözdən əlilliyi olan şəxslər istisna olmaqla) Azərbaycan Respublikası Prezidentinin təqaüdü",
-      "cavab": "Əgər vətəndaşın əlilliyi 2018-ci ildə müəyyən edilmiş, lakin, hər hansı səbəbdən cari tarixədək təqaüd təyin edilməmişdirsə, belə olan halda təqaüdün təyinatı hansı qaydada və hansı tarixdən həyata keçirilir?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edilmiş şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaş müharibə veteranı kimi Prezident təqaüdü alan şəxsdir. Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edildiyi halda Prezident təqaüdünün təyinatı hansı qaydada həyata keçirilir?",
+      "cavab": "Müraciət edən şəxsə Azərbaycan Respublikası Prezidentinin təqaüdünü almaq hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin qeyd olunan təqaüdlərindən yalnız biri – ən yüksəyi verilməsi barədə müvafiq məlumat verilir. Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyə görə Prezident təqaüdünün təyin olunması (müharibə veteranına görə Prezident təqaüdü ödənişinin dayandırılması) ilə bağlı şəxsin müraciəti müvafiq sənədlərlə birgə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filiala kargüzarlıq edilir."
     },
     {
-      "nov": "",
-      "sual": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
-      "cavab": "Vətəndaşın müvafiq sahədə iş stajı hansı formada hesablanır?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edilmiş şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaşa təqaüdün proaktiv təyinatı həyata keçirilmədiyi təqdirdə ərizə qəbulu zərurəti yaranarsa, vətəndaşdan ərizə hansı formada qəbul edilir? Ərizəyə imza çəkməsi prosesi necə tənzimlənir?",
+      "cavab": "Gözdən əlilliyi olan şəxsin müraciəti zamanı tərtib olunan ərizədə əks olunan məlumatlar həmin şəxsə səsli formada oxunur və bu barədə ərizədə müvafiq qeyd aparılır. Ərizə müraciət edən gözdən əlilliyi olan şəxs tərəfindən imzalanır (və ya gözdən əlilliyi olan şəxsin imza möhürü ilə)."
     },
     {
-      "nov": "",
-      "sual": "Xalq\" və \"Əməkdar\" fəxri adlarına görə aylıq təqaüd",
-      "cavab": "“Xalq” və “əməkdar” fəxri adlarına görə aylıq təqaüdün təyinatı hansı sənədlər əsasında həyata keçirilir?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi müəyyən edilmiş şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaş ərizə ilə müraciət zamanı ərizəni imza-möhürlə istifadə etdiyi təqdirdə imza olaraq qəbul edilir?",
+      "cavab": "Gözdən əlilliyi olan şəxsin ərizə ilə müraciəti zamanı imza möhüründən istifadə etdiyi halda, həmin möhür şəxsin imzası kimi qəbul edilir."
     },
     {
-      "nov": "",
-      "sual": "Müharibə veteranlarına Azərbaycan Respublikası Prezidentinin təqaüdü",
-      "cavab": "Təqaüdün təyinatı ilə bağlı müraciət zamanı müraciət hansı formada icra edilir?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə (gözdən əlilliyi olan şəxslər istisna olmaqla) Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Əgər vətəndaşın əlilliyi 2018-ci ildə müəyyən edilmiş, lakin, hər hansı səbəbdən cari tarixədək təqaüd təyin edilməmişdirsə, belə olan halda təqaüdün təyinatı hansı qaydada və hansı tarixdən həyata keçirilir?",
+      "cavab": "Prezident təqaüdü bu kateqoriyadan olan sosial müavinət alan şəxslərə 01.04.2014-cü il tarixindən, əmək pensiyaçılarına isə 01.04.2019-cu il tarixinədək əmək pensiyasının sığorta hissəsinə əlavə kimi, 01.04.2019-cu il tarixindən sonra isə Prezident təqaüdü kimi verilir."
     },
     {
-      "nov": "",
-      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
-      "cavab": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsin ona qulluq edə biləcək qohumluq əlaqəsi olan şəxs olmadıqda ona hansı məlumat verilir?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə (gözdən əlilliyi olan şəxslər istisna olmaqla) Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxs orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsə qulluğa görə Prezident təqaüdünün təyin edilməsi üçün müraciət etdikdə müraciət hansı formada icra edilir?",
+      "cavab": "Fəaliyyət qabiliyyəti olmayan şəxslər istisna olmaqla digər hallarda orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxs başqa  orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsə qulluq edilməsi ilə bağlı müraciəti hər iki şəxsin iştirakı olmaqla müvafiq sənədlərlə birgə şəxsin müraciəti DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filiala kargüzarlıq edilir."
     },
     {
-      "nov": "",
-      "sual": "Şəhid ailəsi üçün və 20 Yanvar şəhidi ailəsinə Azərbaycan Respublikası Prezidentinin təqaüdü",
-      "cavab": "Təqaüd almaq hüququ olan ailə üzvlərinin sayında dəyişiklik olduqda (valideynlərdən biri vəfat etdikdə, övladlarının 18 yaşı tamam olduqda və ya əyani təhsili bitirdikdə), təqaüdün ailə üzvləri arasında bölünməsi hansı qaydada həyata keçirilir?"
+      "nov": "Ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə (gözdən əlilliyi olan şəxslər istisna olmaqla) Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş uşağa təyin edilmiş Prezident təqaüdünün ödənişi uşağın 18 yaşı tamam olduqdan sonra hansı formada ödənilir?",
+      "cavab": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş uşağa təyin edilmiş Prezident təqaüdünün ödənişi uşağın 18 yaşı tamam olduqdan sonra avtomatlaşdırılmış qaydada öz adına təyin edilir. Təyin edilmədiyi halda isə, şəxsin müraciətinin aidiyyəti üzrə ərizə ilə kargüzarlıq edilməsi məqsədəuyğun hesab edilir."
+    },
+    {
+      "nov": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaşın müvafiq sahədə iş stajı hansı formada hesablanır?",
+      "cavab": "Əmək kitabçasında müvafiq qeydiyyat aparılan əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərin əmək kitabçasına baxış keçirilir, işə qəbul ediliyi tarixdən işdən azad olunduğu müddətlər (il,ay,gün) üzrə hesablanaraq ümumi iş stajı müəyyən edilir."
+    },
+    {
+      "nov": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaşın əmək müqaviləsi və aktiv VÖEN-i olmadıqda, lakin, fərdi şəxsi hesabında işləmədiyi müddətdə MDSS ödənişləri aşkarlandıqda, müraciət hansı formada icra olunur?",
+      "cavab": "Şəxsin MDSS hesablanan dövrlərə görə Prezident təqaüdü ödənişinin almaq hüququ olmaması barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaş “Əmək pensiyaları haqqında” Azərbaycan Respublikasının Qanununun 20-ci maddəsinə əsasən qulluq stajına görə əmək pensiyasına əlavələr təyin edilmiş pensiyaçı olduğu təqdirdə təqaüdün təyin edilməsi ilə bağlı müraciət hansı formada icra olunur?",
+      "cavab": "“Əmək pensiyaları haqqında” Azərbaycan Respublikasının Qanununun 20-ci maddəsinə əsasən qulluq stajına görə əmək pensiyasına əlavələr təyin edilmiş əmək pensiyaçılarına Prezident təqaüdü almaq hüququn olmaması barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Elmi dərəcəyə görə Prezident təqaüdü alan şəxsə sonradan ailə başçısını itirməyə görə əmək pensiyası təyin edildikdə (vəfat etmiş ailə başçısı “Əmək pensiyaları haqqında” Azərbaycan Respublikasının Qanununun 20-ci maddəsinə əsasən qulluq stajına görə əmək pensiyasına əlavələr təyin edilmiş pensiyaçı olarsa) təqaüdün ödənişi hansı formada həyata keçirilir?",
+      "cavab": "Elmi dərəcəyə görə Prezident təqaüdü alan şəxsə sonradan ailə başçısını itirməyə görə əmək pensiyası təyin edildiyi halda, həmin şəxs qulluq stajına görə əmək pensiyasına əlavələri də aldığından Prezident təqaüdün ödənişin dayandırılacağı barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaşın ümumilikdə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində 25 il stajı olduqda, lakin, bu stajın müəyyən hissəsi ölkə xaricində olduğu təqdirdə təqaüdün təyin edilməsi üçün müraciət zamanı vətəndaşa hansı məlumat verilir və müraciət necə icra olunur?",
+      "cavab": "Xarici ölkədəki əmək fəaliyyəti dövrünün əmək kitabçasında qeyd olunması üçün DMA-nın Bakı Regional Məşğulluq Agentliyinə müraciət etməsi tövsiyə olunur. Müvafiq məlumatlar əmək kitabçasında qeyd edildiyi təqdirdə, şəxsin ərizəsi digər sənədlərlə birlikdə aidiyyəti üzrə kargüzarlıq edilir."
+    },
+    {
+      "nov": "Əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Şəxsin təqaüdü almaq hüququnun yarandığı, lakin VÖEN-in aktiv statusda olduğu dövrlərin ödənilməsi ilə bağlı müraciət zamanı proses hansı qaydada tənzimlənir?",
+      "cavab": "VÖEN-in aktiv olduğu dövrlər ödənilməsi ilə bağlı müraciət edən şəxsin təqdim edilmiş vergi bəyannamələrinə əsasən dövriyyəsinin olmaması (hüququ yaranan VÖEN-in ativ olduğu dövrlər barədə) barədə arayış təqdim etdiyi halda müraciətə baxılması barədə müvafiq izahat verilir. Eyni zamanda, torpaq pay mülkiyyətçisi olduğu təqdirdə, MDSS ödənişlərinin olub-olmaması da dəqiqləşdirilməlidir."
+    },
+    {
+      "nov": "Xalq\" və \"Əməkdar\" fəxri adlarına görə aylıq təqaüd",
+      "sual": "“Xalq” və “əməkdar” fəxri adlarına görə aylıq təqaüdün təyinatı hansı sənədlər əsasında həyata keçirilir?",
+      "cavab": "Şəxsiyyət vəsiqəsi, Fəxri adla təltif olunma haqqında vəsiqənin və ya Azərbaycan Respublikası\nPrezidentinin müvafiq Sərəncamının surəti"
+    },
+    {
+      "nov": "Xalq\" və \"Əməkdar\" fəxri adlarına görə aylıq təqaüd",
+      "sual": "Vətəndaşa fəxri ad 01.01.2021-ci il tarixindən əvvəl verilmiş və vətəndaş ötən dövrdə işlədiyi müəssisədən ödəniş almamışdırsa, təqaüdün təyinatı və ötən dövr ödənişləri hansı qaydada həyata keçirilir?",
+      "cavab": "Şəxsin işlədiyi müəssisə Azərbaycan Respublikasının dövlət büdcəsindən maliyyələşən idarə və ya təşkilat olduqda, iş yerindən ödənişin 2021-ci ildən əvvəlki dövr üçün hansı tarixədək ödənildiyi və ya ödənilməsinin səbəbi qeyd edilmiş arayışla, özəl müəssisə olduqda, əlavə arayış tələb edilmədən ərizəsi sənədlərlə birlikdə aidiyyəti üzrə kargüzarlıq edilir."
+    },
+    {
+      "nov": "Xalq\" və \"Əməkdar\" fəxri adlarına görə aylıq təqaüd",
+      "sual": "Azərbaycan Respublikasının dövlət büdcəsindən maliyyələşən idarə və təşkilatlarında çalışan fəxri ad verilmiş şəxslər istisna olmaqla, digər şəxslər 01.01.2021-ci ildən əvvəlki dövr üzrə Prezident təqaüdünün təyin edilməsi üçün müraciət etdiyi halda müraciət hansı formada icra edilir?",
+      "cavab": "Şəxsin ərizəsi iş yerindən arayış tələb edilmədən sənədlərlə birlikdə aidiyyəti üzrə kargüzarlıq edilir."
+    },
+    {
+      "nov": "Xalq\" və \"Əməkdar\" fəxri adlarına görə aylıq təqaüd",
+      "sual": "Şəxs əməkdar fəxri adına görə təqaüd aldığı halda, daha sonra xalq fəxri adı verildikdə proses hansı qaydada tənzimlənir?",
+      "cavab": "Müraciət edən şəxsə Azərbaycan Respublikası Prezidentinin təqaüdünü almaq hüququ olan şəxslərə Azərbaycan Respublikası Prezidentinin qeyd olunan təqaüdlərindən yalnız biri – ən yüksəyi verilməsi barədə müvafiq məlumat verilir. Xalq fəxri adına görə Prezident təqaüdün təyin olunması ilə bağlı şəxsin müraciəti müvafiq sənədlərlə birlikdə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir."
+    },
+    {
+      "nov": "Müharibə veteranlarına Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Təqaüdün təyinatı ilə bağlı müraciət zamanı müraciət hansı formada icra edilir?",
+      "cavab": "Şəxs Birinci Qarabağ müharibəsi iştirakçısı olduğu halda şəxsin müraciəti müvafiq sənədlərlə birlikdə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir. Vətən müharibəsi iştirakçılarına münasibətdə Prezident təqaüdünün proaktiv qaydada təyin ediləcəyi bildirilir. Vətəndaş veteran vəsiqəsi ilə müraciətinin qəbul edilməsini təkid etdiyi halda, ərizə qəbul edilir, lakin təqaüdün başlama tarixinin vəsiqə verilən tarixdən müəyyən ediləcəyi, proaktiv təyinat aparıldığı təqdirdə isə, təyinatın başlama tarixinin 01.01.2022-ci il tarixindən olduğu bildirilir."
+    },
+    {
+      "nov": "Müharibə veteranlarına Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaşa veteran vəsiqəsi 2010-cu ildə verilmiş, hər hansı səbəbdən yararsız hala düşmüş və ya itirilmiş, yeni veteran vəsiqəsi isə 2024-cü ildə verilmiş, lakin ötən dövrdə təqaüd və ya müavinət ödənişi ödənilməmişdirsə, müraciət hansı formada və hansı sənədlərlə icra edilir?",
+      "cavab": "Vətəndaşın 2010-cu ildən müharibə veteranı statusuna malik olması barədə müvafiq qurumdan rəsmi arayış təqdim edildikdə, əvvəlki dövrdə rəsmi müraciəti olduğu halda həmin müraciət tarixindən əvvəlki 3 il üzrə sosial müavinət və 01.04.2019-cu il tarixdən Prezident təqaüdü ödənilir, rəsmi müraciəti olmadığı halda isə 01.04.2019-cu il tarixdən Prezident təqaüdü təyin edilir.Qeyd olunanları nəzərə alaraq şəxsin müraciəti müvafiq sənədlərlə (Şəxsiyyət vəsiqəsi, Veteranlıq vəsiqəsi və müvafiq arayışla) birlikdə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir."
+    },
+    {
+      "nov": "Müharibə veteranlarına Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Şəxsə veteran vəsiqəsi 2025-ci ildə verilmişdir, lakin 01.04.2019-cu il tarixindən olan ödənişlərin ödənilməsini tələb edirsə,  hansı məlumatlar verilir və müraciət hansı formada icra edilir?",
+      "cavab": "Şəxsə Prezident təqaüdünün veteranlıq vəsiqəsinin verilmə tarixindən təyin olunması ilə bağlı müvafiq izahat verilir. Əlavə olaraq şəxs Prezident təqaüdünün əvvəlki dövr üzrə ödənişlərin də ödənilməsi ilə bağlı təkid etdiyi halda şəxsin həm ilkin təyinatı üçün həmdə əvvəlki dövr üzrə ödənişlərinin verilməsi ilə bağlı müraciəti bir ərizədə qeyd edilərək müvafiq sənədlərlə birlikdə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir."
+    },
+    {
+      "nov": "Müharibə veteranlarına Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Lokal antiterror əməliyyatlarında iştirak etmiş və veteran vəsiqəsi verilmiş şəxslərə təqaüdün təyinatı hansı formada icra edilir və təyinatın başlama tarixi necə müəyyən edilir?",
+      "cavab": "Şəxsin müraciəti müvafiq sənədlərlə birlikdə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir. Prezident təqaüdün veteranlıq vəsiqəsinin verilmə tarixindən təyin olunacağı barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsin ona qulluq edə biləcək qohumluq əlaqəsi olan şəxs olmadıqda ona hansı məlumat verilir?",
+      "cavab": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsə qulluq edən, ailə üzvü olmayan şəxslərə münasibətdə Azərbaycan Respublikasının Mülki Məcəlləsinin 39-cu maddəsinə uyğun olaraq patronajın təyin edilməsi barədə qəyyumluq və himayəçilik orqanının qərarı ilə müraciət olunması barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Vətəndaşın əlilliyi 01.04.2019-cu ildə müəyyən edilmiş, lakin, hər hansı səbəbdən qulluğa görə təqaüd üçün müraciət edilməmişdirsə, 2025-ci ildə qulluğa görə Prezident təqaüdünün təyin edilməsi üçün müraciət edilən zaman ərizə hansı formada qəbul edilir?",
+      "cavab": "Əlilliyi olan şəxsə qulluq edən şəxs qəyyum və ya patronaj təyin edilmiş şəxs olduğu halda, təyinat müvafiq sərəncamın verildiyi tarixdən həyata keçirilir.\nAzərbaycan Respublikası Nazirlər Kabinetinin 2019-cu il 9 iyul tarixli 294 nömrəli Qərarı ilə təsdiq edilmiş Qaydaların 1.6-cı bəndində qeyd olunan ailə üzvləri olduğu halda əlilliyi olan şəxsin ərizəsində qulluq edən şəxsin ona 01.04.2019-cu il tarixindən qulluq etməsi barədə müvafiq məlumat göstərilməli və digər zəruri sənədlərlə birlikdə şəxsin müraciəti DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə müddətsiz əlilliyi müəyyən edilmiş uşağın 18 yaşı tamam olduqdan sonra öz fikirlərini aydın ifadə etmək qabiliyyəti olmayan şəxs olduğu müəyyən edildikdə, vətəndaşa hansı məlumat verilir və müraciət hansı formada icra olunur?",
+      "cavab": "Şəxsin özünü ifadə etmə qabiliyyəti, anlaqlı vəziyyətdə olmadığı, həmçinin imza çəkmək qabiliyyəti olmadığı hallarda, qəyyumun təyin edilməsi ilə bağlı aidiyyəti üzrə müraciət edilməsi tövsiyə edilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxs ona qulluq edəcək şəxs tərəfindən verilmiş etibarnamə ilə müraciət edirsə, müraciət hansı formada icra edilir?",
+      "cavab": "Qulluq edən şəxsin adına növbə verilərək orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxs tərəfindən etibarnamə əsasında və digər zəruri sənədlər əlavə olunmaqla şəxsin müraciəti DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsin və ona qulluq edəcək şəxsin etibarnaməsi ilə digər bir şəxs müraciət edirsə, müraciət hansı formada icra edilir?",
+      "cavab": "Həm əlilliyi olan şəxsin, həm də ona qulluq edən şəxsin etibar etdiyi qanuni nümayəndənin müraciəti qəbul edilir və qulluq edən şəxsin adından növbə verilərək nümayəndə tərəfindən zəruri sənədlər əlavə olunmaqla şəxsin müraciəti DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsin patronajı həmin şəxsi iştirakı olmadan müraciət etdiyi zaman müraciət hansı formada icra edilir?",
+      "cavab": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsə qulluq edən, ailə üzvü olmayan şəxslərə münasibətdə Azərbaycan Respublikasının Mülki Məcəlləsinin 39-cu maddəsinə uyğun olaraq patronajın təyin edilməsi barədə qəyyumluq və himayəçilik orqanının qərarının surəti və Şəxsin həqiqətən ona qulluq etdiyi barədə əlilliyi olan şəxsin (fəaliyyət qabiliyyəti olmayan orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslər istisna olmaqla) ərizəsinin olması, yəni şəxsin iştirakının olması barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "25.09.2024-cü il tarixində müvafiq məhkəmə tərəfindən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsin fəaliyyət qabiliyyəti olmayan şəxs hesab edilməsi barədə qətnamə, 23.12.2024-cü il tarixində isə ona qəyyum təyin edilməsi barədə sərəncam verilmişdirsə, təqaüdün təyinatı hansı tarixdən hesablanır?",
+      "cavab": "Qəyyumun təyin edilməsi barədə qəyyumluq və himayəçilik orqanı tərəfindən verilmiş qərarın tarixindən hesablanır."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "17 yaşı tamam olmuş əlilliyi olan uşaq ona qulluğa görə təyin edilmiş Prezident təqaüdünün dayandırılması üçün müraciət etdikdə, müraciət hansı formada icra edilir?",
+      "cavab": "Əlilliyi müəyyən edilmiş 14-18 yaşınadək uşaq (14 yaşadək uşaqlara münasibətdə qəyyumluq və himayə orqanı) təqaüd alan şəxsin onlara qulluq etmədiyi barədə müraciət etdiyi gündən təqaüd dayandırılır."
+    },
+    {
+      "nov": "Orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərə və ya əlilliyi olan uşaqlara qulluq edən şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Əlilliyi olan uşağın valideyni digər valideynə uşağa qulluğa görə təyin edilmiş Prezident təqaüdünün öz adına təyin edilməsi üçün müraciət etdikdə, müraciət hansı formada icra edilir və hansı məlumat verilir?",
+      "cavab": "Əlilliyi olan uşağa qulluğa görə Prezident təqaüdünün öz adında dəyişdirilməsi ilə bağlı müraciətə Prezident təqaüdünün təyinatı aparılmış digər valideynin razılıq ərizə olmaqla şəxsin müraciəti müvafiq sənədlərlə birlikdə DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir. Nikahın pozulması zamanı isə məhkəmə qətnaməsinə əsasən (uşağın həmin valideyinin himayəsində olması halında) şəxsin müraciəti müvafiq sənədlərlə birlikdə kargüzarlıq edilir."
+    },
+    {
+      "nov": "Şəhid ailəsi üçün və 20 Yanvar şəhidi ailəsinə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Təqaüd almaq hüququ olan ailə üzvlərinin sayında dəyişiklik olduqda (valideynlərdən biri vəfat etdikdə, övladlarının 18 yaşı tamam olduqda və ya əyani təhsili bitirdikdə), təqaüdün ailə üzvləri arasında bölünməsi hansı qaydada həyata keçirilir?",
+      "cavab": "Ailə üzvlərinin sayında dəyişiklik baş verdiyi halda digər ailə üzvünün müraciəti əsasında Prezident təqaüdünün ailə üzvlərinin sayına bərabər bölünməklə ödənilməsi ilə bağlı şəxsin müraciəti zəruri olan sənədlər də əlavə olunmaqla DSMF-nin Sosial Ödənişlərin Təyinatı üzrə Mərkəzi Filialına kargüzarlıq edilir. \n\nQeyd: Adətən, şəhidin ailə üzvünün vəfatı ilə əlaqədar təqaüdün pay bölgüsü digər hüququ olan ailə üzvləri arasında avtomatlaşdırılmış qaydada bölünür. Lakin qəbul zamanı, payın avtomatik bölgüsünün aparılmadığı müəyyən edildiyi halda, ailə üzvünün müraciəti aidiyyəti üzrə ərizə ilə kargüzarlıq edilir."
+    },
+    {
+      "nov": "Şəhid ailəsi üçün və 20 Yanvar şəhidi ailəsinə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "Şəhid ailəsi üzvü kimi Prezident təqaüdü alan şəxsin ona düşən payın digər ailə üzvünə ödənilməsi ilə bağlı razılıq ərizəsi verdiyi halda digər ailə üzvü təqaüdün həmin pay hissəsinin ona ödənilməsi üçün müraciəti hansı formada icra edilir?",
+      "cavab": "Şəhid ailəsi üzvü kimi Prezidentinin təqaüdünü alan şəxsin ona məxsus payın digər ailə üzvünə ödənilməsi ilə bağlı müraciətinə hər bir ailə üzvünə düşən payın yalnız həmin şəxsin özünə ödənildiyi barədə müvafiq izahat verilir."
+    },
+    {
+      "nov": "Şəhid ailəsi üçün və 20 Yanvar şəhidi ailəsinə Azərbaycan Respublikası Prezidentinin təqaüdü",
+      "sual": "20 yanvar şəhidinin statusu hansı formada verilir?",
+      "cavab": "Azərbaycan Respublikası Prezidentinin 1998-ci il 29 dekabr tarixli 51 nömrəli Fərmanı ilə təsdiq edilmiş “20 Yanvar şəhidi” fəxri adı haqqında Əsasnamə”yə əsasən “20 Yanvar şəhidi” fəxri adı Azərbaycan Respublikası Prezidentinin sərəncamı əsasında verilir."
     }
   ],
   "Dövlət icbari şəxsi sığortası": [
