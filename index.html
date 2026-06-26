@@ -825,7 +825,7 @@
   }
 
   // Boş sətir - spacing:0 ki xəttə yapışsın
-  function ep0(){return new docx.Paragraph({spacing:{before:0,after:0,line:240},children:[new docx.TextRun('')]});}
+  function ep0(){return new docx.Paragraph({spacing:{before:0,after:0,line:240},children:[new docx.TextRun({text:'',font:'Arial',size:24})]});}
   // Normal boş sətir
   function ep(){return new docx.Paragraph({spacing:{after:0,line:240},children:[new docx.TextRun('')]});}
 
