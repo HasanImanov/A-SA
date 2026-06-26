@@ -905,9 +905,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
  function showLoading(){var o=document.getElementById('loading-overlay');if(o)o.classList.add('active');}
  function hideLoading(){var o=document.getElementById('loading-overlay');if(o)o.classList.remove('active');}
+ function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
  async function hazirla(tip, format) {
   showLoading();
+  var loadStart = Date.now();
   try{
   var d = getData(tip);
   var pp = {size:{width:11906,height:16838}, margin:{top:709,right:656,bottom:2269,left:1418}};
@@ -1061,6 +1063,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
   }
   } finally {
+    var elapsed = Date.now() - loadStart;
+    if (elapsed < 600) { await wait(600 - elapsed); }
     hideLoading();
   }
 }
