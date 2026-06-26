@@ -89,9 +89,15 @@
     .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:0.9rem;}
     .empty-state span{font-size:2.5rem;display:block;margin-bottom:12px;}
     @media(max-width:500px){.form-row{grid-template-columns:1fr;}.btn-group{grid-template-columns:1fr;}}
+    #loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;}
+    #loading-overlay.active{display:flex;}
+    .loading-spinner{width:56px;height:56px;border:5px solid rgba(26,95,168,0.2);border-top-color:var(--blue);border-radius:50%;animation:loading-spin 0.8s linear infinite;}
+    .loading-text{margin-top:16px;font-family:'Nunito',sans-serif;font-weight:800;color:var(--blue);font-size:1rem;}
+    @keyframes loading-spin{to{transform:rotate(360deg);}}
   </style>
 </head>
 <body>
+<div id="loading-overlay"><div class="loading-spinner"></div><div class="loading-text">Sənəd hazırlanır...</div></div>
 <header>
   <img src="logo.png" alt="Logo"/>
   <div class="header-text"><h1>AİSA</h1><p><span class="status-dot"></span>Sosial agentlər üçün AI assistant</p></div>
@@ -897,7 +903,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return ch;
   }
 
+ function showLoading(){var o=document.getElementById('loading-overlay');if(o)o.classList.add('active');}
+ function hideLoading(){var o=document.getElementById('loading-overlay');if(o)o.classList.remove('active');}
+
  async function hazirla(tip, format) {
+  showLoading();
+  try{
   var d = getData(tip);
   var pp = {size:{width:11906,height:16838}, margin:{top:709,right:656,bottom:2269,left:1418}};
   var ch = await buildChildren(d, false);
@@ -1048,6 +1059,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     } else {
       alert('PDF xeta!');
     }
+  }
+  } finally {
+    hideLoading();
   }
 }
 
