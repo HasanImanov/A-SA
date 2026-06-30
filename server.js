@@ -46,7 +46,14 @@ console.log('Fuzzy search hazırlandı:', FUZZY_DATA.length, 'sual yükləndi');
 const DAYANMA_SOZLERI = new Set([
   've', 'ya', 'ki', 'bu', 'necə', 'hansı', 'üçün', 'ilə', 'də', 'da',
   'nə', 'olan', 'olur', 'edir', 'var', 'ola', 'bilər', 'görə',
-  'haqqında', 'barədə', 'zaman', 'zamanı', 'şəxs', 'şəxsə', 'şəxsin'
+  'haqqında', 'barədə', 'zaman', 'zamanı', 'şəxs', 'şəxsə', 'şəxsin',
+  // Reqlament başlıqlarında təkrarlanan "boilerplate" sözlər (49 reqlamentin
+  // hamısı eyni quyruqla bitir: "... xidməti üzrə sosial agent tərəfindən
+  // müraciətin qəbulu prosesi necədir?") - bunlar diskriminativ deyil və
+  // söz-üst-üstə-düşmə skorunu süni şəkildə şişirdir
+  'xidməti', 'xidmət', 'üzrə', 'tərəfindən', 'müraciətin', 'müraciəti',
+  'müraciət', 'qəbulu', 'qəbul', 'prosesi', 'proses', 'necədir', 'agent',
+  'reqlament', 'reqlamenti'
 ]);
 
 // Qısaltmalar lüğəti: qısa forma -> tam açıq forma (bir neçə sözlə)
