@@ -78,6 +78,11 @@ const ABREVIATURALAR = {
 
   'şt': 'sosial təminat',
   'esa': 'əhalinin sosial müdafiəsi',
+
+  'dsmf': 'dövlət sosial müdafiə fondu',
+  'tsek': 'tibbi sosial ekspertiza komissiyası',
+  'nmr': 'naxçıvan muxtar respublikası',
+  'şv': 'şəhid vəsiqəsi',
 };
 
 function sozlereAyir(metn) {
