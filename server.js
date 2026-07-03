@@ -58,34 +58,17 @@ const DAYANMA_SOZLERI = new Set([
 
 // Qısaltmalar lüğəti: qısa forma -> tam açıq forma (bir neçə sözlə)
 
-const SINONIM_LUGETI = {
-  'pul': 'məbləğ',
-  'vəsait': 'məbləğ',
-  'mıqdar': 'məbləğ',
-
-  'uşaq': 'övlad',
-  'körpə': 'övlad',
-
-  'ana': 'valideyn',
-  'ata': 'valideyn',
-
-  'yardım': 'müavinət',
-  'kömək': 'müavinət',
-
-  'kağız': 'sənəd',
-  'vərəqə': 'sənəd',
-  'sənədlər': 'sənəd',
-
-  'müraciət': 'ərizə',
-  'müraciəti': 'ərizə',
-
-  'qeydiyyat': 'qeydiyyatı',
-
-  'pensiya': 'pensiyası',
-
-  'müddət': 'vaxt',
-  'müddəti': 'vaxt'
-};
+const SINONIM_LUGETI = (() => {
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(__dirname, 'synonyms.json'), 'utf8'));
+    delete raw._qeyd;
+    console.log('Sinonim lüğəti yükləndi:', Object.keys(raw).length, 'cüt');
+    return raw;
+  } catch (e) {
+    console.warn('Sinonim lüğəti yüklənmədi, boş lüğətlə davam edilir:', e.message);
+    return {};
+  }
+})();
 
 const ABREVIATURALAR = {
   'üdsy': 'ünvanlı dövlət sosial yardımı',
