@@ -89,6 +89,33 @@
     .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:0.9rem;}
     .empty-state span{font-size:2.5rem;display:block;margin-bottom:12px;}
     @media(max-width:500px){.form-row{grid-template-columns:1fr;}.btn-group{grid-template-columns:1fr;}}
+    #tab-abi{flex:1;display:none;flex-direction:column;}
+    #tab-abi.active{display:flex;}
+    #abi-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
+    #abi-flow{display:flex;flex-direction:column;gap:16px;}
+    .abi-bubble{display:flex;gap:10px;align-items:flex-start;animation:fadeIn 0.3s ease;}
+    .abi-bubble.user{flex-direction:row-reverse;}
+    .abi-card{max-width:86%;padding:14px 18px;border-radius:var(--radius);font-size:0.92rem;line-height:1.6;}
+    .abi-card.bot{background:var(--white);border:1.5px solid var(--blue-mid);color:var(--text);border-top-left-radius:4px;box-shadow:var(--shadow);}
+    .abi-card.user{background:var(--blue);color:white;border-top-right-radius:4px;}
+    .abi-q{font-weight:700;color:var(--blue);margin-bottom:10px;font-family:'Nunito',sans-serif;}
+    .abi-note{font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-top:8px;}
+    .abi-btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+    .abi-choice-btn{background:var(--blue-pale);color:var(--blue);border:1.5px solid var(--blue-mid);border-radius:10px;padding:9px 22px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;transition:background 0.15s;}
+    .abi-choice-btn:hover{background:var(--blue-mid);}
+    .abi-choice-btn.yes{background:var(--blue);color:white;}
+    .abi-choice-btn.yes:hover{background:var(--blue-light);}
+    .abi-input-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+    .abi-input-group.single{grid-template-columns:1fr;}
+    .abi-input-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;}
+    .abi-input-group input{width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:'Inter',sans-serif;outline:none;color:var(--text);}
+    .abi-input-group input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,168,0.10);}
+    .abi-go-btn{margin-top:12px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.86rem;}
+    .abi-go-btn:hover{background:var(--blue-light);}
+    .abi-result{border-radius:var(--radius);padding:16px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;margin-top:2px;}
+    .abi-result.pensiya{background:#e6f8ee;color:#1a7a45;border:1.5px solid #a6e6c3;}
+    .abi-result.muavinet{background:#fdf3e3;color:#96650a;border:1.5px solid #f3d9a1;}
+    .abi-restart-btn{align-self:flex-start;margin-top:6px;background:none;border:1.5px solid var(--blue-mid);color:var(--blue);border-radius:10px;padding:8px 16px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;}
     #loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;}
     #loading-overlay.active{display:flex;}
     .loading-spinner{width:56px;height:56px;border:5px solid rgba(26,95,168,0.2);border-top-color:var(--blue);border-radius:50%;animation:loading-spin 0.8s linear infinite;}
@@ -103,9 +130,10 @@
   <div class="header-text"><h1>AİSA</h1><p><span class="status-dot"></span>Sosial agentlər üçün AI assistant</p></div>
 </header>
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('refiq')">💬 AİSA</button>
-  <button class="tab-btn" onclick="switchTab('arayish')">📄 Arayışlar</button>
-  <button class="tab-btn" onclick="switchTab('erize')">📝 Ərizələr</button>
+  <button class="tab-btn active" data-tab="refiq" onclick="switchTab('refiq')">💬 AİSA</button>
+  <button class="tab-btn" data-tab="arayish" onclick="switchTab('arayish')">📄 Arayışlar</button>
+  <button class="tab-btn" data-tab="erize" onclick="switchTab('erize')">📝 Ərizələr</button>
+  <button class="tab-btn" data-tab="abi" onclick="switchTab('abi')">👨‍👩‍👧 ABİ</button>
 </div>
 <div id="tab-refiq" class="active">
   <main>
@@ -311,6 +339,13 @@
       </div>
     </div>
     <div class="empty-state" id="empty-state"><span>📋</span>Yuxarıdan arayış növünü seçin</div>
+  </div>
+</div>
+
+<div id="tab-abi">
+  <div id="abi-main">
+    <div class="arayish-title">👨‍👩‍👧 Ailə başçısını itirməyə görə pensiya/müavinət təyinatı</div>
+    <div id="abi-flow"></div>
   </div>
 </div>
 <script>
@@ -736,10 +771,11 @@
   }
 
   function switchTab(tab){
-    document.querySelectorAll('.tab-btn').forEach(function(b,i){b.classList.toggle('active',(i===0&&tab==='refiq')||(i===1&&tab==='arayish')||(i===2&&tab==='erize'));});
+    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===tab);});
     document.getElementById('tab-refiq').classList.toggle('active',tab==='refiq');
     document.getElementById('tab-arayish').classList.toggle('active',tab==='arayish');
     document.getElementById('tab-erize').classList.toggle('active',tab==='erize');
+    document.getElementById('tab-abi').classList.toggle('active',tab==='abi');
   }
   function selectCat(cat){
     document.querySelectorAll('.arayish-form').forEach(function(f){f.classList.remove('active');});
@@ -1137,6 +1173,311 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key)) { e.preventDefault(); location.reload(); return; }
     if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); location.reload(); return; }
   });
+
+  /* ========================================================================
+     ABİ TAB — "Ailə başçısını itirməyə görə pensiya/müavinət" qərar ağacı
+     ======================================================================== */
+  var ABI_LIMIT = 140; // adam başına aylıq həddi (AZN)
+  var GIFT_YEAR_BASE = 2005; // hədiyyə staj düsturunda istifadə olunan baza il
+  var GIFT_YEAR_CUTOFF = '2019-01-01'; // hədiyyə staj yalnız bu tarixdən sonrakı vəfatlara aiddir
+  var abi = {}; // cari sessiyanın cavabları
+
+  function abiFlowEl(){ return document.getElementById('abi-flow'); }
+
+  function abiParseDate(str){
+    // gözlənilən format: gg.aa.iiii
+    var p = (str||'').split('.');
+    if(p.length!==3) return null;
+    var d=parseInt(p[0],10), m=parseInt(p[1],10), y=parseInt(p[2],10);
+    if(!d||!m||!y) return null;
+    return new Date(y, m-1, d);
+  }
+  function abiAgeAt(birth, death){
+    var age = death.getFullYear() - birth.getFullYear();
+    var mDiff = death.getMonth() - birth.getMonth();
+    if(mDiff<0 || (mDiff===0 && death.getDate()<birth.getDate())) age--;
+    return age;
+  }
+  function abiRound2(n){ return Math.round(n*100)/100; }
+
+  function abiAddBotCard(html){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble bot';
+    wrap.innerHTML='<div class="abi-card bot">'+html+'</div>';
+    abiFlowEl().appendChild(wrap);
+    document.getElementById('abi-main').scrollTop = document.getElementById('abi-main').scrollHeight;
+    return wrap.querySelector('.abi-card');
+  }
+  function abiAddUserCard(text){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble user';
+    wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
+    abiFlowEl().appendChild(wrap);
+    document.getElementById('abi-main').scrollTop = document.getElementById('abi-main').scrollHeight;
+  }
+  function abiLockCard(cardEl){
+    // sual cavablandıqdan sonra düymələri/inputları bağla ki, geri qayıdıb dəyişməsin
+    var interactive = cardEl.querySelectorAll('button, input');
+    interactive.forEach(function(el){ el.disabled = true; el.style.opacity='0.5'; });
+  }
+
+  function abiStart(){
+    document.getElementById('abi-flow').innerHTML='';
+    abi = {};
+    var card = abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs pensiya və ya müavinət alan idimi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQ1(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQ1(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+
+  function abiQ1(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.hadPension = yes;
+    if(yes){
+      abiAddBotCard(
+        '<div class="abi-q">Pensiyanın məbləği və hüququ yaranan şəxslərin sayını daxil edin</div>'+
+        '<div class="abi-input-group">'+
+          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="abi-p1-mebleg" placeholder="220"/></div>'+
+          '<div><label>Hüququ yaranan şəxslərin sayı</label><input type="number" id="abi-p1-say" placeholder="2"/></div>'+
+        '</div>'+
+        '<button class="abi-go-btn" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
+      );
+    } else {
+      abiAddBotCard(
+        '<div class="abi-q">Mərhumun əmək stajı olubmu?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQ2(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQ2(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    }
+  }
+
+  function abiCalcPensionSplit(btn){
+    var card = btn.closest('.abi-card');
+    var mebleg = parseFloat(document.getElementById('abi-p1-mebleg').value);
+    var say = parseFloat(document.getElementById('abi-p1-say').value);
+    if(!mebleg || !say){ alert('Zəhmət olmasa hər iki xananı doldurun.'); return; }
+    abiLockCard(card);
+    abiAddUserCard('Məbləğ: '+mebleg+' AZN, Şəxs sayı: '+say);
+    var perPerson = abiRound2(mebleg/say);
+    abiShowFinalResult(perPerson>ABI_LIMIT, 'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).');
+  }
+
+  function abiQ2(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.hasStaj = yes;
+    if(yes){
+      abiAddBotCard(
+        '<div class="abi-q">Təvəllüd və vəfat tarixini, həmçinin faktiki stajı daxil edin</div>'+
+        '<div class="abi-input-group">'+
+          '<div><label>Təvəllüd tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10"/></div>'+
+          '<div><label>Vəfat tarixi</label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10"/></div>'+
+        '</div>'+
+        '<div class="abi-input-group single">'+
+          '<div><label>Faktiki əmək stajı (il)</label><input type="number" id="abi-faktiki-staj" placeholder="12"/></div>'+
+        '</div>'+
+        '<button class="abi-go-btn" onclick="abiCalcStaj(this)">Hesabla</button>'
+      );
+    } else {
+      // Staj yoxdursa hesablama mərhələsi keçilir, birbaşa qulluq bloklarına gedirik
+      abiAskAhil();
+    }
+  }
+
+  function abiCalcStaj(btn){
+    var card = btn.closest('.abi-card');
+    var dogumStr = document.getElementById('abi-dogum').value;
+    var vefatStr = document.getElementById('abi-vefat').value;
+    var faktiki = parseFloat(document.getElementById('abi-faktiki-staj').value);
+    var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
+    if(!dogum || !vefat || isNaN(faktiki)){ alert('Tarixləri gg.aa.iiii formatında və stajı düzgün daxil edin.'); return; }
+    abiLockCard(card);
+    abiAddUserCard('Təvəllüd: '+dogumStr+', Vəfat: '+vefatStr+', Faktiki staj: '+faktiki+' il');
+
+    var yas = abiAgeAt(dogum, vefat);
+    var teleb = abiRound2((yas-15)/3);
+    abi.dogum = dogum; abi.vefat = vefat; abi.faktikiStaj = faktiki; abi.telebOlunanStaj = teleb;
+
+    var catmayan = abiRound2(teleb - faktiki);
+    if(catmayan<0) catmayan = 0;
+
+    abiAddBotCard(
+      '<div class="abi-q">Nəticə</div>'+
+      'Vəfat anına yaş: <b>'+yas+'</b><br/>'+
+      'Tələb olunan minimum staj: (yaş-15)/3 = <b>'+teleb+' il</b><br/>'+
+      (catmayan>0 ? 'Çatmayan staj: <b>'+catmayan+' il</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
+      '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
+    );
+
+    if(catmayan>0 && vefat.getTime() >= new Date(2019,0,1).getTime()){
+      abiAddBotCard(
+        '<div class="abi-q">Vəfat tarixinə qədər sosial müavinət alıbmı?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQGift(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQGift(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    } else {
+      abiAskPersonCountForMinPension();
+    }
+  }
+
+  function abiQGift(btn, aldi){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(aldi?'Bəli':'Xeyr');
+    if(!aldi){
+      var hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - abi.dogum.getFullYear()) - 15)/3);
+      if(hediyyeStaj<0) hediyyeStaj = 0;
+      abi.hediyyeStaj = hediyyeStaj;
+      var yeniFaktiki = abiRound2(abi.faktikiStaj + hediyyeStaj);
+      var yeniCatmayan = abiRound2(abi.telebOlunanStaj - yeniFaktiki);
+      if(yeniCatmayan<0) yeniCatmayan = 0;
+      abiAddBotCard(
+        '<div class="abi-q">Hədiyyə staj</div>'+
+        'Düstur: (('+GIFT_YEAR_BASE+' - təvəllüd ili) - 15) / 3 = <b>'+hediyyeStaj+' il</b><br/>'+
+        'Yeni cəmi staj: '+yeniFaktiki+' il<br/>'+
+        (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+yeniCatmayan+' il</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
+      );
+      abi.catmayanStaj = yeniCatmayan;
+    } else {
+      abi.hediyyeStaj = 0;
+    }
+    abiAskPersonCountForMinPension();
+  }
+
+  function abiAskPersonCountForMinPension(){
+    abiAddBotCard(
+      '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxslərin sayını daxil edin</div>'+
+      '<div class="abi-input-group">'+
+        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ"/></div>'+
+        '<div><label>Hüququ yaranan şəxslərin sayı</label><input type="number" id="abi-p2-say" placeholder="2"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
+    );
+  }
+
+  function abiCalcPensionSplit2(btn){
+    var card = btn.closest('.abi-card');
+    var mebleg = parseFloat(document.getElementById('abi-p2-mebleg').value);
+    var say = parseFloat(document.getElementById('abi-p2-say').value);
+    if(!mebleg || !say){ alert('Zəhmət olmasa hər iki xananı doldurun.'); return; }
+    abiLockCard(card);
+    abiAddUserCard('Minimum pensiya: '+mebleg+' AZN, Şəxs sayı: '+say);
+    var perPerson = abiRound2(mebleg/say);
+    var catmayan = abi.catmayanStaj || 0;
+    if(catmayan>0){
+      // staj hələ tam ödənilmir — qulluq bloku ilə əlavə staj toplamaq mümkündürmü, yoxlayaq
+      abi._pendingPerPerson = perPerson;
+      abiAddBotCard('<div class="abi-note">Staj tələbi hələ tam ödənilmədiyi üçün əlavə qulluq şərtlərinə baxılır.</div>');
+      abiAskAhil();
+    } else {
+      abiShowFinalResult(perPerson>ABI_LIMIT, 'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).');
+    }
+  }
+
+  function abiAskAhil(){
+    abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs ahıl (yaşlı) şəxsə qulluq edibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQAhil(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQAhil(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQAhil(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ abiAskElillik1(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Sağ olarkən bu barədə notariusdan təsdiqedici ərizə/arayış alınıbmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQAhilNotarius(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQAhilNotarius(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQAhilNotarius(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){
+      abiShowFinalResult(false, 'Ahıl şəxsə qulluq notariat qaydasında təsdiqlənməyib.');
+    } else {
+      abiAskElillik1();
+    }
+  }
+
+  function abiAskElillik1(){
+    abiAddBotCard(
+      '<div class="abi-q">I dərəcə əlilliyi olan şəxsə qulluq edilibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQElillik1(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQElillik1(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQElillik1(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){
+      abiShowFinalResult(false, 'Heç bir əlavə şərt ödənilmir.');
+      return;
+    }
+    abiAddBotCard(
+      '<div class="abi-q">Bu, sistemdə (elektron bazada) qeydə alınıbmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQElillikSistem(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQElillikSistem(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQElillikSistem(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      abiShowFinalResult(true, 'I dərəcə əlilliyi olan şəxsə qulluq sistemdə qeydə alınıb.');
+      return;
+    }
+    abiAddBotCard(
+      '<div class="abi-q">Sağ olarkən bu barədə notariusdan təsdiqedici ərizə alınıbmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQElillikNotarius(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQElillikNotarius(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQElillikNotarius(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){
+      abiShowFinalResult(false, 'I dərəcə əlilliyə qulluq notariat qaydasında təsdiqlənməyib.');
+    } else {
+      abiShowFinalResult(true, 'I dərəcə əlilliyə qulluq notariat qaydasında təsdiqlənib.');
+    }
+  }
+
+  function abiShowFinalResult(isPensiya, detailHtml){
+    var cls = isPensiya ? 'pensiya' : 'muavinet';
+    var title = isPensiya ? '✅ Pensiya təyin olunacaq' : '📋 Ailə başçısını itirməyə görə sosial müavinət təyin olunacaq';
+    abiAddBotCard(
+      '<div class="abi-result '+cls+'">'+title+'</div>'+
+      '<div style="margin-top:10px;">'+detailHtml+'</div>'+
+      '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
+    );
+  }
+
+  // Tab ilk dəfə açılanda axını başlat
+  var _abiInitDone = false;
+  var _origSwitchTab = switchTab;
+  switchTab = function(tab){
+    _origSwitchTab(tab);
+    if(tab==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
+  };
 </script>
 </body>
 </html>
