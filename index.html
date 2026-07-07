@@ -133,7 +133,7 @@
   <button class="tab-btn active" data-tab="refiq" onclick="switchTab('refiq')">💬 AİSA</button>
   <button class="tab-btn" data-tab="arayish" onclick="switchTab('arayish')">📄 Arayışlar</button>
   <button class="tab-btn" data-tab="erize" onclick="switchTab('erize')">📝 Ərizələr</button>
-  <button class="tab-btn" data-tab="abi" onclick="switchTab('abi')">👨‍👩‍👧 ABİ</button>
+  <button class="tab-btn" data-tab="abi" onclick="switchTab('abi')">ABİ</button>
 </div>
 <div id="tab-refiq" class="active">
   <main>
@@ -344,7 +344,7 @@
 
 <div id="tab-abi">
   <div id="abi-main">
-    <div class="arayish-title">👨‍👩‍👧 Ailə başçısını itirməyə görə pensiya/müavinət təyinatı</div>
+    <div class="arayish-title">Ailə başçısını itirməyə görə pensiya/müavinət təyinatı</div>
     <div id="abi-flow"></div>
   </div>
 </div>
@@ -1225,7 +1225,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     document.getElementById('abi-flow').innerHTML='';
     abi = {};
     var card = abiAddBotCard(
-      '<div class="abi-q">Mərhum şəxs pensiya və ya müavinət alan idimi?</div>'+
+      '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQ1(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="abiQ1(this,false)">Xeyr</button>'+
@@ -1309,8 +1309,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
-      'Vəfat anına yaş: <b>'+yas+'</b><br/>'+
-      'Tələb olunan minimum staj: (yaş-15)/3 = <b>'+teleb+' il</b><br/>'+
+      'Tələb olunan minimum staj: <b>'+teleb+' il</b><br/>'+
       (catmayan>0 ? 'Çatmayan staj: <b>'+catmayan+' il</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
       '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
     );
@@ -1340,7 +1339,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(yeniCatmayan<0) yeniCatmayan = 0;
       abiAddBotCard(
         '<div class="abi-q">Hədiyyə staj</div>'+
-        'Düstur: (('+GIFT_YEAR_BASE+' - təvəllüd ili) - 15) / 3 = <b>'+hediyyeStaj+' il</b><br/>'+
+        'Hədiyyə staj: <b>'+hediyyeStaj+' il</b><br/>'+
         'Yeni cəmi staj: '+yeniFaktiki+' il<br/>'+
         (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+yeniCatmayan+' il</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
       );
