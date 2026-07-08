@@ -1330,23 +1330,43 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQGift(btn, aldi){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(aldi?'Bəli':'Xeyr');
-    if(!aldi){
-      var hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - abi.dogum.getFullYear()) - 15)/3);
-      if(hediyyeStaj<0) hediyyeStaj = 0;
-      abi.hediyyeStaj = hediyyeStaj;
-      var yeniFaktiki = abiRound2(abi.faktikiStaj + hediyyeStaj);
-      var yeniCatmayan = abiRound2(abi.telebOlunanStaj - yeniFaktiki);
-      if(yeniCatmayan<0) yeniCatmayan = 0;
-      abiAddBotCard(
-        '<div class="abi-q">Hədiyyə staj</div>'+
-        'Hədiyyə staj: <b>'+hediyyeStaj+' il</b><br/>'+
-        'Yeni cəmi staj: '+yeniFaktiki+' il<br/>'+
-        (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+yeniCatmayan+' il</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
-      );
-      abi.catmayanStaj = yeniCatmayan;
-    } else {
+    if(aldi){
+      // Sosial müavinət alıbsa hədiyyə staj verilmir
       abi.hediyyeStaj = 0;
+      abiAskPersonCountForMinPension();
+      return;
     }
+    // Sosial müavinət almayıbsa, hədiyyə stajın verilməsi üçün əlavə şərt yoxlanılır
+    abiAddBotCard(
+      '<div class="abi-q">01.01.2018-ci ilə dək sığorta stajı olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQSigortaStaj(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQSigortaStaj(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+
+  function abiQSigortaStaj(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){
+      abi.hediyyeStaj = 0;
+      abiAskPersonCountForMinPension();
+      return;
+    }
+    var hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - abi.dogum.getFullYear()) - 15)/3);
+    if(hediyyeStaj<0) hediyyeStaj = 0;
+    abi.hediyyeStaj = hediyyeStaj;
+    var yeniFaktiki = abiRound2(abi.faktikiStaj + hediyyeStaj);
+    var yeniCatmayan = abiRound2(abi.telebOlunanStaj - yeniFaktiki);
+    if(yeniCatmayan<0) yeniCatmayan = 0;
+    abiAddBotCard(
+      '<div class="abi-q">Hədiyyə staj</div>'+
+      'Hədiyyə staj: <b>'+hediyyeStaj+' il</b><br/>'+
+      'Yeni cəmi staj: '+yeniFaktiki+' il<br/>'+
+      (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+yeniCatmayan+' il</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
+    );
+    abi.catmayanStaj = yeniCatmayan;
     abiAskPersonCountForMinPension();
   }
 
