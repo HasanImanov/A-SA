@@ -1199,6 +1199,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return age;
   }
   function abiRound2(n){ return Math.round(n*100)/100; }
+  function abiYearsDaysDiff(d1, d2){
+    // Təqvimə əsaslanan dəqiq il+gün fərqi (gün-gün hesabla)
+    var years = d2.getFullYear() - d1.getFullYear();
+    var anniv = new Date(d1.getFullYear()+years, d1.getMonth(), d1.getDate());
+    if(anniv.getTime() > d2.getTime()){ years--; anniv = new Date(d1.getFullYear()+years, d1.getMonth(), d1.getDate()); }
+    var days = Math.round((d2.getTime()-anniv.getTime())/86400000);
+    return {years:years, days:days};
+  }
+  function abiFmtYD(o){ return o.years+' il '+o.days+' gün'; }
+  function abiDecimalYearsToYD(dec){
+    var years = Math.floor(dec);
+    var days = Math.round((dec-years)*365.25);
+    if(days>=365){ years++; days-=365; }
+    return {years:years, days:days};
+  }
 
   function abiAddBotCard(html){
     var wrap=document.createElement('div');
@@ -1223,8 +1238,109 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function abiStart(){
     document.getElementById('abi-flow').innerHTML='';
-    abi = {};
-    var card = abiAddBotCard(
+    abi = {}; abi.bonusStaj = 0;
+    abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs kişidir, yoxsa qadındır?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQGender(this,true)">Kişi</button>'+
+        '<button class="abi-choice-btn" onclick="abiQGender(this,false)">Qadın</button>'+
+      '</div>'
+    );
+  }
+
+  function abiQGender(btn, isMale){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(isMale?'Kişi':'Qadın');
+    abi.gender = isMale?'kisi':'qadin';
+    if(isMale){
+      abiAddBotCard(
+        '<div class="abi-q">Hərbi xidmətdə olubmu?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQHerbi(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQHerbi(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    } else {
+      abiAddBotCard(
+        '<div class="abi-q">2006-cı ilə qədər (işləmədən) 3 yaşına qədər uşağa qulluq edilibmi?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQUsaqQulluq(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQUsaqQulluq(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    }
+  }
+
+  function abiQHerbi(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      abi.bonusStaj += 2;
+      abiAddBotCard('<div class="abi-note">Hərbi xidmətə görə stajınıza <b>2 il</b> əlavə olunacaq.</div>');
+    }
+    abiAskTehsil();
+  }
+
+  function abiQUsaqQulluq(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ abiAskTehsil(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Uşağa qulluğa görə neçə il staj əlavə olunsun?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>İllərin sayı (maks. 3 il/uşaq)</label><input type="number" id="abi-usaq-il" placeholder="3"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcUsaqQulluq(this)">Davam et</button>'
+    );
+  }
+  function abiCalcUsaqQulluq(btn){
+    var card = btn.closest('.abi-card');
+    var il = parseFloat(document.getElementById('abi-usaq-il').value);
+    if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
+    abiLockCard(card);
+    abiAddUserCard(il+' il');
+    abi.bonusStaj += il;
+    abiAddBotCard('<div class="abi-note">Uşağa qulluğa görə stajınıza <b>'+il+' il</b> əlavə olunacaq.</div>');
+    abiAskTehsil();
+  }
+
+  function abiAskTehsil(){
+    abiAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər təhsil olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQTehsil(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQTehsil(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQTehsil(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ abiStartMainFlow(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Təhsil aldığı illərin sayını daxil edin</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Təhsil müddəti (il)</label><input type="number" id="abi-tehsil-il" placeholder="4"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcTehsil(this)">Davam et</button>'
+    );
+  }
+  function abiCalcTehsil(btn){
+    var card = btn.closest('.abi-card');
+    var il = parseFloat(document.getElementById('abi-tehsil-il').value);
+    if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
+    abiLockCard(card);
+    abiAddUserCard(il+' il');
+    // Hər tədris ilindən yay tətili (3 ay) çıxılır, qalan 9 ay staj kimi sayılır
+    var eduYearsDecimal = il * 9/12;
+    var eduYD = abiDecimalYearsToYD(eduYearsDecimal);
+    abi.bonusStaj += eduYearsDecimal;
+    abiAddBotCard('<div class="abi-note">Təhsilə görə stajınıza <b>'+abiFmtYD(eduYD)+'</b> əlavə olunacaq (yay tətili — 3 ay/il çıxılmaqla).</div>');
+    abiStartMainFlow();
+  }
+
+  function abiStartMainFlow(){
+    abiAddBotCard(
       '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQ1(this,true)">Bəli</button>'+
@@ -1300,15 +1416,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(card);
     abiAddUserCard('Təvəllüd: '+dogumStr+', Vəfat: '+vefatStr+', Faktiki staj: '+faktiki+' il');
 
-    var yas = abiAgeAt(dogum, vefat);
-    var teleb = abiRound2((yas-15)/3);
-    abi.dogum = dogum; abi.vefat = vefat; abi.faktikiStaj = faktiki; abi.telebOlunanStaj = teleb;
+    var ageObj = abiYearsDaysDiff(dogum, vefat);
+    var teleb = abiRound2((ageObj.years-15)/3);
+    var bonus = abi.bonusStaj||0;
+    var faktikiTotal = abiRound2(faktiki + bonus);
+    abi.dogum = dogum; abi.vefat = vefat; abi.faktikiStaj = faktikiTotal; abi.telebOlunanStaj = teleb;
 
-    var catmayan = abiRound2(teleb - faktiki);
+    var catmayan = abiRound2(teleb - faktikiTotal);
     if(catmayan<0) catmayan = 0;
 
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
+      'Vəfat anına yaş: <b>'+abiFmtYD(ageObj)+'</b><br/>'+
+      (bonus>0 ? 'Bonus staj (hərbi/uşağa qulluq/təhsil): <b>'+abiFmtYD(abiDecimalYearsToYD(bonus))+'</b><br/>Ümumi faktiki staj: <b>'+faktikiTotal+' il</b><br/>' : '')+
       'Tələb olunan minimum staj: <b>'+teleb+' il</b><br/>'+
       (catmayan>0 ? 'Çatmayan staj: <b>'+catmayan+' il</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
       '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
