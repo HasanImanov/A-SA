@@ -1331,11 +1331,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
     abiLockCard(card);
     abiAddUserCard(il+' il');
-    // Hər tədris ilindən yay tətili (3 ay) çıxılır, qalan 9 ay staj kimi sayılır
-    var eduYearsDecimal = il * 9/12;
+    // Təhsil müddətindən yalnız bir dəfə 3 ay (yay tətili) çıxılır
+    var eduYearsDecimal = il - 3/12;
+    if(eduYearsDecimal<0) eduYearsDecimal = 0;
     var eduYD = abiDecimalYearsToYD(eduYearsDecimal);
     abi.bonusStaj += eduYearsDecimal;
-    abiAddBotCard('<div class="abi-note">Təhsilə görə stajınıza <b>'+abiFmtYD(eduYD)+'</b> əlavə olunacaq (yay tətili — 3 ay/il çıxılmaqla).</div>');
+    abiAddBotCard('<div class="abi-note">Təhsilə görə stajınıza <b>'+abiFmtYD(eduYD)+'</b> əlavə olunacaq (ümumi təhsil müddətindən 3 ay çıxılmaqla).</div>');
     abiStartMainFlow();
   }
 
