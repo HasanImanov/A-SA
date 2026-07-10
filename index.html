@@ -1535,6 +1535,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddUserCard(yes?'Bəli':'Xeyr');
     if(!yes){ abiAskElillik1(); return; }
     abiAddBotCard(
+      '<div class="abi-q">Neçə il ahıl şəxsə qulluq edilib?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>İllərin sayı</label><input type="number" id="abi-ahil-il" placeholder="3"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcAhilIl(this)">Davam et</button>'
+    );
+  }
+  function abiCalcAhilIl(btn){
+    var card = btn.closest('.abi-card');
+    var il = parseFloat(document.getElementById('abi-ahil-il').value);
+    if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
+    abiLockCard(card);
+    abiAddUserCard(il+' il');
+    abi.ahilIl = il;
+    abiAddBotCard(
       '<div class="abi-q">Sağ olarkən bu barədə notariusdan təsdiqedici ərizə/arayış alınıbmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQAhilNotarius(this,true)">Bəli</button>'+
@@ -1568,6 +1583,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       abiShowFinalResult(false, 'Heç bir əlavə şərt ödənilmir.');
       return;
     }
+    abiAddBotCard(
+      '<div class="abi-q">Neçə il I dərəcə əlilliyi olan şəxsə qulluq edilib?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>İllərin sayı</label><input type="number" id="abi-elillik-il" placeholder="3"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcElillikIl(this)">Davam et</button>'
+    );
+  }
+  function abiCalcElillikIl(btn){
+    var card = btn.closest('.abi-card');
+    var il = parseFloat(document.getElementById('abi-elillik-il').value);
+    if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
+    abiLockCard(card);
+    abiAddUserCard(il+' il');
+    abi.elillikIl = il;
     abiAddBotCard(
       '<div class="abi-q">Bu, sistemdə (elektron bazada) qeydə alınıbmı?</div>'+
       '<div class="abi-btn-row">'+
@@ -1604,9 +1634,13 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiShowFinalResult(isPensiya, detailHtml){
     var cls = isPensiya ? 'pensiya' : 'muavinet';
     var title = isPensiya ? '✅ Pensiya təyin olunacaq' : '📋 Ailə başçısını itirməyə görə sosial müavinət təyin olunacaq';
+    var extra = '';
+    if(abi.ahilIl) extra += '<div class="abi-note">Ahıl şəxsə qulluq: '+abi.ahilIl+' il</div>';
+    if(abi.elillikIl) extra += '<div class="abi-note">I dərəcə əlilliyi olan şəxsə qulluq: '+abi.elillikIl+' il</div>';
     abiAddBotCard(
       '<div class="abi-result '+cls+'">'+title+'</div>'+
       '<div style="margin-top:10px;">'+detailHtml+'</div>'+
+      extra+
       '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
     );
   }
