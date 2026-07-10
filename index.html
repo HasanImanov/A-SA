@@ -1515,14 +1515,25 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(card);
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN, Şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
+    abi._pendingPerPerson = perPerson;
+    abiAddBotCard('<div class="abi-note">Əlavə qulluq şərtləri yoxlanılır — bu illər stajınıza əlavə olunacaq.</div>');
+    abiAskAhil();
+  }
+
+  function abiFinalizeAfterQulluq(qualified){
+    var perPerson = abi._pendingPerPerson;
+    if(perPerson === undefined){
+      // Bu, "stajı olubmu: Xeyr" yolundandır — pul hesablaması yoxdur, birbaşa qulluq şərtinə görə qərar
+      abiShowFinalResult(qualified, qualified ? 'Əlavə qulluq şərti təsdiqləndi.' : 'Əlavə qulluq şərti təsdiqlənmədi.');
+      return;
+    }
     var catmayan = abi.catmayanStaj || 0;
-    if(catmayan>0){
-      // staj hələ tam ödənilmir — qulluq bloku ilə əlavə staj toplamaq mümkündürmü, yoxlayaq
-      abi._pendingPerPerson = perPerson;
-      abiAddBotCard('<div class="abi-note">Staj tələbi hələ tam ödənilmədiyi üçün əlavə qulluq şərtlərinə baxılır.</div>');
-      abiAskAhil();
-    } else {
+    if(catmayan<=0){
       abiShowFinalResult(perPerson>ABI_LIMIT, 'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).');
+    } else if(qualified){
+      abiShowFinalResult(true, 'Əlavə qulluq şərti təsdiqləndiyi üçün pensiya təyin olunacaq.');
+    } else {
+      abiShowFinalResult(false, 'Əlavə qulluq şərti təsdiqlənmədiyi üçün sosial müavinət təyin olunacaq.');
     }
   }
 
@@ -1566,7 +1577,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
     if(!yes){
-      abiShowFinalResult(false, 'Ahıl şəxsə qulluq notariat qaydasında təsdiqlənməyib.');
+      abiFinalizeAfterQulluq(false);
     } else {
       abiAskElillik1();
     }
@@ -1585,7 +1596,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
     if(!yes){
-      abiShowFinalResult(false, 'Heç bir əlavə şərt ödənilmir.');
+      abiFinalizeAfterQulluq(false);
       return;
     }
     abiAddBotCard(
@@ -1615,7 +1626,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
     if(yes){
-      abiShowFinalResult(true, 'I dərəcə əlilliyi olan şəxsə qulluq sistemdə qeydə alınıb.');
+      abiFinalizeAfterQulluq(true);
       return;
     }
     abiAddBotCard(
@@ -1629,11 +1640,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQElillikNotarius(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    if(!yes){
-      abiShowFinalResult(false, 'I dərəcə əlilliyə qulluq notariat qaydasında təsdiqlənməyib.');
-    } else {
-      abiShowFinalResult(true, 'I dərəcə əlilliyə qulluq notariat qaydasında təsdiqlənib.');
-    }
+    abiFinalizeAfterQulluq(yes);
   }
 
   function abiShowFinalResult(isPensiya, detailHtml){
