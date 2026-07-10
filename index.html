@@ -1240,6 +1240,35 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     document.getElementById('abi-flow').innerHTML='';
     abi = {}; abi.bonusStaj = 0;
     abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQ1(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQ1(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+
+  function abiQ1(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.hadPension = yes;
+    if(yes){
+      abiAddBotCard(
+        '<div class="abi-q">Pensiyanın məbləği və hüququ yaranan şəxslərin sayını daxil edin</div>'+
+        '<div class="abi-input-group">'+
+          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="abi-p1-mebleg" placeholder="220"/></div>'+
+          '<div><label>Hüququ yaranan şəxslərin sayı</label><input type="number" id="abi-p1-say" placeholder="2"/></div>'+
+        '</div>'+
+        '<button class="abi-go-btn" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
+      );
+    } else {
+      // Pensiya almayıbsa, staj hesablamasına təsir edən amillər (cins, hərbi, uşağa qulluq, təhsil) soruşulur
+      abiAskGender();
+    }
+  }
+
+  function abiAskGender(){
+    abiAddBotCard(
       '<div class="abi-q">Mərhum şəxs kişidir, yoxsa qadındır?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQGender(this,true)">Kişi</button>'+
@@ -1316,7 +1345,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQTehsil(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    if(!yes){ abiStartMainFlow(); return; }
+    if(!yes){ abiAskStajQuestion(); return; }
     abiAddBotCard(
       '<div class="abi-q">Təhsil aldığı illərin sayını daxil edin</div>'+
       '<div class="abi-input-group single">'+
@@ -1337,41 +1366,17 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var eduYD = abiDecimalYearsToYD(eduYearsDecimal);
     abi.bonusStaj += eduYearsDecimal;
     abiAddBotCard('<div class="abi-note">Təhsilə görə stajınıza <b>'+abiFmtYD(eduYD)+'</b> əlavə olunacaq (ümumi təhsil müddətindən 3 ay çıxılmaqla).</div>');
-    abiStartMainFlow();
+    abiAskStajQuestion();
   }
 
-  function abiStartMainFlow(){
+  function abiAskStajQuestion(){
     abiAddBotCard(
-      '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
+      '<div class="abi-q">Mərhumun əmək stajı olubmu?</div>'+
       '<div class="abi-btn-row">'+
-        '<button class="abi-choice-btn yes" onclick="abiQ1(this,true)">Bəli</button>'+
-        '<button class="abi-choice-btn" onclick="abiQ1(this,false)">Xeyr</button>'+
+        '<button class="abi-choice-btn yes" onclick="abiQ2(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQ2(this,false)">Xeyr</button>'+
       '</div>'
     );
-  }
-
-  function abiQ1(btn, yes){
-    abiLockCard(btn.closest('.abi-card'));
-    abiAddUserCard(yes?'Bəli':'Xeyr');
-    abi.hadPension = yes;
-    if(yes){
-      abiAddBotCard(
-        '<div class="abi-q">Pensiyanın məbləği və hüququ yaranan şəxslərin sayını daxil edin</div>'+
-        '<div class="abi-input-group">'+
-          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="abi-p1-mebleg" placeholder="220"/></div>'+
-          '<div><label>Hüququ yaranan şəxslərin sayı</label><input type="number" id="abi-p1-say" placeholder="2"/></div>'+
-        '</div>'+
-        '<button class="abi-go-btn" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
-      );
-    } else {
-      abiAddBotCard(
-        '<div class="abi-q">Mərhumun əmək stajı olubmu?</div>'+
-        '<div class="abi-btn-row">'+
-          '<button class="abi-choice-btn yes" onclick="abiQ2(this,true)">Bəli</button>'+
-          '<button class="abi-choice-btn" onclick="abiQ2(this,false)">Xeyr</button>'+
-        '</div>'
-      );
-    }
   }
 
   function abiCalcPensionSplit(btn){
