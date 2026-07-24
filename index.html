@@ -1582,7 +1582,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '</div>'
       );
     } else {
-      abiAskPersonCountForMinPension();
+      abiAskKapital();
     }
   }
 
@@ -1592,7 +1592,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(aldi){
       // Sosial müavinət alıbsa hədiyyə staj verilmir
       abi.hediyyeStaj = 0;
-      abiAskPersonCountForMinPension();
+      abiAskKapital();
       return;
     }
     // Sosial müavinət almayıbsa, hədiyyə stajın verilməsi üçün əlavə şərt yoxlanılır
@@ -1610,7 +1610,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddUserCard(yes?'Bəli':'Xeyr');
     if(!yes){
       abi.hediyyeStaj = 0;
-      abiAskPersonCountForMinPension();
+      abiAskKapital();
       return;
     }
     var hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - abi.dogum.getFullYear()) - 15)/3);
@@ -1626,14 +1626,50 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(yeniCatmayan))+'</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
     );
     abi.catmayanStaj = yeniCatmayan;
-    abiAskPersonCountForMinPension();
+    abiAskKapital();
   }
 
-  function abiAskPersonCountForMinPension(){
+  function abiAskKapital(){
+    abiAddBotCard(
+      '<div class="abi-q">2006-cı ildən əvvəl və sonra pensiya kapitalı varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQKapital(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQKapital(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQKapital(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ abiAskPersonCountForMinPension(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Kapital məbləğlərini daxil edin</div>'+
+      '<div class="abi-input-group">'+
+        '<div><label>2006-dan əvvəl kapital (AZN)</label><input type="number" id="abi-kap-evvel" placeholder="0"/></div>'+
+        '<div><label>2006-dan sonra kapital (AZN)</label><input type="number" id="abi-kap-sonra" placeholder="0"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcKapital(this)">Davam et</button>'
+    );
+  }
+  function abiCalcKapital(btn){
+    var card = btn.closest('.abi-card');
+    var kapEvvel = parseFloat(document.getElementById('abi-kap-evvel').value) || 0;
+    var kapSonra = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
+    abiLockCard(card);
+    abiAddUserCard('2006-dan əvvəl: '+kapEvvel+' AZN, 2006-dan sonra: '+kapSonra+' AZN');
+    // QEYD: kapitaldan minimum pensiya məbləğinə keçid düsturu hələ təsdiqlənməyib —
+    // müvəqqəti olaraq cəm göstərilir, mebləğ xanasını lazım gələrsə əl ilə düzəldin.
+    abi.kapitalEvvel = kapEvvel; abi.kapitalSonra = kapSonra;
+    var tapilanMebleg = abiRound2(kapEvvel + kapSonra);
+    abiAddBotCard('<div class="abi-note">⚠️ Kapital → pensiya məbləği düsturu hələ dəqiqləşdirilməyib, ona görə məbləğ sahəsi müvəqqəti cəm ilə doldurulub — lazım olsa özünüz düzəldin.</div>');
+    abiAskPersonCountForMinPension(tapilanMebleg);
+  }
+
+  function abiAskPersonCountForMinPension(prefillMebleg){
     abiAddBotCard(
       '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxslərin sayını daxil edin</div>'+
       '<div class="abi-input-group">'+
-        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ"/></div>'+
+        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
         '<div><label>Hüququ yaranan şəxslərin sayı</label><input type="number" id="abi-p2-say" placeholder="2"/></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
