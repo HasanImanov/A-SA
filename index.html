@@ -1359,7 +1359,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQTehsil(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    if(!yes){ abiAskStajQuestion(); return; }
+    if(!yes){ abiAskXarici(); return; }
     abiAddBotCard(
       '<div class="abi-q">Təhsil aldığı illərin sayını daxil edin</div>'+
       '<div class="abi-input-group single">'+
@@ -1380,6 +1380,40 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var eduYD = abiDecimalYearsToYD(eduYearsDecimal);
     abi.bonusStaj += eduYearsDecimal;
     abiAddBotCard('<div class="abi-note">Təhsilə görə stajınıza <b>'+abiFmtYD(eduYD)+'</b> əlavə olunacaq (ümumi təhsil müddətindən 3 ay çıxılmaqla).</div>');
+    abiAskXarici();
+  }
+
+  var ABI_XARICI_OLKELER = ['Rusiya','Gürcüstan','Türkiyə'];
+  function abiAskXarici(){
+    abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs xaricdə işləyibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQXarici(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQXarici(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQXarici(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ abiAskStajQuestion(); return; }
+    var options = ABI_XARICI_OLKELER.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
+    abiAddBotCard(
+      '<div class="abi-q">Hansı ölkədə işləyib?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Ölkə</label><select id="abi-xarici-olke" style="width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:\'Inter\',sans-serif;color:var(--text);">'+options+'</select></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcXarici(this)">Davam et</button>'
+    );
+  }
+  function abiCalcXarici(btn){
+    var card = btn.closest('.abi-card');
+    var olke = document.getElementById('abi-xarici-olke').value;
+    abiLockCard(card);
+    abiAddUserCard(olke);
+    abi.xaricdeIslib = true;
+    abi.xariciOlke = olke;
+    abiAddBotCard('<div class="abi-note">Xaricdə (<b>'+olke+'</b>) işləmə məlumatı qeydə alındı.</div>');
     abiAskStajQuestion();
   }
 
