@@ -1303,10 +1303,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQHerbi(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    if(yes){
-      abi.bonusStaj += 2;
-      abiAddBotCard('<div class="abi-note">Hərbi xidmətə görə stajınıza <b>2 il</b> əlavə olunacaq.</div>');
-    }
+    if(!yes){ abiAskTehsil(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Hərbi xidmətdə neçə il olub?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>İllərin sayı</label><input type="number" id="abi-herbi-il" placeholder="2"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="abiCalcHerbiIl(this)">Davam et</button>'
+    );
+  }
+  function abiCalcHerbiIl(btn){
+    var card = btn.closest('.abi-card');
+    var il = parseFloat(document.getElementById('abi-herbi-il').value);
+    if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
+    abiLockCard(card);
+    abiAddUserCard(il+' il');
+    abi.bonusStaj += il;
+    abiAddBotCard('<div class="abi-note">Hərbi xidmətə görə stajınıza <b>'+il+' il</b> əlavə olunacaq.</div>');
     abiAskTehsil();
   }
 
@@ -1317,7 +1330,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Uşağa qulluğa görə neçə il staj əlavə olunsun?</div>'+
       '<div class="abi-input-group single">'+
-        '<div><label>İllərin sayı (maks. 3 il/uşaq)</label><input type="number" id="abi-usaq-il" placeholder="3"/></div>'+
+        '<div><label>İllərin sayı (maks. 6 il)</label><input type="number" id="abi-usaq-il" placeholder="6"/></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="abiCalcUsaqQulluq(this)">Davam et</button>'
     );
@@ -1326,10 +1339,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var card = btn.closest('.abi-card');
     var il = parseFloat(document.getElementById('abi-usaq-il').value);
     if(isNaN(il) || il<0){ alert('Zəhmət olmasa illərin sayını düzgün daxil edin.'); return; }
+    if(il>6) il = 6;
     abiLockCard(card);
     abiAddUserCard(il+' il');
     abi.bonusStaj += il;
-    abiAddBotCard('<div class="abi-note">Uşağa qulluğa görə stajınıza <b>'+il+' il</b> əlavə olunacaq.</div>');
+    abiAddBotCard('<div class="abi-note">Uşağa qulluğa görə stajınıza <b>'+il+' il</b> əlavə olunacaq (maksimum 6 il həddi ilə).</div>');
     abiAskTehsil();
   }
 
@@ -1434,7 +1448,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
       'Vəfat anına yaş: <b>'+abiFmtYD(ageObj)+'</b><br/>'+
-      (bonus>0 ? 'Bonus staj (hərbi/uşağa qulluq/təhsil): <b>'+abiFmtYD(abiDecimalYearsToYD(bonus))+'</b><br/>Ümumi faktiki staj: <b>'+faktikiTotal+' il</b><br/>' : '')+
+      (bonus>0 ? 'Faktiki staj (hərbi/uşağa qulluq/təhsil): <b>'+abiFmtYD(abiDecimalYearsToYD(bonus))+'</b><br/>Ümumi faktiki staj: <b>'+faktikiTotal+' il</b><br/>' : '')+
       'Tələb olunan minimum staj: <b>'+teleb+' il</b><br/>'+
       (catmayan>0 ? 'Çatmayan staj: <b>'+catmayan+' il</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
       '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
@@ -1464,7 +1478,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     // Sosial müavinət almayıbsa, hədiyyə stajın verilməsi üçün əlavə şərt yoxlanılır
     abiAddBotCard(
-      '<div class="abi-q">01.01.2018-ci ilə dək sığorta stajı olubmu?</div>'+
+      '<div class="abi-q">01.07.2018-ci ilə dək sığorta stajı olubmu?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQSigortaStaj(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="abiQSigortaStaj(this,false)">Xeyr</button>'+
