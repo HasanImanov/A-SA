@@ -1482,9 +1482,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
       'Vəfat anına yaş: <b>'+abiFmtYD(ageObj)+'</b><br/>'+
-      (bonus>0 ? 'Faktiki staj (hərbi/uşağa qulluq/təhsil): <b>'+abiFmtYD(abiDecimalYearsToYD(bonus))+'</b><br/>Ümumi faktiki staj: <b>'+faktikiTotal+' il</b><br/>' : '')+
-      'Tələb olunan minimum staj: <b>'+teleb+' il</b><br/>'+
-      (catmayan>0 ? 'Çatmayan staj: <b>'+catmayan+' il</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
+      (bonus>0 ? 'Faktiki staj (hərbi/uşağa qulluq/təhsil): <b>'+abiFmtYD(abiDecimalYearsToYD(bonus))+'</b><br/>Ümumi faktiki staj: <b>'+abiFmtYD(abiDecimalYearsToYD(faktikiTotal))+'</b><br/>' : '')+
+      'Tələb olunan minimum staj: <b>'+abiFmtYD(abiDecimalYearsToYD(teleb))+'</b><br/>'+
+      (catmayan>0 ? 'Çatmayan staj: <b>'+abiFmtYD(abiDecimalYearsToYD(catmayan))+'</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
       '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
     );
 
@@ -1536,9 +1536,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(yeniCatmayan<0) yeniCatmayan = 0;
     abiAddBotCard(
       '<div class="abi-q">Hədiyyə staj</div>'+
-      'Hədiyyə staj: <b>'+hediyyeStaj+' il</b><br/>'+
-      'Yeni cəmi staj: '+yeniFaktiki+' il<br/>'+
-      (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+yeniCatmayan+' il</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
+      'Hədiyyə staj: <b>'+abiFmtYD(abiDecimalYearsToYD(hediyyeStaj))+'</b><br/>'+
+      'Yeni cəmi staj: '+abiFmtYD(abiDecimalYearsToYD(yeniFaktiki))+'<br/>'+
+      (yeniCatmayan>0 ? 'Hələ də çatmayan staj: <b>'+abiFmtYD(abiDecimalYearsToYD(yeniCatmayan))+'</b>' : 'Hədiyyə staj ilə birlikdə tələb olunan staj <b>ödənilir</b>.')
     );
     abi.catmayanStaj = yeniCatmayan;
     abiAskPersonCountForMinPension();
