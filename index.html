@@ -1258,6 +1258,33 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function abiFmtYM(il, ay){ return (ay>0 ? il+' il '+ay+' ay' : il+' il'); }
 
+  // İl+ay+gün üç sahəli input qrupu (2006-dan əvvəlki staj kimi daha dəqiq daxiletmələr üçün)
+  function abiYMDInputHTML(idPrefix, yearPlaceholder, monthPlaceholder, dayPlaceholder){
+    return '<div class="abi-input-group" style="grid-template-columns:1fr 1fr 1fr;">'+
+      '<div><label>İl</label><input type="number" id="'+idPrefix+'-il" placeholder="'+yearPlaceholder+'" min="0"/></div>'+
+      '<div><label>Ay</label><input type="number" id="'+idPrefix+'-ay" placeholder="'+monthPlaceholder+'" min="0" max="11"/></div>'+
+      '<div><label>Gün</label><input type="number" id="'+idPrefix+'-gun" placeholder="'+dayPlaceholder+'" min="0" max="30"/></div>'+
+    '</div>';
+  }
+  // İl+ay+gün inputlarını oxuyub decimal il olaraq qaytarır, səhv olsa null
+  function abiReadYMD(idPrefix){
+    var ilEl = document.getElementById(idPrefix+'-il');
+    var ayEl = document.getElementById(idPrefix+'-ay');
+    var gunEl = document.getElementById(idPrefix+'-gun');
+    var il = parseFloat(ilEl.value); if(isNaN(il)) il = 0;
+    var ay = parseFloat(ayEl.value); if(isNaN(ay)) ay = 0;
+    var gun = parseFloat(gunEl.value); if(isNaN(gun)) gun = 0;
+    if(il<0 || ay<0 || ay>11 || gun<0 || gun>30) return null;
+    return abiRound2(il + ay/12 + gun/365.25);
+  }
+  function abiFmtYMDraw(il, ay, gun){
+    var parts = [];
+    if(il>0) parts.push(il+' il');
+    if(ay>0) parts.push(ay+' ay');
+    if(gun>0) parts.push(gun+' gün');
+    return parts.length ? parts.join(' ') : '0 il';
+  }
+
   function abiScrollToCard(wrap){
     // #abi-main-in özündə sabit hündürlük olmadığı üçün adətən səhifənin özü scroll olur,
     // ona görə scrollIntoView istifadə edirik ki, hansı element scroll olunursa olunsun düzgün işləsin.
@@ -1682,9 +1709,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddUserCard(yes?'Bəli':'Xeyr');
     if(!yes){ abiAskPersonCountForMinPension(); return; }
     abiAddBotCard(
-      '<div class="abi-q">Kapital məbləğlərini daxil edin</div>'+
-      '<div class="abi-input-group">'+
-        '<div><label>2006-dan əvvəl kapital (AZN)</label><input type="number" id="abi-kap-evvel" placeholder="0"/></div>'+
+      '<div class="abi-q">2006-cı ildən əvvəlki stajı (il/ay/gün) və 2006-dan sonrakı kapitalı (AZN) daxil edin</div>'+
+      '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">2006-dan əvvəlki staj</div>'+
+      abiYMDInputHTML('abi-kap-evvel','0','0','0')+
+      '<div class="abi-input-group single" style="margin-top:10px;">'+
         '<div><label>2006-dan sonra kapital (AZN)</label><input type="number" id="abi-kap-sonra" placeholder="0"/></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="abiCalcKapital(this)">Davam et</button>'
@@ -1692,15 +1720,29 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function abiCalcKapital(btn){
     var card = btn.closest('.abi-card');
-    var kapEvvel = parseFloat(document.getElementById('abi-kap-evvel').value) || 0;
+    var evvelIlRaw = parseFloat(document.getElementById('abi-kap-evvel-il').value)||0;
+    var evvelAyRaw = parseFloat(document.getElementById('abi-kap-evvel-ay').value)||0;
+    var evvelGunRaw = parseFloat(document.getElementById('abi-kap-evvel-gun').value)||0;
+    var evvelStajDecimal = abiReadYMD('abi-kap-evvel');
     var kapSonra = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
+    if(evvelStajDecimal===null){ alert('Zəhmət olmasa il/ay/gün sahələrini düzgün daxil edin (ay 0-11, gün 0-30 arası olmalıdır).'); return; }
     abiLockCard(card);
-    abiAddUserCard('2006-dan əvvəl: '+kapEvvel+' AZN, 2006-dan sonra: '+kapSonra+' AZN');
-    // QEYD: kapitaldan minimum pensiya məbləğinə keçid düsturu hələ təsdiqlənməyib —
-    // müvəqqəti olaraq cəm göstərilir, mebləğ xanasını lazım gələrsə əl ilə düzəldin.
+    // 2006-dan əvvəlki staj → kapital: hər il üçün 1087 AZN
+    var kapEvvel = abiRound2(evvelStajDecimal * 1087);
+    abiAddUserCard('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw)+' → '+kapEvvel+' AZN, 2006-dan sonra: '+kapSonra+' AZN');
     abi.kapitalEvvel = kapEvvel; abi.kapitalSonra = kapSonra;
-    var tapilanMebleg = abiRound2(kapEvvel + kapSonra);
-    abiAddBotCard('<div class="abi-note">⚠️ Kapital → pensiya məbləği düsturu hələ dəqiqləşdirilməyib, ona görə məbləğ sahəsi müvəqqəti cəm ilə doldurulub — lazım olsa özünüz düzəldin.</div>');
+    var totalKapital = abiRound2(kapEvvel + kapSonra);
+    // Yaş — vəfat anına olan yaş (il), staj tələbi hesablanan yerdəki eyni yaş
+    var yas = abiYearsDaysDiff(abi.dogum, abi.vefat).years;
+    var boluc = (yas-15)*4/200*144;
+    var tapilanMebleg = boluc>0 ? abiRound2(totalKapital/boluc) : 0;
+    abiAddBotCard(
+      '<div class="abi-note">Kapital (2006-dan əvvəl): <b>'+kapEvvel+' AZN</b><br/>'+
+      'Kapital (2006-dan sonra): <b>'+kapSonra+' AZN</b><br/>'+
+      'Ümumi kapital: <b>'+totalKapital+' AZN</b><br/>'+
+      'Düstur: Ümumi kapital ÷ ((yaş-15)×4/200×144) = '+totalKapital+' ÷ '+abiRound2(boluc)+'<br/>'+
+      'Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b></div>'
+    );
     abiAskPersonCountForMinPension(tapilanMebleg);
   }
 
