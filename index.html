@@ -1543,9 +1543,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abi.hasStaj = yes;
     if(yes){
       abiAddBotCard(
-        '<div class="abi-q">Təvəllüd və vəfat tarixini, həmçinin faktiki stajı daxil edin</div>'+
+        '<div class="abi-q">Doğum və vəfat tarixini, həmçinin faktiki stajı daxil edin</div>'+
         '<div class="abi-input-group">'+
-          '<div><label>Təvəllüd tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10"/></div>'+
+          '<div><label>Doğum tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10"/></div>'+
           '<div><label>Vəfat tarixi</label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10"/></div>'+
         '</div>'+
         '<div><label style="display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">Faktiki əmək stajı</label></div>'+
@@ -1555,9 +1555,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     } else {
       // Rəsmi əmək stajı yoxdur (faktiki=0), amma toplanmış bonus staj (hərbi/uşağa qulluq/təhsil/ahıl/əlillik) hələ də hesaba alınır
       abiAddBotCard(
-        '<div class="abi-q">Təvəllüd və vəfat tarixini daxil edin</div>'+
+        '<div class="abi-q">Doğum və vəfat tarixini daxil edin</div>'+
         '<div class="abi-input-group">'+
-          '<div><label>Təvəllüd tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10"/></div>'+
+          '<div><label>Doğum tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10"/></div>'+
           '<div><label>Vəfat tarixi</label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10"/></div>'+
         '</div>'+
         '<input type="hidden" id="abi-faktiki-staj-il" value="0"/>'+
@@ -1578,7 +1578,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
     if(!dogum || !vefat){ alert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
     abiLockCard(card);
-    abiAddUserCard('Təvəllüd: '+dogumStr+', Vəfat: '+vefatStr+', Faktiki staj: '+abiFmtYM(faktikiIlRaw,faktikiAyRaw));
+    abiAddUserCard('Doğum: '+dogumStr+', Vəfat: '+vefatStr+', Faktiki staj: '+abiFmtYM(faktikiIlRaw,faktikiAyRaw));
 
     var ageObj = abiYearsDaysDiff(dogum, vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
