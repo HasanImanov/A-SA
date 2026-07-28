@@ -1208,6 +1208,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return {years:years, days:days};
   }
   function abiFmtYD(o){ return o.years+' il '+o.days+' gün'; }
+  function abiYearsMonthsDaysDiff(d1, d2){
+    // Təqvimə əsaslanan dəqiq il+ay+gün fərqi (339 gün kimi böyük gün ədədi əvəzinə ay/gün-ə bölünür)
+    var years = d2.getFullYear() - d1.getFullYear();
+    var months = d2.getMonth() - d1.getMonth();
+    var days = d2.getDate() - d1.getDate();
+    if(days < 0){
+      months--;
+      var prevMonthLastDay = new Date(d2.getFullYear(), d2.getMonth(), 0).getDate();
+      days += prevMonthLastDay;
+    }
+    if(months < 0){ years--; months += 12; }
+    return {years:years, months:months, days:days};
+  }
   function abiDecimalYearsToYD(dec){
     var years = Math.floor(dec);
     var days = Math.round((dec-years)*365.25);
@@ -1581,6 +1594,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddUserCard('Doğum: '+dogumStr+', Vəfat: '+vefatStr+', Faktiki staj: '+abiFmtYM(faktikiIlRaw,faktikiAyRaw));
 
     var ageObj = abiYearsDaysDiff(dogum, vefat);
+    var ageYMD = abiYearsMonthsDaysDiff(dogum, vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
     var bonus = abi.bonusStaj||0;
     var faktikiTotal = abiRound2(faktiki + bonus);
@@ -1591,7 +1605,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
-      'Vəfat anına yaş: <b>'+abiFmtYD(ageObj)+'</b><br/>'+
+      'Vəfat anına yaş: <b>'+abiFmtYMD(ageYMD)+'</b><br/>'+
       (bonus>0 ? 'Faktiki staj (hərbi/uşağa qulluq/təhsil): <b>'+abiFmtYMD(abiDecimalYearsToYMD(bonus))+'</b><br/>Ümumi faktiki staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
       'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
       (catmayan>0 ? 'Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b>' : 'Faktiki staj tələbi <b>ödəyir</b>.')+
