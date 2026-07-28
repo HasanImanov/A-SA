@@ -1226,12 +1226,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function abiFmtYMD(o){ return o.years+' il '+o.months+' ay '+o.days+' gün'; }
 
+  function abiScrollToCard(wrap){
+    // #abi-main-in özündə sabit hündürlük olmadığı üçün adətən səhifənin özü scroll olur,
+    // ona görə scrollIntoView istifadə edirik ki, hansı element scroll olunursa olunsun düzgün işləsin.
+    requestAnimationFrame(function(){
+      wrap.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
   function abiAddBotCard(html){
     var wrap=document.createElement('div');
     wrap.className='abi-bubble bot';
     wrap.innerHTML='<div class="abi-card bot">'+html+'</div>';
     abiFlowEl().appendChild(wrap);
-    document.getElementById('abi-main').scrollTop = document.getElementById('abi-main').scrollHeight;
+    abiScrollToCard(wrap);
     return wrap.querySelector('.abi-card');
   }
   function abiAddUserCard(text){
@@ -1239,7 +1246,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     wrap.className='abi-bubble user';
     wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
     abiFlowEl().appendChild(wrap);
-    document.getElementById('abi-main').scrollTop = document.getElementById('abi-main').scrollHeight;
+    abiScrollToCard(wrap);
   }
   function abiLockCard(cardEl){
     // sual cavablandıqdan sonra düymələri/inputları bağla ki, geri qayıdıb dəyişməsin
