@@ -1339,11 +1339,69 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<button class="abi-go-btn" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
       );
     } else {
-      // Pensiya almayıbsa, staj hesablamasına təsir edən amillər (hərbi/uşağa qulluq/təhsil - manual, sonra ahıl/əlillik) soruşulur
-      abiAskManualBonus();
+      // Pensiya almayıbsa, staj hesablamasına təsir edən amillər (hərbi/uşağa qulluq/təhsil - sual qalır, ədədi manual cəm kimi sonra soruşulur) soruşulur
+      abiAskGender();
     }
   }
 
+  function abiAskGender(){
+    abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs kişidir, yoxsa qadındır?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQGender(this,true)">Kişi</button>'+
+        '<button class="abi-choice-btn" onclick="abiQGender(this,false)">Qadın</button>'+
+      '</div>'
+    );
+  }
+  function abiQGender(btn, isMale){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(isMale?'Kişi':'Qadın');
+    abi.gender = isMale?'kisi':'qadin';
+    if(isMale){
+      abiAddBotCard(
+        '<div class="abi-q">Hərbi xidmətdə olubmu?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQHerbi(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQHerbi(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    } else {
+      abiAddBotCard(
+        '<div class="abi-q">2006-cı ilə qədər (işləmədən) 3 yaşına qədər uşağa qulluq edilibmi?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQUsaqQulluq(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQUsaqQulluq(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    }
+  }
+  function abiQHerbi(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.herbiOlub = yes;
+    abiAskTehsil();
+  }
+  function abiQUsaqQulluq(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.usaqQulluqOlub = yes;
+    abiAskTehsil();
+  }
+  function abiAskTehsil(){
+    abiAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər təhsil olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQTehsil(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQTehsil(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQTehsil(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.tehsilOlub = yes;
+    abiAskManualBonus();
+  }
   function abiAskManualBonus(){
     abiAddBotCard(
       '<div class="abi-q">Hərbi xidmət, uşağa qulluq və təhsilə görə əlavə staj varsa, cəmini daxil edin (yoxdursa boş buraxın)</div>'+
