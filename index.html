@@ -1400,27 +1400,6 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
     abi.tehsilOlub = yes;
-    abiAskManualBonus();
-  }
-  function abiAskManualBonus(){
-    abiAddBotCard(
-      '<div class="abi-q">Hərbi xidmət, uşağa qulluq və təhsilə görə əlavə staj varsa, cəmini daxil edin (yoxdursa boş buraxın)</div>'+
-      abiYMInputHTML('abi-manual-bonus','0','0')+
-      '<button class="abi-go-btn" onclick="abiCalcManualBonus(this)">Davam et</button>'
-    );
-  }
-  function abiCalcManualBonus(btn){
-    var card = btn.closest('.abi-card');
-    var ilRaw = parseFloat(document.getElementById('abi-manual-bonus-il').value)||0;
-    var ayRaw = parseFloat(document.getElementById('abi-manual-bonus-ay').value)||0;
-    if(ilRaw<0 || ayRaw<0 || ayRaw>11){ alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return; }
-    var dec = abiRound2(ilRaw + ayRaw/12);
-    abiLockCard(card);
-    abiAddUserCard(dec>0 ? abiFmtYM(ilRaw,ayRaw) : 'Yoxdur');
-    abi.bonusStaj += dec;
-    if(dec>0){
-      abiAddBotCard('<div class="abi-note">Hərbi xidmət/uşağa qulluq/təhsilə görə stajınıza <b>'+abiFmtYMD(abiDecimalYearsToYMD(dec))+'</b> əlavə olunacaq.</div>');
-    }
     abiAskXarici();
   }
 
