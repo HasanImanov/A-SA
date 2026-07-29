@@ -1237,7 +1237,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(months>=12){ years++; months-=12; }
     return {years:years, months:months, days:days};
   }
-  function abiFmtYMD(o){ return o.years+' il '+o.months+' ay '+o.days+' gün'; }
+  function abiFmtYMD(o){ return o.years+' il '+o.months+' ay'; }
 
   // İl+ay cütü olan input qrupu üçün ortaq HTML — hər yerdə eyni görünüşdə olsun deyə
   function abiYMInputHTML(idPrefix, yearPlaceholder, monthPlaceholder){
