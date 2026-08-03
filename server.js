@@ -685,6 +685,9 @@ app.post('/api/feedback', async (req, res) => {
     return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
   }
   const { message, contact, page } = req.body || {};
+  if (!contact || typeof contact !== 'string' || !contact.trim()) {
+    return res.status(400).json({ error: 'Ad Soyad mütləqdir.' });
+  }
   if (!message || typeof message !== 'string' || !message.trim()) {
     return res.status(400).json({ error: 'Mesaj boş ola bilməz.' });
   }

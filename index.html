@@ -1711,7 +1711,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function fbOpen(){
     document.getElementById('fb-modal').style.display = 'flex';
     document.getElementById('fb-status').textContent = '';
-    document.getElementById('fb-message').focus();
+    document.getElementById('fb-contact').focus();
   }
   function fbClose(){
     document.getElementById('fb-modal').style.display = 'none';
@@ -1720,6 +1720,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var msg = document.getElementById('fb-message').value.trim();
     var contact = document.getElementById('fb-contact').value.trim();
     var statusEl = document.getElementById('fb-status');
+    if(!contact){ alert('Zəhmət olmasa Ad Soyad yazın — bu sahə mütləqdir.'); document.getElementById('fb-contact').focus(); return; }
     if(!msg){ statusEl.textContent = 'Zəhmət olmasa mesajınızı yazın.'; statusEl.style.color = '#c0392b'; return; }
     var btn = document.getElementById('fb-submit-btn');
     btn.disabled = true; btn.textContent = 'Göndərilir...';
@@ -1756,8 +1757,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       <div style="font-weight:700;color:var(--blue);font-family:'Nunito',sans-serif;font-size:1.05rem;">Rəyinizi bildirin</div>
       <button onclick="fbClose()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
     </div>
+    <input id="fb-contact" type="text" placeholder="Ad Soyad (məs: Hasan İmanov)" style="width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:0.88rem;color:var(--text);box-sizing:border-box;"/>
+    <div style="font-size:0.72rem;color:var(--danger,#c0392b);margin:3px 0 10px 2px;">* Ad Soyad mütləq yazılmalıdır</div>
     <textarea id="fb-message" placeholder="Fikrinizi, təklifinizi və ya qarşılaşdığınız problemi yazın..." style="width:100%;min-height:110px;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
-    <input id="fb-contact" type="text" placeholder="Əlaqə (email/telefon) — istəyə bağlı" style="width:100%;margin-top:8px;border:1.5px solid var(--blue-mid);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:0.88rem;color:var(--text);box-sizing:border-box;"/>
     <div id="fb-status" style="font-size:0.82rem;margin-top:8px;min-height:18px;"></div>
     <button id="fb-submit-btn" onclick="fbSubmit()" style="margin-top:8px;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;width:100%;">Göndər</button>
   </div>
