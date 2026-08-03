@@ -1599,9 +1599,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + usaqDecimalRaw);
 
-    // Hədiyyə staj: sosial müavinət əvəzinə, 2018-ə qədər sığorta stajı olubsa hesablanır
+    // Hədiyyə staj: yalnız staj artıq özü-özlüyündə çatmadığı halda hesablanır (2018-ə qədər sığorta stajı olubsa)
+    var catmayanEvvel = abiRound2(teleb - pre2006StajTotal);
     var hediyyeStaj = 0;
-    if(abi.sigortaStajOlub){
+    if(catmayanEvvel>0 && abi.sigortaStajOlub){
       hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - abi.dogum.getFullYear()) - 15)/3);
       if(hediyyeStaj<0) hediyyeStaj = 0;
     }
