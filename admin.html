@@ -91,6 +91,29 @@
 
 <script>
   var ADMIN_KEY = '';
+  var lastMaxId = 0;
+  var pollTimer = null;
+
+  function playBeep(){
+    try{
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var playTone = function(freq, startTime, dur){
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.18, startTime+0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime+dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(startTime);
+        osc.stop(startTime+dur);
+      };
+      var now = ctx.currentTime;
+      playTone(880, now, 0.15);
+      playTone(1175, now+0.16, 0.18);
+    }catch(e){ /* səs dəstəklənmirsə səssizcə keç */ }
+  }
 
   function doLogin(){
     var k = document.getElementById('key-input').value.trim();
@@ -124,12 +147,38 @@
         document.getElementById('login-box').style.display = 'none';
         document.getElementById('panel').style.display = 'block';
         renderList(res.d);
+        updateLastMaxId(res.d);
+        if(isFirstLoad){ startPolling(); }
       })
       .catch(function(){
         document.getElementById('loading').style.display = 'none';
         if(isFirstLoad){ document.getElementById('login-error').textContent = 'Şəbəkə xətası.'; }
         else { alert('Şəbəkə xətası.'); }
       });
+  }
+
+  function updateLastMaxId(items){
+    lastMaxId = items.reduce(function(max,it){ return Math.max(max, it.id); }, lastMaxId);
+  }
+
+  // Panel açıq qalanda arxa planda, xəbərdarlıqsız/spinnersiz yoxlayır — təzə rəy gələndə səs çıxarır
+  function startPolling(){
+    if(pollTimer) return;
+    pollTimer = setInterval(function(){
+      if(!ADMIN_KEY) return;
+      fetch('/api/feedback?key='+encodeURIComponent(ADMIN_KEY))
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(items){
+          if(!items) return;
+          var newMax = items.reduce(function(max,it){ return Math.max(max, it.id); }, 0);
+          if(newMax > lastMaxId){
+            playBeep();
+            renderList(items);
+          }
+          lastMaxId = Math.max(lastMaxId, newMax);
+        })
+        .catch(function(){});
+    }, 15000);
   }
 
   function renderList(items){
