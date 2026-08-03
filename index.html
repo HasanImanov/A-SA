@@ -1701,6 +1701,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   switchTab = function(tab){
     _origSwitchTab(tab);
     if(tab==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
+    var fbFab = document.getElementById('fb-fab');
+    if(fbFab){ fbFab.style.display = (tab==='abi') ? 'none' : 'flex'; }
   };
 
   // ----------------------------
