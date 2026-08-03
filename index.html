@@ -1390,34 +1390,75 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(isMale?'Kişi':'Qadın');
     abi.gender = isMale?'kisi':'qadin';
-    if(isMale){
-      abiAddBotCard(
-        '<div class="abi-q">Hərbi xidmətdə olubmu?</div>'+
-        '<div class="abi-btn-row">'+
-          '<button class="abi-choice-btn yes" onclick="abiQHerbi(this,true)">Bəli</button>'+
-          '<button class="abi-choice-btn" onclick="abiQHerbi(this,false)">Xeyr</button>'+
-        '</div>'
-      );
-    } else {
-      abiAddBotCard(
-        '<div class="abi-q">2006-cı ilə qədər (işləmədən) 3 yaşına qədər uşağa qulluq edilibmi?</div>'+
-        '<div class="abi-btn-row">'+
-          '<button class="abi-choice-btn yes" onclick="abiQUsaqQulluq(this,true)">Bəli</button>'+
-          '<button class="abi-choice-btn" onclick="abiQUsaqQulluq(this,false)">Xeyr</button>'+
-        '</div>'
-      );
-    }
+    abiAskHerbiQuestion();
+  }
+  function abiAskHerbiQuestion(){
+    abiAddBotCard(
+      '<div class="abi-q">Hərbi xidmətdə olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQHerbi(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQHerbi(this,false)">Xeyr</button>'+
+      '</div>'
+    );
   }
   function abiQHerbi(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    abi.herbiOlub = yes;
-    abiAskTehsil();
+    if(!yes){
+      abi.herbiStajDecimal = 0;
+      if(abi.gender==='qadin'){ abiAskUsaqQulluqQuestion(); } else { abiAskTehsil(); }
+      return;
+    }
+    abiAddBotCard(
+      '<div class="abi-q">Hərbi xidmət müddətini daxil edin</div>'+
+      abiYMInputHTML('abi-herbi','2','0')+
+      '<button class="abi-go-btn" onclick="abiCalcHerbiStaj(this)">Davam et</button>'
+    );
+  }
+  function abiCalcHerbiStaj(btn){
+    var card = btn.closest('.abi-card');
+    var ilRaw = parseFloat(document.getElementById('abi-herbi-il').value)||0;
+    var ayRaw = parseFloat(document.getElementById('abi-herbi-ay').value)||0;
+    if(ilRaw<0 || ayRaw<0 || ayRaw>11){ alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return; }
+    var dec = abiRound2(ilRaw + ayRaw/12);
+    abiLockCard(card);
+    abiAddUserCard(abiFmtYM(ilRaw,ayRaw));
+    abi.herbiStajDecimal = dec;
+    if(abi.gender==='qadin'){ abiAskUsaqQulluqQuestion(); } else { abiAskTehsil(); }
+  }
+  function abiAskUsaqQulluqQuestion(){
+    abiAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər (işləmədən) 3 yaşına qədər uşağa qulluq edilibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQUsaqQulluq(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQUsaqQulluq(this,false)">Xeyr</button>'+
+      '</div>'
+    );
   }
   function abiQUsaqQulluq(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    abi.usaqQulluqOlub = yes;
+    if(!yes){
+      abi.usaqStajDecimal = 0;
+      abiAskTehsil();
+      return;
+    }
+    abiAddBotCard(
+      '<div class="abi-q">Uşağa qulluq dövrünü daxil edin (maks. 6 il)</div>'+
+      abiYMInputHTML('abi-usaq','6','0')+
+      '<button class="abi-go-btn" onclick="abiCalcUsaqStaj(this)">Davam et</button>'
+    );
+  }
+  function abiCalcUsaqStaj(btn){
+    var card = btn.closest('.abi-card');
+    var ilRaw = parseFloat(document.getElementById('abi-usaq-il').value)||0;
+    var ayRaw = parseFloat(document.getElementById('abi-usaq-ay').value)||0;
+    if(ilRaw<0 || ayRaw<0 || ayRaw>11){ alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return; }
+    var dec = abiRound2(ilRaw + ayRaw/12);
+    if(dec>6){ dec = 6; ilRaw = 6; ayRaw = 0; }
+    abiLockCard(card);
+    abiAddUserCard(abiFmtYM(ilRaw,ayRaw));
+    abi.usaqStajDecimal = dec;
     abiAskTehsil();
   }
   function abiAskTehsil(){
@@ -1572,7 +1613,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ageObj = abiYearsDaysDiff(abi.dogum, abi.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12);
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (abi.herbiStajDecimal||0) + (abi.usaqStajDecimal||0));
 
     // Hədiyyə staj: sosial müavinət əvəzinə, 2018-ə qədər sığorta stajı olubsa hesablanır
     var hediyyeStaj = 0;
