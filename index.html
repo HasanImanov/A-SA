@@ -1702,7 +1702,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     _origSwitchTab(tab);
     if(tab==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
     var fbFab = document.getElementById('fb-fab');
-    if(fbFab){ fbFab.style.display = (tab==='abi') ? 'none' : 'flex'; }
+    if(fbFab){ fbFab.style.display = (tab==='abi') ? 'flex' : 'none'; }
   };
 
   // ----------------------------
@@ -1748,7 +1748,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
 </script>
 
-<button id="fb-fab" onclick="fbOpen()" style="position:fixed;bottom:22px;right:22px;z-index:9998;background:var(--blue);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;gap:6px;">💬 Rəy bildir</button>
+<button id="fb-fab" onclick="fbOpen()" style="display:none;position:fixed;bottom:22px;right:22px;z-index:9998;background:var(--blue);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;box-shadow:var(--shadow);cursor:pointer;align-items:center;gap:6px;">💬 Rəy bildir</button>
 
 <div id="fb-modal" style="display:none;position:fixed;inset:0;background:rgba(20,30,50,0.45);z-index:9999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:var(--radius);max-width:420px;width:100%;padding:22px;box-shadow:var(--shadow);font-family:'Inter',sans-serif;">
