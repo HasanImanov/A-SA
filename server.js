@@ -716,6 +716,45 @@ app.get('/api/feedback', async (req, res) => {
   }
 });
 
+// Tək feedback sil: DELETE /api/feedback/:id?key=ADMIN_KEY
+app.delete('/api/feedback/:id', async (req, res) => {
+  if (!feedbackPool) {
+    return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
+  }
+  if (!process.env.ADMIN_KEY || req.query.key !== process.env.ADMIN_KEY) {
+    return res.status(403).json({ error: 'İcazə yoxdur.' });
+  }
+  const id = parseInt(req.params.id, 10);
+  if (!id) {
+    return res.status(400).json({ error: 'Yanlış id.' });
+  }
+  try {
+    await feedbackPool.query('DELETE FROM feedback WHERE id = $1', [id]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Silinə bilmədi.' });
+  }
+});
+
+// Bütün feedback-ləri təmizlə: DELETE /api/feedback?key=ADMIN_KEY&all=1
+app.delete('/api/feedback', async (req, res) => {
+  if (!feedbackPool) {
+    return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
+  }
+  if (!process.env.ADMIN_KEY || req.query.key !== process.env.ADMIN_KEY) {
+    return res.status(403).json({ error: 'İcazə yoxdur.' });
+  }
+  if (req.query.all !== '1') {
+    return res.status(400).json({ error: 'Hamısını silmək üçün ?all=1 əlavə edin.' });
+  }
+  try {
+    await feedbackPool.query('DELETE FROM feedback');
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Silinə bilmədi.' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Rəfiq server işləyir: http://localhost:${PORT}`);
 });
