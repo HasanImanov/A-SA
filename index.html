@@ -1635,6 +1635,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       }
     }
     abi.kapitalEvvel = kapEvvel; abi.kapitalSonra = kapSonra; abi.tapilanMebleg = tapilanMebleg;
+    abi.stajCatmir = catmayan>0;
 
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
@@ -1671,7 +1672,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(card);
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN, Şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
-    abiShowFinalResult(perPerson>ABI_LIMIT, 'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).');
+    var isPensiya = abi.stajCatmir ? false : (perPerson>ABI_LIMIT);
+    var detail2 = 'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).';
+    if(abi.stajCatmir){
+      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.';
+    }
+    abiShowFinalResult(isPensiya, detail2);
   }
 
   function abiShowFinalResult(isPensiya, detailHtml){
