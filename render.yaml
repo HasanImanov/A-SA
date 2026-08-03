@@ -8,3 +8,13 @@ services:
         value: 3000
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: refiq-feedback-db
+          property: connectionString
+      - key: ADMIN_KEY
+        sync: false
+
+databases:
+  - name: refiq-feedback-db
+    plan: free

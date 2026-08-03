@@ -4,6 +4,33 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+// ----------------------------
+// Feedback üçün Postgres bağlantısı (Render-in pulsuz Postgres bazası)
+// ----------------------------
+const { Pool } = require('pg');
+let feedbackPool = null;
+if (process.env.DATABASE_URL) {
+  feedbackPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+  feedbackPool.query(`
+    CREATE TABLE IF NOT EXISTS feedback (
+      id SERIAL PRIMARY KEY,
+      message TEXT NOT NULL,
+      contact TEXT,
+      page TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `).then(() => {
+    console.log('Feedback cədvəli hazırdır.');
+  }).catch(e => {
+    console.warn('Feedback cədvəli yaradıla bilmədi:', e.message);
+  });
+} else {
+  console.warn('DATABASE_URL tapılmadı — feedback funksiyası deaktivdir.');
+}
+
 // Sual-cavab bazası
 let QA_DATA = {};
 try {
@@ -649,6 +676,45 @@ app.post('/api/arayish-pdf', async (req, res) => {
   }
 });
 
+
+// ----------------------------
+// FEEDBACK
+// ----------------------------
+app.post('/api/feedback', async (req, res) => {
+  if (!feedbackPool) {
+    return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
+  }
+  const { message, contact, page } = req.body || {};
+  if (!message || typeof message !== 'string' || !message.trim()) {
+    return res.status(400).json({ error: 'Mesaj boş ola bilməz.' });
+  }
+  try {
+    await feedbackPool.query(
+      'INSERT INTO feedback (message, contact, page) VALUES ($1, $2, $3)',
+      [message.trim().slice(0, 5000), (contact || '').trim().slice(0, 300), (page || '').trim().slice(0, 300)]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('Feedback yazıla bilmədi:', e.message);
+    res.status(500).json({ error: 'Feedback yazıla bilmədi.' });
+  }
+});
+
+// Sadə admin görünüşü: /api/feedback?key=ADMIN_KEY
+app.get('/api/feedback', async (req, res) => {
+  if (!feedbackPool) {
+    return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
+  }
+  if (!process.env.ADMIN_KEY || req.query.key !== process.env.ADMIN_KEY) {
+    return res.status(403).json({ error: 'İcazə yoxdur.' });
+  }
+  try {
+    const result = await feedbackPool.query('SELECT id, message, contact, page, created_at FROM feedback ORDER BY created_at DESC LIMIT 500');
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: 'Oxuna bilmədi.' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Rəfiq server işləyir: http://localhost:${PORT}`);
