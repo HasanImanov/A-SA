@@ -1716,6 +1716,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function fbClose(){
     document.getElementById('fb-modal').style.display = 'none';
   }
+  function fbThanksClose(){
+    document.getElementById('fb-thanks-modal').style.display = 'none';
+  }
   function fbSubmit(){
     var msg = document.getElementById('fb-message').value.trim();
     var contact = document.getElementById('fb-contact').value.trim();
@@ -1732,11 +1735,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       .then(function(res){
         btn.disabled = false; btn.textContent = 'Göndər';
         if(res.ok){
-          statusEl.style.color = '#1a5fa8';
-          statusEl.textContent = 'Təşəkkürlər! Rəyiniz göndərildi.';
           document.getElementById('fb-message').value = '';
           document.getElementById('fb-contact').value = '';
-          setTimeout(fbClose, 1500);
+          statusEl.textContent = '';
+          fbClose();
+          document.getElementById('fb-thanks-modal').style.display = 'flex';
         } else {
           statusEl.style.color = '#c0392b';
           statusEl.textContent = res.d.error || 'Xəta baş verdi, yenidən cəhd edin.';
@@ -1762,6 +1765,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     <textarea id="fb-message" placeholder="Fikrinizi, təklifinizi və ya qarşılaşdığınız problemi yazın..." style="width:100%;min-height:110px;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
     <div id="fb-status" style="font-size:0.82rem;margin-top:8px;min-height:18px;"></div>
     <button id="fb-submit-btn" onclick="fbSubmit()" style="margin-top:8px;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;width:100%;">Göndər</button>
+  </div>
+</div>
+
+<div id="fb-thanks-modal" style="display:none;position:fixed;inset:0;background:rgba(20,30,50,0.45);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:var(--radius);max-width:360px;width:100%;padding:28px 24px;box-shadow:var(--shadow);font-family:'Inter',sans-serif;text-align:center;">
+    <div style="font-size:2.4rem;margin-bottom:10px;">✅</div>
+    <div style="font-weight:800;color:var(--blue);font-family:'Nunito',sans-serif;font-size:1.15rem;margin-bottom:8px;">Təşəkkürlər!</div>
+    <div style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:18px;">Rəyiniz uğurla göndərildi. Fikirlərinizi bizimlə bölüşdüyünüz üçün minnətdarıq.</div>
+    <button onclick="fbThanksClose()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;width:100%;">Bağla</button>
   </div>
 </div>
 </body>
