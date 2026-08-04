@@ -1646,7 +1646,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       var boluc = (ageObj.years-15)*4/200*144;
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
       // Qayda: 2006-dan əvvəl staj var, 2006-dan sonra kapital yoxdur, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
-      if(kapEvvel>0 && kapSonra===0 && tapilanMebleg<320){
+      if(tapilanMebleg<320){
         tapilanMebleg = 320;
       }
     }
