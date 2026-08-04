@@ -92,6 +92,9 @@
     #tab-abi{flex:1;display:none;flex-direction:column;}
     #tab-abi.active{display:flex;}
     #abi-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
+    #tab-elp{flex:1;display:none;flex-direction:column;}
+    #tab-elp.active{display:flex;}
+    #elp-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
     #abi-flow{display:flex;flex-direction:column;gap:16px;}
     .abi-bubble{display:flex;gap:10px;align-items:flex-start;animation:fadeIn 0.3s ease;}
     .abi-bubble.user{flex-direction:row-reverse;}
@@ -134,6 +137,7 @@
   <button class="tab-btn" data-tab="arayish" onclick="switchTab('arayish')">📄 Arayışlar</button>
   <button class="tab-btn" data-tab="erize" onclick="switchTab('erize')">📝 Ərizələr</button>
   <button class="tab-btn" data-tab="abi" onclick="switchTab('abi')">ABİ</button>
+  <button class="tab-btn" data-tab="elp" onclick="switchTab('elp')">ƏLİLLİK</button>
 </div>
 <div id="tab-refiq" class="active">
   <main>
@@ -346,6 +350,13 @@
   <div id="abi-main">
     <div class="arayish-title">Ailə başçısını itirməyə görə pensiya/müavinət təyinatı</div>
     <div id="abi-flow"></div>
+  </div>
+</div>
+
+<div id="tab-elp">
+  <div id="elp-main">
+    <div class="arayish-title">Əlilliyə görə pensiya/müavinət təyinatı</div>
+    <div id="elp-flow"></div>
   </div>
 </div>
 <script>
@@ -776,6 +787,7 @@
     document.getElementById('tab-arayish').classList.toggle('active',tab==='arayish');
     document.getElementById('tab-erize').classList.toggle('active',tab==='erize');
     document.getElementById('tab-abi').classList.toggle('active',tab==='abi');
+    document.getElementById('tab-elp').classList.toggle('active',tab==='elp');
   }
   function selectCat(cat){
     document.querySelectorAll('.arayish-form').forEach(function(f){f.classList.remove('active');});
@@ -1181,6 +1193,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   var GIFT_YEAR_BASE = 2005; // hədiyyə staj düsturunda istifadə olunan baza il
   var GIFT_YEAR_CUTOFF = '2019-01-01'; // hədiyyə staj yalnız bu tarixdən sonrakı vəfatlara aiddir
   var abi = {}; // cari sessiyanın cavabları
+  var elp = {}; // əlillik pensiyası sessiyasının cavabları
 
   function abiFlowEl(){ return document.getElementById('abi-flow'); }
 
@@ -1737,14 +1750,424 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     );
   }
 
+  function elpFlowEl(){ return document.getElementById('elp-flow'); }
+  function elpAddBotCard(html){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble bot';
+    wrap.innerHTML='<div class="abi-card bot">'+html+'</div>';
+    elpFlowEl().appendChild(wrap);
+    abiScrollToCard(wrap);
+    return wrap.querySelector('.abi-card');
+  }
+  function elpAddUserCard(text){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble user';
+    wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
+    elpFlowEl().appendChild(wrap);
+    abiScrollToCard(wrap);
+  }
+  function elpLockCard(cardEl){
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ el.disabled = true; el.style.opacity='0.5'; });
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.textContent = '✏️ Düzəliş et';
+    editBtn.className = 'abi-edit-btn';
+    editBtn.style.cssText = 'margin-top:10px;background:none;border:none;color:var(--blue);font-family:\'Nunito\',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;padding:4px 0;opacity:1;';
+    editBtn.onclick = function(){ elpEditCard(cardEl, editBtn); };
+    cardEl.appendChild(editBtn);
+  }
+  function elpEditCard(cardEl, editBtn){
+    var wrap = cardEl.closest('.abi-bubble');
+    var flow = elpFlowEl();
+    while(wrap.nextSibling){ flow.removeChild(wrap.nextSibling); }
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ if(el!==editBtn){ el.disabled = false; el.style.opacity='1'; } });
+    editBtn.remove();
+    abiScrollToCard(wrap);
+  }
+
+  function elpStart(){
+    document.getElementById('elp-flow').innerHTML='';
+    elp = {};
+    elpAddBotCard(
+      '<div class="abi-q">Əlillik dərəcəsi neçədir?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Dərəcə</label><select id="elp-derece" style="width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:\'Inter\',sans-serif;color:var(--text);">'+
+          '<option value="31-60">31-60%</option>'+
+          '<option value="61-80">61-80%</option>'+
+          '<option value="81-100">81-100%</option>'+
+        '</select></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="elpSaveDerece(this)">Davam et</button>'
+    );
+  }
+  function elpSaveDerece(btn){
+    var card = btn.closest('.abi-card');
+    var derece = document.getElementById('elp-derece').value;
+    elpLockCard(card);
+    elpAddUserCard(derece+'%');
+    elp.derece = derece;
+    elpAskDogumVefat();
+  }
+
+  function elpAskDogumVefat(){
+    elpAddBotCard(
+      '<div class="abi-q">Doğum və əlilliyin müəyyən edildiyi tarixi daxil edin</div>'+
+      '<div class="abi-input-group">'+
+        '<div><label>Doğum tarixi</label><input type="text" id="elp-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+        '<div><label>Əlilliyin müəyyən edildiyi tarix</label><input type="text" id="elp-elillik" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="elpSaveDogumVefat(this)">Davam et</button>'
+    );
+  }
+  function elpSaveDogumVefat(btn){
+    var card = btn.closest('.abi-card');
+    var dogumStr = document.getElementById('elp-dogum').value;
+    var vefatStr = document.getElementById('elp-elillik').value;
+    var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
+    if(!dogum || !vefat){ alert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
+    elpLockCard(card);
+    elpAddUserCard('Doğum: '+dogumStr+', Əlillik tarixi: '+vefatStr);
+    elp.dogum = dogum; elp.vefat = vefat;
+    elpAskGender();
+  }
+
+  function elpAskGender(){
+    elpAddBotCard(
+      '<div class="abi-q">Şəxs kişidir, yoxsa qadındır?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQGender(this,true)">Kişi</button>'+
+        '<button class="abi-choice-btn" onclick="elpQGender(this,false)">Qadın</button>'+
+      '</div>'
+    );
+  }
+  function elpQGender(btn, isMale){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(isMale?'Kişi':'Qadın');
+    elp.gender = isMale?'kisi':'qadin';
+    elpAskHerbiQuestion();
+  }
+  function elpAskHerbiQuestion(){
+    elpAddBotCard(
+      '<div class="abi-q">Hərbi xidmətdə olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQHerbi(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQHerbi(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQHerbi(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.herbiOlub = yes;
+    if(elp.gender==='qadin'){ elpAskUsaqQulluqQuestion(); } else { elpAskTehsil(); }
+  }
+  function elpAskUsaqQulluqQuestion(){
+    elpAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər (işləmədən) 3 yaşına qədər uşağa qulluq edilibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQUsaqQulluq(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQUsaqQulluq(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQUsaqQulluq(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.usaqQulluqOlub = yes;
+    elpAskTehsil();
+  }
+  function elpAskTehsil(){
+    elpAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər təhsil olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQTehsil(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQTehsil(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQTehsil(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.tehsilOlub = yes;
+    elpAskXarici();
+  }
+  function elpAskXarici(){
+    elpAddBotCard(
+      '<div class="abi-q">Şəxs xaricdə işləyibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQXarici(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQXarici(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQXarici(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ elpAskAhilEarly(); return; }
+    var options = ABI_XARICI_OLKELER.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
+    elpAddBotCard(
+      '<div class="abi-q">Hansı ölkədə işləyib?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Ölkə</label><select id="elp-xarici-olke" style="width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:\'Inter\',sans-serif;color:var(--text);">'+options+'</select></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="elpCalcXarici(this)">Davam et</button>'
+    );
+  }
+  function elpCalcXarici(btn){
+    var card = btn.closest('.abi-card');
+    var olke = document.getElementById('elp-xarici-olke').value;
+    elpLockCard(card);
+    elpAddUserCard(olke);
+    elp.xaricdeIslib = true;
+    elp.xariciOlke = olke;
+    elpAddBotCard('<div class="abi-note">Xaricdə (<b>'+olke+'</b>) işləmə məlumatı qeydə alındı.</div>');
+    elpAskAhilEarly();
+  }
+
+  // Ahıl/əlillik qulluğu — sadəcə məlumat üçün, ayrıca ədədi staj inputu yoxdur
+  function elpAskAhilEarly(){
+    elpAddBotCard(
+      '<div class="abi-q">Şəxs ahıl (yaşlı) şəxsə qulluq edibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQAhilEarly(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQAhilEarly(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQAhilEarly(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.ahilOlub = yes;
+    elpAskElillikEarly();
+  }
+  function elpAskElillikEarly(){
+    elpAddBotCard(
+      '<div class="abi-q">I dərəcə əlilliyi olan şəxsə qulluq edilibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQElillikEarly(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQElillikEarly(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQElillikEarly(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.elillikOlub = yes;
+    elpDecidePre2006Path();
+  }
+
+  // Doğum tarixi 01.01.1990-dan sonradırsa, 2006-dan əvvəlki staj mövzusu ehtimal olunmadığı üçün sual verilmir
+  function elpDecidePre2006Path(){
+    var esik = new Date(1990,0,1).getTime();
+    if(elp.dogum.getTime() < esik){
+      elpAskHasStaj();
+    } else {
+      elp.hasStaj = false;
+      elp.sigortaStajOlub = false;
+      elpAskKapitalCard();
+    }
+  }
+  function elpAskHasStaj(){
+    elpAddBotCard(
+      '<div class="abi-q">Şəxsin əmək kitabçası üzrə rəsmi stajı olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQHasStaj(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQHasStaj(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQHasStaj(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.hasStaj = yes;
+    elpAskSigortaStaj();
+  }
+  function elpAskSigortaStaj(){
+    elpAddBotCard(
+      '<div class="abi-q">01.07.2018-ci ilə dək sığorta stajı olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQSigortaStajFinal(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQSigortaStajFinal(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQSigortaStajFinal(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.sigortaStajOlub = yes;
+    elpAskKapitalCard();
+  }
+
+  function elpAskKapitalCard(){
+    var showPre2006 = elp.hasStaj;
+    var pre2006Html = showPre2006
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
+         abiYMInputHTML('elp-kap-evvel','0','0'))
+      : ('<input type="hidden" id="elp-kap-evvel-il" value="0"/><input type="hidden" id="elp-kap-evvel-ay" value="0"/>');
+    var herbiHtml = elp.herbiOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
+         abiYMInputHTML('elp-herbi','2','0'))
+      : ('<input type="hidden" id="elp-herbi-il" value="0"/><input type="hidden" id="elp-herbi-ay" value="0"/>');
+    var usaqHtml = (elp.gender==='qadin' && elp.usaqQulluqOlub)
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
+         abiYMInputHTML('elp-usaq','6','0'))
+      : ('<input type="hidden" id="elp-usaq-il" value="0"/><input type="hidden" id="elp-usaq-ay" value="0"/>');
+    var tehsilHtml = elp.tehsilOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
+         abiYMInputHTML('elp-tehsil','4','0'))
+      : ('<input type="hidden" id="elp-tehsil-il" value="0"/><input type="hidden" id="elp-tehsil-ay" value="0"/>');
+    // 81-100% dərəcədə kapital ümumiyyətlə soruşulmur — yalnız staj yoxlanılır
+    var kapitalAsk = (elp.derece!=='81-100')
+      ? ('<div class="abi-input-group single" style="margin-top:10px;">'+
+          '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="elp-kap-sonra" placeholder="0"/></div>'+
+        '</div>')
+      : ('<input type="hidden" id="elp-kap-sonra" value="0"/>');
+    elpAddBotCard(
+      '<div class="abi-q">'+(elp.derece==='81-100' ? 'Staj məlumatlarını daxil edin' : '2006-dan sonra kapitalı (varsa) daxil edin')+'</div>'+
+      herbiHtml+
+      usaqHtml+
+      tehsilHtml+
+      pre2006Html+
+      '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-dan sonrakı staj (varsa, yalnız hüququn yaranması üçün)</div>'+
+      abiYMInputHTML('elp-post2006','0','0')+
+      kapitalAsk+
+      '<button class="abi-go-btn" onclick="elpCalcFinal(this)">Hesabla</button>'
+    );
+  }
+
+  function elpCalcFinal(btn){
+    var card = btn.closest('.abi-card');
+    var evvelIlRaw = parseFloat(document.getElementById('elp-kap-evvel-il').value)||0;
+    var evvelAyRaw = parseFloat(document.getElementById('elp-kap-evvel-ay').value)||0;
+    var herbiIlRaw = parseFloat(document.getElementById('elp-herbi-il').value)||0;
+    var herbiAyRaw = parseFloat(document.getElementById('elp-herbi-ay').value)||0;
+    var usaqIlRaw = parseFloat(document.getElementById('elp-usaq-il').value)||0;
+    var usaqAyRaw = parseFloat(document.getElementById('elp-usaq-ay').value)||0;
+    var tehsilIlRaw = parseFloat(document.getElementById('elp-tehsil-il').value)||0;
+    var tehsilAyRaw = parseFloat(document.getElementById('elp-tehsil-ay').value)||0;
+    var post2006IlRaw = parseFloat(document.getElementById('elp-post2006-il').value)||0;
+    var post2006AyRaw = parseFloat(document.getElementById('elp-post2006-ay').value)||0;
+    var kapSonra = parseFloat(document.getElementById('elp-kap-sonra').value) || 0;
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+      alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
+    }
+    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
+    if(usaqDecimalRaw>6){ usaqDecimalRaw = 6; usaqIlRaw = 6; usaqAyRaw = 0; }
+    elpLockCard(card);
+    var ozetParts = [];
+    if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
+    if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
+    if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
+    if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
+    if(post2006IlRaw>0||post2006AyRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYM(post2006IlRaw,post2006AyRaw));
+    if(elp.derece!=='81-100') ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
+    elpAddUserCard(ozetParts.join(', '));
+
+    var ageObj = abiYearsDaysDiff(elp.dogum, elp.vefat);
+    var teleb = abiRound2((ageObj.years-15)/3);
+
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
+
+    // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
+    var hediyyeStaj = 0;
+    if(elp.sigortaStajOlub){
+      hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - elp.dogum.getFullYear()) - 15)/3);
+      if(hediyyeStaj<0) hediyyeStaj = 0;
+    }
+    elp.hediyyeStaj = hediyyeStaj;
+
+    var pre2006Effective = Math.max(pre2006StajTotal, hediyyeStaj);
+    var faktikiTotal = abiRound2(pre2006Effective + post2006StajTotal);
+    elp.faktikiStaj = faktikiTotal; elp.telebOlunanStaj = teleb;
+
+    var catmayan = abiRound2(teleb - faktikiTotal);
+    if(catmayan<0) catmayan = 0;
+
+    var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
+    var kapitalTetbiqOlunur = (elp.derece!=='81-100');
+    if(catmayan<=0 && kapitalTetbiqOlunur){
+      // Staj tələbi ödəyəndə YALNIZ o zaman kapital hesablanır (81-100% dərəcədə heç hesablanmır). Kapital HƏQİQƏTƏN olan 2006-dan əvvəlki staja görə hesablanır (hədiyyə daxil deyil).
+      var multiplier = abiGetKapitalMultiplier(elp.vefat);
+      kapEvvel = abiRound2(pre2006Effective * multiplier);
+      totalKapital = abiRound2(kapEvvel + kapSonra);
+      var boluc = (ageObj.years-15)*4/200*144;
+      gerekenKapital = abiRound2(boluc * multiplier);
+      tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
+      // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
+      if(tapilanMebleg<320){
+        tapilanMebleg = 320;
+      }
+    }
+    elp.kapitalEvvel = kapEvvel; elp.kapitalSonra = kapSonra; elp.tapilanMebleg = tapilanMebleg;
+    elp.stajCatmir = catmayan>0;
+
+    elpAddBotCard(
+      '<div class="abi-q">Nəticə</div>'+
+      'Dərəcə: <b>'+elp.derece+'%</b><br/>'+
+      'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
+      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
+      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
+      (catmayan>0
+        ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
+        : ('Faktiki staj tələbi <b>ödəyir</b>.'+
+           (kapitalTetbiqOlunur ? ('<br/>Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')))+
+      '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
+    );
+
+    elpAskPersonCountForMinPension((catmayan<=0 && kapitalTetbiqOlunur) ? tapilanMebleg : undefined);
+  }
+
+
+  function elpAskPersonCountForMinPension(prefillMebleg){
+    elpAddBotCard(
+      '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxslərin sayını daxil edin</div>'+
+      '<div class="abi-input-group">'+
+        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="elp-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
+        '<div><label>Hüququ yaranan şəxslərin sayı</label><input type="number" id="elp-p2-say" placeholder="2"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="elpCalcPensionSplit2(this)">Hesabla</button>'
+    );
+  }
+
+  function elpCalcPensionSplit2(btn){
+    var card = btn.closest('.abi-card');
+    var mebleg = parseFloat(document.getElementById('elp-p2-mebleg').value);
+    var say = parseFloat(document.getElementById('elp-p2-say').value);
+    if(!mebleg || !say){ alert('Zəhmət olmasa hər iki xananı doldurun.'); return; }
+    elpLockCard(card);
+    elpAddUserCard('Minimum pensiya: '+mebleg+' AZN, Şəxs sayı: '+say);
+    var perPerson = abiRound2(mebleg/say);
+    var isPensiya = elp.stajCatmir ? false : (perPerson>ABI_LIMIT);
+    var detail2 = 'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).';
+    if(elp.stajCatmir){
+      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.';
+    }
+    elpShowFinalResult(isPensiya, detail2);
+  }
+
+  function elpShowFinalResult(isPensiya, detailHtml){
+    var cls = isPensiya ? 'pensiya' : 'muavinet';
+    var title = isPensiya ? '✅ Əlillik pensiyası təyin olunacaq' : '📋 Əlilliyə görə sosial müavinət təyin olunacaq';
+    elpAddBotCard(
+      '<div class="abi-result '+cls+'">'+title+'</div>'+
+      '<div style="margin-top:10px;">'+detailHtml+'</div>'+
+      '<button class="abi-restart-btn" onclick="elpStart()">🔄 Yenidən başla</button>'
+    );
+  }
+
   // Tab ilk dəfə açılanda axını başlat
   var _abiInitDone = false;
+  var _elpInitDone = false;
   var _origSwitchTab = switchTab;
   switchTab = function(tab){
     _origSwitchTab(tab);
     if(tab==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
+    if(tab==='elp' && !_elpInitDone){ _elpInitDone = true; elpStart(); }
     var fbFab = document.getElementById('fb-fab');
-    if(fbFab){ fbFab.style.display = (tab==='abi') ? 'flex' : 'none'; }
+    if(fbFab){ fbFab.style.display = (tab==='abi'||tab==='elp') ? 'flex' : 'none'; }
   };
 
   // ----------------------------
