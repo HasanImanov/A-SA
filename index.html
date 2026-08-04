@@ -1641,7 +1641,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(catmayan<=0){
       // Staj tələbi ödəyəndə YALNIZ o zaman kapital hesablanır. Kapital yalnız HƏQİQƏTƏN olan 2006-dan əvvəlki staja görə hesablanır (hədiyyə daxil deyil).
       var multiplier = abiGetKapitalMultiplier(abi.vefat);
-      kapEvvel = abiRound2(pre2006StajTotal * multiplier);
+      kapEvvel = abiRound2(pre2006Effective * multiplier);
       totalKapital = abiRound2(kapEvvel + kapSonra);
       var boluc = (ageObj.years-15)*4/200*144;
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
