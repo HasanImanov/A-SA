@@ -1683,7 +1683,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
     var boluc = (ageObj.years-15)*4/200*144;
-    gerekenKapital = abiRound2(boluc * multiplier);
+    gerekenKapital = abiRound2(boluc * 320);
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -2105,7 +2105,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       kapEvvel = abiRound2(pre2006Effective * multiplier);
       totalKapital = abiRound2(kapEvvel + kapSonra);
       var boluc = (ageObj.years-15)*4/200*144;
-      gerekenKapital = abiRound2(boluc * multiplier);
+      gerekenKapital = abiRound2(boluc * 320);
       if(catmayan<=0){
         // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
         tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
