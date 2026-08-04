@@ -1184,6 +1184,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function abiFlowEl(){ return document.getElementById('abi-flow'); }
 
+  // Tarix inputuna rəqəm yazanda nöqtələri (gg.aa.iiii) özü avtomatik qoyur
+  function abiMaskDate(el){
+    var digits = el.value.replace(/\D/g,'').slice(0,8);
+    var out = digits;
+    if(digits.length>4){ out = digits.slice(0,2)+'.'+digits.slice(2,4)+'.'+digits.slice(4); }
+    else if(digits.length>2){ out = digits.slice(0,2)+'.'+digits.slice(2); }
+    el.value = out;
+  }
   function abiParseDate(str){
     // gözlənilən format: gg.aa.iiii
     var p = (str||'').split('.');
@@ -1378,8 +1386,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Doğum və vəfat tarixini daxil edin</div>'+
       '<div class="abi-input-group">'+
-        '<div><label>Doğum tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10"/></div>'+
-        '<div><label>Vəfat tarixi</label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10"/></div>'+
+        '<div><label>Doğum tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+        '<div><label>Vəfat tarixi</label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="abiSaveDogumVefat(this)">Davam et</button>'
     );
