@@ -1308,9 +1308,28 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiScrollToCard(wrap);
   }
   function abiLockCard(cardEl){
-    // sual cavablandıqdan sonra düymələri/inputları bağla ki, geri qayıdıb dəyişməsin
-    var interactive = cardEl.querySelectorAll('button, input');
+    // sual cavablandıqdan sonra düymələri/inputları bağla, amma "Düzəliş et" ilə geri qayıtmaq mümkün olsun
+    var interactive = cardEl.querySelectorAll('button, input, select');
     interactive.forEach(function(el){ el.disabled = true; el.style.opacity='0.5'; });
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.textContent = '✏️ Düzəliş et';
+    editBtn.className = 'abi-edit-btn';
+    editBtn.style.cssText = 'margin-top:10px;background:none;border:none;color:var(--blue);font-family:\'Nunito\',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;padding:4px 0;opacity:1;';
+    editBtn.onclick = function(){ abiEditCard(cardEl, editBtn); };
+    cardEl.appendChild(editBtn);
+  }
+
+  function abiEditCard(cardEl, editBtn){
+    // Bu sualdan sonra əlavə olunmuş HAMI (cavab qabarcığı + sonrakı suallar) silinir
+    var wrap = cardEl.closest('.abi-bubble');
+    var flow = abiFlowEl();
+    while(wrap.nextSibling){ flow.removeChild(wrap.nextSibling); }
+    // Kartın özü təzədən aktiv olunur ki, yenidən cavablandırıla bilsin
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ if(el!==editBtn){ el.disabled = false; el.style.opacity='1'; } });
+    editBtn.remove();
+    abiScrollToCard(wrap);
   }
 
   function abiStart(){
