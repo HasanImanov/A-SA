@@ -1677,15 +1677,17 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var catmayan = abiRound2(teleb - faktikiTotal);
     if(catmayan<0) catmayan = 0;
 
-    var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0;
+    var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
+    // Kapital (tələb olunan / olan) staj çatıb-çatmamasından asılı olmayaraq hesablanır və göstərilir
+    var multiplier = abiGetKapitalMultiplier(abi.vefat);
+    kapEvvel = abiRound2(pre2006Effective * multiplier);
+    totalKapital = abiRound2(kapEvvel + kapSonra);
+    var boluc = (ageObj.years-15)*4/200*144;
+    gerekenKapital = abiRound2(boluc * multiplier);
     if(catmayan<=0){
-      // Staj tələbi ödəyəndə YALNIZ o zaman kapital hesablanır. Kapital yalnız HƏQİQƏTƏN olan 2006-dan əvvəlki staja görə hesablanır (hədiyyə daxil deyil).
-      var multiplier = abiGetKapitalMultiplier(abi.vefat);
-      kapEvvel = abiRound2(pre2006Effective * multiplier);
-      totalKapital = abiRound2(kapEvvel + kapSonra);
-      var boluc = (ageObj.years-15)*4/200*144;
+      // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
-      // Qayda: 2006-dan əvvəl staj var, 2006-dan sonra kapital yoxdur, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
+      // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
       if(tapilanMebleg<320){
         tapilanMebleg = 320;
       }
@@ -1699,13 +1701,22 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
       'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
       (catmayan>0
-        ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün kapital hesablanmır — bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
-        : ('Faktiki staj tələbi <b>ödəyir</b>.'+
-           (totalKapital>0 ? ('<br/>Ümumi kapital: <b>'+totalKapital+' AZN</b><br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')))+
-      '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
+        ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
+        : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
+      'Olan kapital: <b>'+totalKapital+' AZN</b>'+
+      (catmayan>0
+        ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
+        : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'))+
+      (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
     );
 
-    abiAskPersonCountForMinPension(catmayan<=0 ? tapilanMebleg : undefined);
+    if(catmayan>0){
+      // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
+      abiShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
+    } else {
+      abiAskPersonCountForMinPension(tapilanMebleg);
+    }
   }
 
 
@@ -2088,17 +2099,20 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
     var kapitalTetbiqOlunur = (elp.derece!=='81-100');
-    if(catmayan<=0 && kapitalTetbiqOlunur){
-      // Staj tələbi ödəyəndə YALNIZ o zaman kapital hesablanır (81-100% dərəcədə heç hesablanmır). Kapital HƏQİQƏTƏN olan 2006-dan əvvəlki staja görə hesablanır (hədiyyə daxil deyil).
+    if(kapitalTetbiqOlunur){
+      // Kapital (tələb olunan / olan) staj çatıb-çatmamasından asılı olmayaraq hesablanır və göstərilir (81-100% dərəcədə heç hesablanmır)
       var multiplier = abiGetKapitalMultiplier(elp.vefat);
       kapEvvel = abiRound2(pre2006Effective * multiplier);
       totalKapital = abiRound2(kapEvvel + kapSonra);
       var boluc = (ageObj.years-15)*4/200*144;
       gerekenKapital = abiRound2(boluc * multiplier);
-      tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
-      // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
-      if(tapilanMebleg<320){
-        tapilanMebleg = 320;
+      if(catmayan<=0){
+        // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
+        tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
+        // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
+        if(tapilanMebleg<320){
+          tapilanMebleg = 320;
+        }
       }
     }
     elp.kapitalEvvel = kapEvvel; elp.kapitalSonra = kapSonra; elp.tapilanMebleg = tapilanMebleg;
@@ -2111,13 +2125,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
       'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
       (catmayan>0
-        ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
-        : ('Faktiki staj tələbi <b>ödəyir</b>.'+
-           (kapitalTetbiqOlunur ? ('<br/>Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')))+
-      '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>'
+        ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
+        : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      (kapitalTetbiqOlunur ? ('Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b>'+(catmayan<=0 ? ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')) : '')+
+      (catmayan>0 ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
+      (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
     );
 
-    elpAskPersonCountForMinPension((catmayan<=0 && kapitalTetbiqOlunur) ? tapilanMebleg : undefined);
+    if(catmayan>0){
+      // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
+      elpShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
+    } else {
+      elpAskPersonCountForMinPension(kapitalTetbiqOlunur ? tapilanMebleg : undefined);
+    }
   }
 
 
