@@ -2114,6 +2114,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
           tapilanMebleg = 320;
         }
       }
+    } else if(catmayan<=0){
+      // 81-100% dərəcədə kapital hesablanmır, amma staj ödəyirsə minimum məbləğ avtomatik 320 AZN tətbiq olunur
+      tapilanMebleg = 320;
     }
     elp.kapitalEvvel = kapEvvel; elp.kapitalSonra = kapSonra; elp.tapilanMebleg = tapilanMebleg;
     elp.stajCatmir = catmayan>0;
@@ -2127,7 +2130,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
-      (kapitalTetbiqOlunur ? ('Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b>'+(catmayan<=0 ? ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')) : '')+
+      (kapitalTetbiqOlunur ? ('Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
+      (catmayan<=0 ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')+
       (catmayan>0 ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
       (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
     );
@@ -2136,7 +2140,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       elpShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
-      elpAskPersonCountForMinPension(kapitalTetbiqOlunur ? tapilanMebleg : undefined);
+      elpAskPersonCountForMinPension(tapilanMebleg);
     }
   }
 
