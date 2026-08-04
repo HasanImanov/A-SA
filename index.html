@@ -1546,6 +1546,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAskKapitalCard();
   }
 
+  // Vəfat ilinə görə 2006-dan əvvəlki staj → kapital əmsalı
+  function abiGetKapitalMultiplier(vefatDate){
+    var table = {2019:722, 2020:741, 2021:762, 2022:813, 2023:926, 2024:1007, 2025:1029, 2026:1087};
+    var y = vefatDate.getFullYear();
+    if(table[y]!==undefined) return table[y];
+    if(y>2026) return 1087;
+    return 722;
+  }
+
   function abiAskKapitalCard(){
     var showPre2006 = abi.hasStaj;
     var pre2006Html = showPre2006
@@ -1570,6 +1579,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       usaqHtml+
       tehsilHtml+
       pre2006Html+
+      '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-dan sonrakı staj (varsa, yalnız hüququn yaranması üçün — kapitala təsir etmir)</div>'+
+      abiYMInputHTML('abi-post2006','0','0')+
       '<div class="abi-input-group single" style="margin-top:10px;">'+
         '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="abi-kap-sonra" placeholder="0"/></div>'+
       '</div>'+
@@ -1587,8 +1598,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var usaqAyRaw = parseFloat(document.getElementById('abi-usaq-ay').value)||0;
     var tehsilIlRaw = parseFloat(document.getElementById('abi-tehsil-il').value)||0;
     var tehsilAyRaw = parseFloat(document.getElementById('abi-tehsil-ay').value)||0;
+    var post2006IlRaw = parseFloat(document.getElementById('abi-post2006-il').value)||0;
+    var post2006AyRaw = parseFloat(document.getElementById('abi-post2006-ay').value)||0;
     var kapSonra = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
       alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
     var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
@@ -1599,6 +1612,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
     if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
     if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
+    if(post2006IlRaw>0||post2006AyRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYM(post2006IlRaw,post2006AyRaw));
     ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
     abiAddUserCard(ozetParts.join(', '));
 
@@ -1606,18 +1620,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var teleb = abiRound2((ageObj.years-15)/3);
 
     var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
 
-    // Hədiyyə staj: yalnız staj artıq özü-özlüyündə çatmadığı halda hesablanır (2018-ə qədər sığorta stajı olubsa)
-    var catmayanEvvel = abiRound2(teleb - pre2006StajTotal);
+    // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
     var hediyyeStaj = 0;
-    // Əl ilə daxil edilmiş 2006-dan əvvəlki staj (təhsil/hərbi/uşağa qulluq/manual) varsa, hədiyyə staj verilmir
-    if(catmayanEvvel>0 && abi.sigortaStajOlub && pre2006StajTotal<=0){
+    if(abi.sigortaStajOlub){
       hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - abi.dogum.getFullYear()) - 15)/3);
       if(hediyyeStaj<0) hediyyeStaj = 0;
     }
     abi.hediyyeStaj = hediyyeStaj;
 
-    var faktikiTotal = abiRound2(pre2006StajTotal + hediyyeStaj);
+    var pre2006Effective = Math.max(pre2006StajTotal, hediyyeStaj);
+    var faktikiTotal = abiRound2(pre2006Effective + post2006StajTotal);
     abi.faktikiStaj = faktikiTotal; abi.telebOlunanStaj = teleb;
 
     var catmayan = abiRound2(teleb - faktikiTotal);
@@ -1625,8 +1639,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0;
     if(catmayan<=0){
-      // Staj tələbi ödəyəndə YALNIZ o zaman kapital hesablanır
-      kapEvvel = abiRound2(pre2006StajTotal * 1087);
+      // Staj tələbi ödəyəndə YALNIZ o zaman kapital hesablanır. Kapital yalnız HƏQİQƏTƏN olan 2006-dan əvvəlki staja görə hesablanır (hədiyyə daxil deyil).
+      var multiplier = abiGetKapitalMultiplier(abi.vefat);
+      kapEvvel = abiRound2(pre2006StajTotal * multiplier);
       totalKapital = abiRound2(kapEvvel + kapSonra);
       var boluc = (ageObj.years-15)*4/200*144;
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -1641,7 +1656,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
-      (hediyyeStaj>0 ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
+      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
       'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün kapital hesablanmır — bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
