@@ -44,6 +44,22 @@
   #empty-state{text-align:center;color:var(--text-muted);padding:60px 20px;font-size:0.95rem;}
   #empty-state .big{font-size:2.2rem;margin-bottom:10px;}
   #loading{text-align:center;color:var(--text-muted);padding:40px;font-size:0.9rem;}
+
+  /* Mobil görünüş: cədvəl kartlara çevrilir */
+  @media (max-width: 680px){
+    .wrap{padding:18px 12px 50px;}
+    h1{font-size:1.2rem;}
+    .toolbar{gap:8px;}
+    .fb-table, .fb-table thead, .fb-table tbody, .fb-table th, .fb-table td, .fb-table tr{display:block !important;width:100%;}
+    .fb-table thead{display:none;}
+    .fb-table tr{border:1px solid var(--gray);border-radius:12px;margin-bottom:12px;padding:10px 12px;box-shadow:var(--shadow);position:relative;}
+    .fb-table tr:hover td{background:transparent;}
+    .fb-table td{border-top:none;padding:6px 0 6px 42%;position:relative;min-height:20px;word-break:break-word;white-space:normal;}
+    .fb-table td::before{content:attr(data-label);position:absolute;left:0;top:6px;width:38%;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.72rem;color:var(--blue);white-space:normal;}
+    .fb-table td.msg-cell{max-width:none;}
+    .fb-table td:last-child{padding-left:0;text-align:right;}
+    .fb-table td:last-child::before{content:none;}
+  }
 </style>
 </head>
 <body>
@@ -194,10 +210,10 @@
     document.getElementById('empty-state').style.display = 'none';
     listEl.innerHTML = items.map(function(it){
       return '<tr>'+
-        '<td class="name-cell">'+(it.contact ? escapeHtml(it.contact) : '—')+'</td>'+
-        '<td class="msg-cell">'+escapeHtml(it.message)+'</td>'+
-        '<td class="date-cell">'+fmtDate(it.created_at)+'</td>'+
-        '<td class="date-cell">'+(it.page ? escapeHtml(it.page) : '—')+'</td>'+
+        '<td class="name-cell" data-label="Ad Soyad">'+(it.contact ? escapeHtml(it.contact) : '—')+'</td>'+
+        '<td class="msg-cell" data-label="Mesaj">'+escapeHtml(it.message)+'</td>'+
+        '<td class="date-cell" data-label="Tarix">'+fmtDate(it.created_at)+'</td>'+
+        '<td class="date-cell" data-label="Səhifə">'+(it.page ? escapeHtml(it.page) : '—')+'</td>'+
         '<td><button class="del-btn" onclick="delOne('+it.id+')" title="Sil">🗑</button></td>'+
       '</tr>';
     }).join('');
