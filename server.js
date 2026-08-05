@@ -634,7 +634,7 @@ app.post('/api/chat', async (req, res) => {
         const ikinciSkor = skorlu.find(x => x.skor < maxSkor - 0.01)?.skor || 0;
         // Çəkiləndirilmiş skorlar üçün nisbi fərq həddi: ikinci ən yaxşı nəticə
         // birinciyə nisbətən azı 35% aşağıdırsa, aydın qalib sayılır
-        const AYDIN_QALIB_NISBETI = 0.65;
+        const AYDIN_QALIB_NISBETI = 0.80;
 
         if (tepedekiler.length === 1 && (ikinciSkor === 0 || ikinciSkor < maxSkor * AYDIN_QALIB_NISBETI)) {
           // Aydın qalib, etibarlı fərq
