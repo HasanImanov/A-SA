@@ -173,7 +173,7 @@ function sozlereAyir(metn) {
 
   return xammSozler
     .filter(s => !DAYANMA_SOZLERI.has(s))
-    .map(s => SINONIM_LUGETI[s] || s)
+    .flatMap(s => (SINONIM_LUGETI[s] && SINONIM_LUGETI[s] !== s) ? [s, SINONIM_LUGETI[s]] : [s])
     .concat(bonusTokenler);
 }
 
