@@ -1674,6 +1674,13 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAskSigortaStaj();
   }
   function abiAskSigortaStaj(){
+    // Vəfat tarixi 01.07.2018-dən əvvəldirsə, bu tarixə qədər sığorta stajı sualı mənasız olur — sual verilmir
+    var esik2018 = new Date(2018,6,1).getTime();
+    if(abi.vefat.getTime() < esik2018){
+      abi.sigortaStajOlub = false;
+      abiAskKapitalCard();
+      return;
+    }
     abiAddBotCard(
       '<div class="abi-q">01.07.2018-ci ilə dək sığorta stajı olubmu?</div>'+
       '<div class="abi-btn-row">'+
@@ -2209,6 +2216,13 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpAskSigortaStaj();
   }
   function elpAskSigortaStaj(){
+    // Əlillik/vəfat tarixi 01.07.2018-dən əvvəldirsə, bu tarixə qədər sığorta stajı sualı mənasız olur — sual verilmir
+    var esik2018 = new Date(2018,6,1).getTime();
+    if(elp.vefat.getTime() < esik2018){
+      elp.sigortaStajOlub = false;
+      elpAskKapitalCard();
+      return;
+    }
     elpAddBotCard(
       '<div class="abi-q">01.07.2018-ci ilə dək sığorta stajı olubmu?</div>'+
       '<div class="abi-btn-row">'+
