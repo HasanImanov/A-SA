@@ -181,23 +181,62 @@ FUZZY_DATA.forEach(item => {
   item._sozSet = new Set(sozlereAyir(item.sual));
 });
 
-// IDF-ə bənzər söz çəkiləndirməsi: bir söz nə qədər çox sualda təkrarlanırsa
-// (məs. "sosial", "dövlət", "yardımı" onlarla ÜDSY sualında var), bir o qədər
-// az diskriminativdir; nadir/konkret sözlər (məs. "nəqliyyat") isə daha çox
-// çəkiyə malik olmalıdır ki, doğru sualı digərlərindən ayıra bilsin.
-const SOZ_SUAL_SAYI = {};
+// Azərbaycan dili aqlütinativdir (çox sayda hal/şəkilçi variantı var: arayış/arayışı,
+// itirildikdə/itirildiyi və s.) — hər variant üçün ayrıca sinonim yazmaq mümkün deyil.
+// Ona görə iki sözün "eyni kökdən" olub-olmadığını sözün ƏVVƏLİNİN (kökün adətən
+// şəkilçidən əvvəl gəldiyi hissənin) üst-üstə düşmə nisbətinə görə təxmin edirik.
+function kokUygunlugu(a, b) {
+  if (a === b) return true;
+  const minLen = Math.min(a.length, b.length);
+  if (minLen < 4) return false; // qısa sözlərdə yanlış uyğunluğun qarşısını almaq üçün tam uyğunluq tələb olunur
+  let ortaqUzunluq = 0;
+  while (ortaqUzunluq < minLen && a[ortaqUzunluq] === b[ortaqUzunluq]) ortaqUzunluq++;
+  return ortaqUzunluq >= Math.max(4, Math.ceil(minLen * 0.7));
+}
+
+// IDF-ə bənzər söz çəkiləndirməsi — AMMA tək bir söz FORMASINA görə yox, KÖK-KLASTERİNƏ
+// görə hesablanır. Əks halda bir feilin nadir işlədilən forması (məs. məsdər "etmək",
+// halbuki demək olar hər sualda "edilir/ediləcək" kimi başqa formalar var) süni şəkildə
+// "nadir" sayılıb yüksək çəki alır, sonra kök-uyğunluğu vasitəsilə bu şişirdilmiş çəki
+// kökün BÜTÜN digər (əslində tamam adi) formalarına da yayılır və yanlış uyğunluqlar yaradır.
+const BUTUN_SOZLER = [...new Set(FUZZY_DATA.flatMap(item => [...item._sozSet]))];
+const KLASTER_EBEVEYNI = {};
+BUTUN_SOZLER.forEach(s => { KLASTER_EBEVEYNI[s] = s; });
+function klasterKoku(x) {
+  if (KLASTER_EBEVEYNI[x] !== x) KLASTER_EBEVEYNI[x] = klasterKoku(KLASTER_EBEVEYNI[x]);
+  return KLASTER_EBEVEYNI[x];
+}
+function klasterlereBirlesdir(a, b) {
+  const ra = klasterKoku(a), rb = klasterKoku(b);
+  if (ra !== rb) KLASTER_EBEVEYNI[ra] = rb;
+}
+for (let i = 0; i < BUTUN_SOZLER.length; i++) {
+  for (let j = i + 1; j < BUTUN_SOZLER.length; j++) {
+    if (kokUygunlugu(BUTUN_SOZLER[i], BUTUN_SOZLER[j])) {
+      klasterlereBirlesdir(BUTUN_SOZLER[i], BUTUN_SOZLER[j]);
+    }
+  }
+}
+
+const KLASTER_SUAL_SAYI = {};
 FUZZY_DATA.forEach(item => {
-  item._sozSet.forEach(soz => {
-    SOZ_SUAL_SAYI[soz] = (SOZ_SUAL_SAYI[soz] || 0) + 1;
+  const buSualinKlasterleri = new Set([...item._sozSet].map(klasterKoku));
+  buSualinKlasterleri.forEach(k => {
+    KLASTER_SUAL_SAYI[k] = (KLASTER_SUAL_SAYI[k] || 0) + 1;
   });
 });
 const CEMI_SUAL_SAYI = FUZZY_DATA.length;
-const SOZ_CEKISI = {};
-Object.keys(SOZ_SUAL_SAYI).forEach(soz => {
-  SOZ_CEKISI[soz] = Math.log((CEMI_SUAL_SAYI + 1) / (SOZ_SUAL_SAYI[soz] + 1)) + 1;
+const KLASTER_CEKISI = {};
+Object.keys(KLASTER_SUAL_SAYI).forEach(k => {
+  KLASTER_CEKISI[k] = Math.log((CEMI_SUAL_SAYI + 1) / (KLASTER_SUAL_SAYI[k] + 1)) + 1;
 });
 function sozCekisi(soz) {
-  return SOZ_CEKISI[soz] || 1;
+  if (KLASTER_EBEVEYNI[soz] !== undefined) return KLASTER_CEKISI[klasterKoku(soz)] || 1;
+  // Korpusda heç görünməyən söz (yalnız sorğuda) — ən yaxın kök-uyğun klasterin çəkisini istifadə et
+  for (const vocabSoz of BUTUN_SOZLER) {
+    if (kokUygunlugu(soz, vocabSoz)) return KLASTER_CEKISI[klasterKoku(vocabSoz)] || 1;
+  }
+  return 1;
 }
 
 console.log('Söz sayı axtarışı hazırlandı.');
@@ -576,7 +615,12 @@ app.post('/api/chat', async (req, res) => {
       const skorlu = FUZZY_DATA
         .map(item => ({
           item,
-          skor: sorguSozleri.filter(s => item._sozSet.has(s)).reduce((cem, s) => cem + sozCekisi(s), 0)
+          skor: sorguSozleri.reduce((cem, sorguSoz) => {
+            for (const itemSoz of item._sozSet) {
+              if (kokUygunlugu(sorguSoz, itemSoz)) return cem + sozCekisi(sorguSoz);
+            }
+            return cem;
+          }, 0)
         }))
         .filter(x => x.skor > 0)
         .sort((a, b) => b.skor - a.skor);
