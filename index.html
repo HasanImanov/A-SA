@@ -1462,6 +1462,37 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
     abi.herbiOlub = yes;
+    abiAskDoyusenOrdu();
+  }
+  function abiAskDoyusenOrdu(){
+    abiAddBotCard(
+      '<div class="abi-q">Döyüşən ordunun tərkibində olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQDoyusenOrdu(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQDoyusenOrdu(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQDoyusenOrdu(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.doyusenOrduOlub = false; // arayış sualından sonra dəqiqləşəcək
+    if(!yes){
+      if(abi.gender==='qadin'){ abiAskUsaqQulluqQuestion(); } else { abiAskTehsil(); }
+      return;
+    }
+    abiAddBotCard(
+      '<div class="abi-q">Müvafiq nazirliyin arayışı varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQDoyusenOrduArayis(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQDoyusenOrduArayis(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQDoyusenOrduArayis(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.doyusenOrduOlub = yes; // yalnız arayış da varsa input açılacaq
     if(abi.gender==='qadin'){ abiAskUsaqQulluqQuestion(); } else { abiAskTehsil(); }
   }
   function abiAskUsaqQulluqQuestion(){
@@ -1622,6 +1653,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
          abiYMInputHTML('abi-herbi','2','0'))
       : ('<input type="hidden" id="abi-herbi-il" value="0"/><input type="hidden" id="abi-herbi-ay" value="0"/>');
+    var doyusenOrduHtml = abi.doyusenOrduOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
+         abiYMInputHTML('abi-doyusen','0','0'))
+      : ('<input type="hidden" id="abi-doyusen-il" value="0"/><input type="hidden" id="abi-doyusen-ay" value="0"/>');
     var usaqHtml = (abi.gender==='qadin' && abi.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
          abiYMInputHTML('abi-usaq','6','0'))
@@ -1633,6 +1668,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
       herbiHtml+
+      doyusenOrduHtml+
       usaqHtml+
       tehsilHtml+
       pre2006Html+
@@ -1651,6 +1687,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var evvelAyRaw = parseFloat(document.getElementById('abi-kap-evvel-ay').value)||0;
     var herbiIlRaw = parseFloat(document.getElementById('abi-herbi-il').value)||0;
     var herbiAyRaw = parseFloat(document.getElementById('abi-herbi-ay').value)||0;
+    var doyusenIlRaw = parseFloat(document.getElementById('abi-doyusen-il').value)||0;
+    var doyusenAyRaw = parseFloat(document.getElementById('abi-doyusen-ay').value)||0;
     var usaqIlRaw = parseFloat(document.getElementById('abi-usaq-il').value)||0;
     var usaqAyRaw = parseFloat(document.getElementById('abi-usaq-ay').value)||0;
     var tehsilIlRaw = parseFloat(document.getElementById('abi-tehsil-il').value)||0;
@@ -1658,7 +1696,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006IlRaw = parseFloat(document.getElementById('abi-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('abi-post2006-ay').value)||0;
     var kapSonra = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
       alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
     var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
@@ -1666,6 +1704,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(card);
     var ozetParts = [];
     if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw));
     if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
     if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
     if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
@@ -1676,7 +1715,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ageObj = abiYearsDaysDiff(abi.dogum, abi.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12));
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
@@ -1889,6 +1928,37 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpLockCard(btn.closest('.abi-card'));
     elpAddUserCard(yes?'Bəli':'Xeyr');
     elp.herbiOlub = yes;
+    elpAskDoyusenOrdu();
+  }
+  function elpAskDoyusenOrdu(){
+    elpAddBotCard(
+      '<div class="abi-q">Döyüşən ordunun tərkibində olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQDoyusenOrdu(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQDoyusenOrdu(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQDoyusenOrdu(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.doyusenOrduOlub = false; // arayış sualından sonra dəqiqləşəcək
+    if(!yes){
+      if(elp.gender==='qadin'){ elpAskUsaqQulluqQuestion(); } else { elpAskTehsil(); }
+      return;
+    }
+    elpAddBotCard(
+      '<div class="abi-q">Müvafiq nazirliyin arayışı varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQDoyusenOrduArayis(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQDoyusenOrduArayis(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQDoyusenOrduArayis(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.doyusenOrduOlub = yes; // yalnız arayış da varsa input açılacaq
     if(elp.gender==='qadin'){ elpAskUsaqQulluqQuestion(); } else { elpAskTehsil(); }
   }
   function elpAskUsaqQulluqQuestion(){
@@ -2038,6 +2108,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
          abiYMInputHTML('elp-herbi','2','0'))
       : ('<input type="hidden" id="elp-herbi-il" value="0"/><input type="hidden" id="elp-herbi-ay" value="0"/>');
+    var doyusenOrduHtml = elp.doyusenOrduOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
+         abiYMInputHTML('elp-doyusen','0','0'))
+      : ('<input type="hidden" id="elp-doyusen-il" value="0"/><input type="hidden" id="elp-doyusen-ay" value="0"/>');
     var usaqHtml = (elp.gender==='qadin' && elp.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
          abiYMInputHTML('elp-usaq','6','0'))
@@ -2055,6 +2129,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpAddBotCard(
       '<div class="abi-q">'+(elp.derece==='81-100' ? 'Staj məlumatlarını daxil edin' : '2006-dan sonra kapitalı (varsa) daxil edin')+'</div>'+
       herbiHtml+
+      doyusenOrduHtml+
       usaqHtml+
       tehsilHtml+
       pre2006Html+
@@ -2071,6 +2146,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var evvelAyRaw = parseFloat(document.getElementById('elp-kap-evvel-ay').value)||0;
     var herbiIlRaw = parseFloat(document.getElementById('elp-herbi-il').value)||0;
     var herbiAyRaw = parseFloat(document.getElementById('elp-herbi-ay').value)||0;
+    var doyusenIlRaw = parseFloat(document.getElementById('elp-doyusen-il').value)||0;
+    var doyusenAyRaw = parseFloat(document.getElementById('elp-doyusen-ay').value)||0;
     var usaqIlRaw = parseFloat(document.getElementById('elp-usaq-il').value)||0;
     var usaqAyRaw = parseFloat(document.getElementById('elp-usaq-ay').value)||0;
     var tehsilIlRaw = parseFloat(document.getElementById('elp-tehsil-il').value)||0;
@@ -2078,7 +2155,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006IlRaw = parseFloat(document.getElementById('elp-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('elp-post2006-ay').value)||0;
     var kapSonra = parseFloat(document.getElementById('elp-kap-sonra').value) || 0;
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
       alert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
     var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
@@ -2086,6 +2163,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpLockCard(card);
     var ozetParts = [];
     if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw));
     if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
     if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
     if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
@@ -2096,7 +2174,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ageObj = abiYearsDaysDiff(elp.dogum, elp.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12));
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
