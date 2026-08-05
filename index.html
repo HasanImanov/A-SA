@@ -2384,7 +2384,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       elpShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
-      elpAskPersonCountForMinPension(tapilanMebleg);
+      // Əlillikdə yalnız bir hüquq sahibi (şəxsin özü) olur — bölüşdürmə sualı verilmir, birbaşa nəticə göstərilir
+      var isPensiyaElp = tapilanMebleg > ABI_LIMIT;
+      elpShowFinalResult(isPensiyaElp, 'Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>.');
     }
   }
 
