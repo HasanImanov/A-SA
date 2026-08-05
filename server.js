@@ -112,26 +112,69 @@ const ABREVIATURALAR = {
   'şv': 'şəhid vəsiqəsi',
 };
 
+// Unicode-uyğun "söz sərhədi" — JS-in daxili \b və \w-si Azərbaycan hərflərini
+// (ə, ü, ö, ş, ç, ğ, ı) söz simvolu saymır, ona görə lookaround istifadə edirik
+const SOZ_SERHEDI_EVVEL = '(?<![\\p{L}\\p{N}_])';
+const SOZ_SERHEDI_SONRA = '(?![\\p{L}\\p{N}_])';
+
+// Qısaltmaların TAM açıq formaları (məs. "ünvanlı dövlət sosial yardımı") — bunlar
+// bir qısaltmanın tam adı olduğu üçün TƏK TOKEN halına salınır (əvəzlənir), çünki
+// "üdsy" yazan biri ilə tam adı yazan biri eyni cür (bir vahid termin kimi)
+// qiymətləndirilməlidir; əks halda 4 ayrı ümumi söz (ünvanlı/dövlət/sosial/yardımı)
+// süni şəkildə yüksək skor yaradır və konkret sözlərin (məs. "nəqliyyat") nisbi
+// çəkisini basdırır.
+const ABREVIATURA_TAM_IFADELERI = [...new Set(Object.values(ABREVIATURALAR))];
+
+function ifadeRegexi(ifade) {
+  return new RegExp(SOZ_SERHEDI_EVVEL + ifade + '\\p{L}*', 'gu');
+}
+
+// Digər tez-tez keçən çoxsözlü domen ifadələri — bunlarda isə komponent sözlər
+// (məs. "nəqliyyat", "pensiya") tək başına da mənalı/nadir ola bildiyi üçün
+// ƏVƏZLƏMİRİK, əksinə əlavə bir "bonus" token qoşuruq. Beləliklə "nəqliyyat"
+// tək yazılanda da uyğun sual tapılır, "nəqliyyat vasitəsi" tam yazılanda isə
+// əlavə bonusla daha da önə çıxır.
+const BONUS_IFADE_QAYDALARI = [
+  { pattern: ifadeRegexi('yaşa görə əmək pensiya'), token: 'yaşa_görə_əmək_pensiyası' },
+  { pattern: ifadeRegexi('əmək pensiya'), token: 'əmək_pensiyası' },
+  { pattern: ifadeRegexi('ailə başçısını itirməyə görə'), token: 'ailə_başçısını_itirməyə_görə' },
+  { pattern: ifadeRegexi('orqanizmin funksiyalarının pozulma\\p{L}* faiz'), token: 'orqanizmin_funksiyalarının_pozulması_faizi' },
+  { pattern: ifadeRegexi('nəqliyyat vasitə'), token: 'nəqliyyat_vasitəsi' },
+  { pattern: ifadeRegexi('vəfat etmiş şəxs'), token: 'vəfat_etmiş_şəxsin' },
+  { pattern: ifadeRegexi('3 yaşınadək uşağa qulluq'), token: '3_yaşınadək_uşağa_qulluq' },
+  { pattern: ifadeRegexi('xüsusi hallar və istisnalar'), token: 'xüsusi_hallar_və_istisnalar' },
+];
+
 function sozlereAyir(metn) {
-  const xammSozler = (metn || '')
+  let temizMetn = (metn || '')
     .toLowerCase()
     .replace(/[^\p{L}\s]/gu, ' ')
-    .split(/\s+/)
-    .filter(s => s.length > 1);
+    .replace(/\s+/g, ' ');
 
-  // Qısaltmaları aç (bir söz -> bir neçə söz ola bilər)
-  const genisleyenSozler = [];
-  for (const soz of xammSozler) {
-    if (ABREVIATURALAR[soz]) {
-      genisleyenSozler.push(...ABREVIATURALAR[soz].split(' '));
-    } else {
-      genisleyenSozler.push(soz);
-    }
+  // 1) Qısaltmaları mətn səviyyəsində aç (məs. "üdsy" -> "ünvanlı dövlət sosial yardımı")
+  for (const [qisa, tam] of Object.entries(ABREVIATURALAR)) {
+    temizMetn = temizMetn.replace(new RegExp(SOZ_SERHEDI_EVVEL + qisa + SOZ_SERHEDI_SONRA, 'gu'), tam);
   }
 
-  return genisleyenSozler
+  // 2) Bonus (əlavə) komponent tokenlərini mətn təmizlənməmişdən əvvəl aşkarla —
+  //    orijinal sözlər sonra da qalacaq, bu sadəcə üstəlik əlavə olunur
+  const bonusTokenler = [];
+  for (const qayda of BONUS_IFADE_QAYDALARI) {
+    if (qayda.pattern.test(temizMetn)) bonusTokenler.push(qayda.token);
+    qayda.pattern.lastIndex = 0;
+  }
+
+  // 3) Qısaltmaların TAM adlarını (indi mətndə açılmış formada) tək token halına əvəz et
+  for (const ifade of ABREVIATURA_TAM_IFADELERI) {
+    temizMetn = temizMetn.replace(ifadeRegexi(ifade), ifade.replace(/\s+/g, '_'));
+  }
+
+  const xammSozler = temizMetn.split(/\s+/).filter(s => s.length > 1);
+
+  return xammSozler
     .filter(s => !DAYANMA_SOZLERI.has(s))
-    .map(s => SINONIM_LUGETI[s] || s);
+    .map(s => SINONIM_LUGETI[s] || s)
+    .concat(bonusTokenler);
 }
 
 FUZZY_DATA.forEach(item => {
