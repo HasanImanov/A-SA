@@ -138,6 +138,25 @@ FUZZY_DATA.forEach(item => {
   item._sozSet = new Set(sozlereAyir(item.sual));
 });
 
+// IDF-ə bənzər söz çəkiləndirməsi: bir söz nə qədər çox sualda təkrarlanırsa
+// (məs. "sosial", "dövlət", "yardımı" onlarla ÜDSY sualında var), bir o qədər
+// az diskriminativdir; nadir/konkret sözlər (məs. "nəqliyyat") isə daha çox
+// çəkiyə malik olmalıdır ki, doğru sualı digərlərindən ayıra bilsin.
+const SOZ_SUAL_SAYI = {};
+FUZZY_DATA.forEach(item => {
+  item._sozSet.forEach(soz => {
+    SOZ_SUAL_SAYI[soz] = (SOZ_SUAL_SAYI[soz] || 0) + 1;
+  });
+});
+const CEMI_SUAL_SAYI = FUZZY_DATA.length;
+const SOZ_CEKISI = {};
+Object.keys(SOZ_SUAL_SAYI).forEach(soz => {
+  SOZ_CEKISI[soz] = Math.log((CEMI_SUAL_SAYI + 1) / (SOZ_SUAL_SAYI[soz] + 1)) + 1;
+});
+function sozCekisi(soz) {
+  return SOZ_CEKISI[soz] || 1;
+}
+
 console.log('Söz sayı axtarışı hazırlandı.');
 
 const app = express();
@@ -514,7 +533,7 @@ app.post('/api/chat', async (req, res) => {
       const skorlu = FUZZY_DATA
         .map(item => ({
           item,
-          skor: sorguSozleri.filter(s => item._sozSet.has(s)).length
+          skor: sorguSozleri.filter(s => item._sozSet.has(s)).reduce((cem, s) => cem + sozCekisi(s), 0)
         }))
         .filter(x => x.skor > 0)
         .sort((a, b) => b.skor - a.skor);
@@ -524,19 +543,21 @@ app.post('/api/chat', async (req, res) => {
 
       } else {
         const maxSkor = skorlu[0].skor;
-        const tepedekiler = skorlu.filter(x => x.skor === maxSkor);
-        const ikinciSkor = skorlu.find(x => x.skor < maxSkor)?.skor || 0;
-        const FERQ_ESIK = 2; // bu qədər və ya az fərq varsa, "yaxın hesab" sayılır
+        const tepedekiler = skorlu.filter(x => Math.abs(x.skor - maxSkor) < 0.01);
+        const ikinciSkor = skorlu.find(x => x.skor < maxSkor - 0.01)?.skor || 0;
+        // Çəkiləndirilmiş skorlar üçün nisbi fərq həddi: ikinci ən yaxşı nəticə
+        // birinciyə nisbətən azı 35% aşağıdırsa, aydın qalib sayılır
+        const AYDIN_QALIB_NISBETI = 0.65;
 
-        if (tepedekiler.length === 1 && (maxSkor - ikinciSkor) > FERQ_ESIK) {
+        if (tepedekiler.length === 1 && (ikinciSkor === 0 || ikinciSkor < maxSkor * AYDIN_QALIB_NISBETI)) {
           // Aydın qalib, etibarlı fərq
           cavabMetni = tepedekiler[0].item.cavab;
           console.log('✓ Tək qalib (aydın fərq):', tepedekiler[0].item.sual);
 
         } else if (tepedekiler.length === 1) {
           // Tək qalib, amma fərq kiçikdir — yaxın namizədi də göstər
-          const yaxinNamizedler = skorlu.filter(x => x.skor >= maxSkor - FERQ_ESIK).slice(0, 5);
-          console.log('⚠ Yaxın hesab, namizədlər:', yaxinNamizedler.map(n => `${n.item.sual} (${n.skor})`));
+          const yaxinNamizedler = skorlu.filter(x => x.skor >= maxSkor * AYDIN_QALIB_NISBETI).slice(0, 5);
+          console.log('⚠ Yaxın hesab, namizədlər:', yaxinNamizedler.map(n => `${n.item.sual} (${n.skor.toFixed(2)})`));
           cavabMetni = 'Dəqiq tapa bilmədim, bəlkə bunlardan birini nəzərdə tutursunuz?\n\n' +
             yaxinNamizedler.map((n, i) => (i + 1) + '. ' + n.item.sual).join('\n');
 
