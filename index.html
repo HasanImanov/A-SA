@@ -1603,6 +1603,35 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddUserCard(yes?'Bəli':'Xeyr');
     abi.elillikOlub = false; // arayış sualından sonra dəqiqləşəcək
     if(!yes){ abiDecidePre2006Path(); return; }
+    abiAskElillik18();
+  }
+  function abiAskElillik18(){
+    abiAddBotCard(
+      '<div class="abi-q">18 yaşından aşağı əlilliyi varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQElillik18(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQElillik18(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQElillik18(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.elillik18Olub = yes;
+    abiAddBotCard(
+      '<div class="abi-q">Müddətsiz əlillik sənədi varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQMuddetsizSened(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQMuddetsizSened(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQMuddetsizSened(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      abiAddBotCard('<div class="abi-note">Qeyd: TSEK-ə əlillik sənədi əlavə edildikdən sonra müəyyən staj əlavə edilir.</div>');
+    }
     abiAddBotCard(
       '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
       '<div class="abi-btn-row">'+
@@ -2109,6 +2138,35 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpAddUserCard(yes?'Bəli':'Xeyr');
     elp.elillikOlub = false; // arayış sualından sonra dəqiqləşəcək
     if(!yes){ elpDecidePre2006Path(); return; }
+    elpAskElillik18();
+  }
+  function elpAskElillik18(){
+    elpAddBotCard(
+      '<div class="abi-q">18 yaşından aşağı əlilliyi varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQElillik18(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQElillik18(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQElillik18(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    elp.elillik18Olub = yes;
+    elpAddBotCard(
+      '<div class="abi-q">Müddətsiz əlillik sənədi varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQMuddetsizSened(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQMuddetsizSened(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQMuddetsizSened(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      elpAddBotCard('<div class="abi-note">Qeyd: TSEK-ə əlillik sənədi əlavə edildikdən sonra müəyyən staj əlavə edilir.</div>');
+    }
     elpAddBotCard(
       '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
       '<div class="abi-btn-row">'+
