@@ -673,7 +673,7 @@
     var tarix=today();
     var unvanSec=g('df-unvan').trim()||'Xüsusi Şərtlərə Təyinat üzrə Mərkəzi Filialına';
     var qohum=g('df-qohum')||'atam';
-    var vefatMetn='Sizdən xahiş edirəm ki, '+qohum+' '+vefatAd+' '+vefatTarix+'-'+ilShekilchi(vefatTarix)+' il tarixdə vəfatı ilə əlaqədar dəfn üçün müavinətin ödənilməsinə kömək edəsiniz.';
+    var vefatMetn='Sizdən xahiş edirəm ki, '+qohum+' '+vefatAd+' '+vefatTarix+'-'+ilShekilchi(vefatTarix)+' il tarixində vəfatı ilə əlaqədar dəfn üçün müavinətin ödənilməsinə kömək edəsiniz.';
     var INDENT=4800;
     function ep2(){return new docx.Paragraph({spacing:{before:0,after:0,line:276,lineRule:'auto'},children:[new docx.TextRun({text:'',font:'Arial',size:24})]});}
     function pr2(text,opts){
@@ -721,8 +721,6 @@
     rows.push(ep2());
     rows.push(ep2());
     rows.push(pr2('Pensiya hesab № '+hesab,{}));
-    rows.push(ep2());
-    rows.push(ep2());rows.push(ep2());
     rows.push(new docx.Paragraph({spacing:{before:0,after:0,line:276,lineRule:'auto'},children:[new docx.TextRun({text:'Ərizəyə əlavə olunan sənədlər:',font:'Arial',size:24,italics:true,language:{value:'az-Latn-AZ'}})]}));
     ['1.  Dəfni təşkil edən şəxsin şəxsiyyət vəsiqəsinin surəti;',
      '2.  Ölüm haqqında şahədətnamənin surəti;',
@@ -730,7 +728,7 @@
      '4.  Dəfni təşkil edən şəxs barədə müvafiq bələdiyyə tərəfindən verilmiş arayış.'
     ].forEach(function(s){rows.push(pr2(s,{after:80}));});
     rows.push(ep2());rows.push(ep2());rows.push(ep2());
-    rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());
+    rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());rows.push(ep2());
     rows.push(new docx.Paragraph({spacing:{before:0,after:0,line:276,lineRule:'auto'},
       tabStops:[{type:docx.TabStopType.LEFT,position:5500}],
       children:[
