@@ -1266,12 +1266,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiDecimalYearsToYMD(dec){
     var years = Math.floor(dec);
     var remYear = dec - years;
-    var monthsFloat = remYear*12;
-    var months = Math.floor(monthsFloat);
-    var days = Math.round((monthsFloat-months)*30.44);
-    if(days>=30){ months++; days-=30; }
+    var months = Math.round(remYear*12);
     if(months>=12){ years++; months-=12; }
-    return {years:years, months:months, days:days};
+    return {years:years, months:months, days:0};
   }
   function abiFmtYMD(o){ return o.years+' il '+o.months+' ay'; }
 
