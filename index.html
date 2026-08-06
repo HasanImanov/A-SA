@@ -1343,6 +1343,13 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiFlowEl().appendChild(wrap);
     abiScrollToCard(wrap);
   }
+  // İki checkbox-un eyni anda seçilməsinin qarşısını alır (eyni şəxs iki kateqoriyada sayılmasın deyə)
+  function abiMutexCat(bu, o){
+    var buEl = document.getElementById(bu);
+    var oEl = document.getElementById(o);
+    if(buEl.checked) oEl.checked = false;
+  }
+
   function abiLockCard(cardEl){
     // sual cavablandıqdan sonra düymələri/inputları bağla, amma "Düzəliş et" ilə geri qayıtmaq mümkün olsun
     var interactive = cardEl.querySelectorAll('button, input, select');
@@ -1401,15 +1408,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
           '<input type="number" id="abi-p1cat2-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-          '<input type="checkbox" id="abi-p1cat3"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
+          '<input type="checkbox" id="abi-p1cat3" onclick="abiMutexCat(\'abi-p1cat3\',\'abi-p1cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
           '<input type="number" id="abi-p1cat4-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-          '<input type="checkbox" id="abi-p1cat5"/> Pensiya hüququ yaranmış ər və ya arvad'+
+          '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Pensiya hüququ yaranmış ər və ya arvad'+
         '</label>'+
+        '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
         '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
       );
     } else {
@@ -1911,15 +1919,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<input type="number" id="abi-cat2-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="abi-cat3"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
+        '<input type="checkbox" id="abi-cat3" onclick="abiMutexCat(\'abi-cat3\',\'abi-cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
         '<input type="number" id="abi-cat4-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="abi-cat5"/> Pensiya hüququ yaranmış ər və ya arvad'+
+        '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Pensiya hüququ yaranmış ər və ya arvad'+
       '</label>'+
+      '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
       '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
     );
   }
