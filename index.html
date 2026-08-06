@@ -2135,6 +2135,84 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpLockCard(card);
     elpAddUserCard(derece+'%');
     elp.derece = derece;
+    elpAskSebeb();
+  }
+
+  // Əlillik səbəbi: Ümumi / Xüsusi, hər ikisinin öz "hərbi ilə əlaqədar" alt-seçimi var
+  function elpAskSebeb(){
+    elpAddBotCard(
+      '<div class="abi-q">Əlillik səbəbi nədir?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQSebeb(this,true)">Ümumi</button>'+
+        '<button class="abi-choice-btn" onclick="elpQSebeb(this,false)">Xüsusi</button>'+
+      '</div>'
+    );
+  }
+  function elpQSebeb(btn, isUmumi){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(isUmumi?'Ümumi':'Xüsusi');
+    elp.sebebUmumi = isUmumi;
+    if(isUmumi){ elpAskUmumiAlt(); } else { elpAskXususiAlt(); }
+  }
+  function elpAskUmumiAlt(){
+    elpAddBotCard(
+      '<div class="abi-q">Ümumi əsasla hansı?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="elpQAltSebeb(this,true)">Hərbi xidmət dövrü ilə əlaqədar</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="elpQAltSebeb(this,false)">Digər</button>'+
+      '</div>'
+    );
+  }
+  function elpAskXususiAlt(){
+    elpAddBotCard(
+      '<div class="abi-q">Xüsusi əsasla hansı?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="elpQAltSebeb(this,true)">Hərbi xidmət vəzifələrini (xidməti vəzifələri) yerinə yetirməklə əlaqədar</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="elpQAltSebeb(this,false)">Digər</button>'+
+      '</div>'
+    );
+  }
+  function elpQAltSebeb(btn, isHerbi){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(isHerbi?'Hərbi ilə əlaqədar':'Digər');
+    if(isHerbi){ elpAskEsosial(); } else { elpAskDogumVefat(); }
+  }
+  function elpAskEsosial(){
+    elpAddBotCard(
+      '<div class="abi-q">⚠️ e-sosialdan baxın: pensiya təyinatı gedibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQEsosial(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQEsosial(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQEsosial(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      elpAddBotCard('<div class="abi-note">Pensiya təyinatı artıq gedib.</div>');
+      elpAskDogumVefat();
+    } else {
+      elpAskXstMelumatVereqe();
+    }
+  }
+  function elpAskXstMelumatVereqe(){
+    elpAddBotCard(
+      '<div class="abi-q">⚠️ XŞT ilə əlaqə yaradıb, Təminat xərcliyi haqqında məlumat vərəqəsi gəlibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQXstMelumatVereqe(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQXstMelumatVereqe(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQXstMelumatVereqe(btn, yes){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      elpAddBotCard('<div class="abi-note">⚠️ Vətəndaşa 15 iş günü ərzində bildiriş gələcəyi barədə məlumat verin.</div>');
+    } else {
+      elpAddBotCard('<div class="abi-note">⚠️ Vətəndaşa bildirin ki, qurumuna yaxınlaşıb Təminat xərcliyini hazırlayıb DSMF-ə göndərsinlər.</div>');
+    }
     elpAskDogumVefat();
   }
 
