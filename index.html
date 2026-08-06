@@ -1444,6 +1444,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
+    abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
     abiLockCard(card);
     abiAddUserCard('Məbləğ: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
@@ -1949,6 +1950,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
+    abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
     abiLockCard(card);
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
@@ -1977,7 +1979,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function abiAskPasQuestion(){
     abiAddBotCard(
-      '<div class="abi-q">📌 PAS (Pensiya Alt Sistemi)-ə baxdınız mı?</div>'+
+      '<div class="abi-q">⚠️ PAS-da pensiyanı hansı qurumdan aldığına baxdınız mı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQPasQuestion(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="abiQPasQuestion(this,false)">Xeyr</button>'+
@@ -2005,7 +2007,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(isXstmf){
       abiAskXstmfKateqoriya();
     } else {
-      abiShowSenedSiyahisi();
+      abiAskTehsilQizSoyad();
     }
   }
   function abiAskXstmfKateqoriya(){
@@ -2023,6 +2025,24 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var mətnler = {1:'Zərərli peşə/vəzifə üzrə güzəştli pensiya', 2:'Hərbi rütbəli şəxs', 3:'Əmək haqqı əsasında pensiya'};
     abiAddUserCard(mətnler[secim]);
     abi.xstmfHerbi = (secim===2);
+    abiAskTehsilQizSoyad();
+  }
+
+  // 23 yaşadək əyani təhsil alan övlad kateqoriyası seçilibsə, qızın ərə getdiyinə görə soyadı dəyişib-dəyişmədiyi soruşulur
+  function abiAskTehsilQizSoyad(){
+    if(!abi.tehsilQizVar){ abiShowSenedSiyahisi(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">23 yaşadək əyani təhsil alan övlad ərə getdiyinə görə soyadını dəyişibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQTehsilQizSoyad(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQTehsilQizSoyad(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQTehsilQizSoyad(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abi.tehsilQizSoyadDeyisib = yes;
     abiShowSenedSiyahisi();
   }
 
@@ -2039,6 +2059,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(abi.qurumXstmf && abi.xstmfHerbi){
       sened.push('Ailə tərkibi haqqında DİN-dən və ya MyGov-dan arayış');
     }
+    if(abi.tehsilQizSoyadDeyisib){
+      sened.push('Nikah haqqında şəhadətnamə');
+    }
     // Təkrarlananları çıxart
     sened = sened.filter(function(s,i){ return sened.indexOf(s)===i; });
     var kargQurum = abi.qurumXstmf ? 'XŞTMF' : 'SÖMTİ';
@@ -2048,7 +2071,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Tələb olunan sənədlər</div>'+
       senedHtml+
-      '<div class="abi-note" style="margin-top:10px;">📌 Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə kargüzarlıq edilməsi bildirilsin.</div>'+
+      '<div class="abi-note" style="margin-top:10px;">⚠️ Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə kargüzarlıq edilsin.</div>'+
       '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
     );
   }
