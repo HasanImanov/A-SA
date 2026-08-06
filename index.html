@@ -1443,6 +1443,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
+    abi.erArvadKategoriyaVar = cat3 || cat5;
     abiLockCard(card);
     abiAddUserCard('Məbləğ: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
@@ -1946,6 +1948,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
+    abi.erArvadKategoriyaVar = cat3 || cat5;
     abiLockCard(card);
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
@@ -1963,12 +1967,88 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var extra = '';
     if(abi.ahilIl) extra += '<div class="abi-note">Ahıl şəxsə qulluq: '+abi.ahilIl+' il</div>';
     if(abi.elillikIl) extra += '<div class="abi-note">I dərəcə əlilliyi olan şəxsə qulluq: '+abi.elillikIl+' il</div>';
-    var pasQeyd = '<div class="abi-note" style="margin-top:10px;">📌 PAS (Pensiya Alt Sistemi)-dən yoxlayıb bu şəxsin pensiyasını hansı qurumdan aldığını müəyyənləşdirin və sənəd siyahısı ilə həmin quruma kargüzarlıq edin.</div>';
     abiAddBotCard(
       '<div class="abi-result '+cls+'">'+title+'</div>'+
       '<div style="margin-top:10px;">'+detailHtml+'</div>'+
-      extra+
-      pasQeyd+
+      extra
+    );
+    abiAskPasQuestion();
+  }
+
+  function abiAskPasQuestion(){
+    abiAddBotCard(
+      '<div class="abi-q">📌 PAS (Pensiya Alt Sistemi)-ə baxdınız mı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQPasQuestion(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQPasQuestion(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQPasQuestion(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes?'Bəli':'Xeyr');
+    abiAskQurum();
+  }
+  function abiAskQurum(){
+    abiAddBotCard(
+      '<div class="abi-q">Hansı qurumdur?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQQurum(this,true)">XŞTMF</button>'+
+        '<button class="abi-choice-btn" onclick="abiQQurum(this,false)">Ümumi əsaslarla</button>'+
+      '</div>'
+    );
+  }
+  function abiQQurum(btn, isXstmf){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(isXstmf?'XŞTMF':'Ümumi əsaslarla');
+    abi.qurumXstmf = isXstmf;
+    if(isXstmf){
+      abiAskXstmfKateqoriya();
+    } else {
+      abiShowSenedSiyahisi();
+    }
+  }
+  function abiAskXstmfKateqoriya(){
+    abiAddBotCard(
+      '<div class="abi-q">XŞTMF üzrə hansı əsasla?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="abiQXstmfKateqoriya(this,1)">Zərərli peşə və vəzifələrdə çalışdıqları üçün güzəştli şərtlərlə pensiya alan şəxslər vəfat etdikdə ailə üzvlərinə görə</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="abiQXstmfKateqoriya(this,2)">Hərbi rütbəli və onlara bərabər tutulan xüsusi rütbəli şəxslər vəfat etdikdə ailə üzvlərinə görə</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="abiQXstmfKateqoriya(this,3)">Əmək haqqı əsasında hesablanan pensiya alan şəxs vəfat etdikdə ailə üzvlərinə görə</button>'+
+      '</div>'
+    );
+  }
+  function abiQXstmfKateqoriya(btn, secim){
+    abiLockCard(btn.closest('.abi-card'));
+    var mətnler = {1:'Zərərli peşə/vəzifə üzrə güzəştli pensiya', 2:'Hərbi rütbəli şəxs', 3:'Əmək haqqı əsasında pensiya'};
+    abiAddUserCard(mətnler[secim]);
+    abi.xstmfHerbi = (secim===2);
+    abiShowSenedSiyahisi();
+  }
+
+  function abiShowSenedSiyahisi(){
+    var sened = [];
+    if(abi.usaqKategoriyaVar){
+      sened.push('Ölüm haqqında şəhadətnamə');
+      sened.push('Doğum haqqında şəhadətnamə');
+    }
+    if(abi.erArvadKategoriyaVar){
+      sened.push('Nikah haqqında şəhadətnamə');
+      sened.push('Ölüm haqqında şəhadətnamə');
+    }
+    if(abi.qurumXstmf && abi.xstmfHerbi){
+      sened.push('Ailə tərkibi haqqında DİN-dən və ya MyGov-dan arayış');
+    }
+    // Təkrarlananları çıxart
+    sened = sened.filter(function(s,i){ return sened.indexOf(s)===i; });
+    var kargQurum = abi.qurumXstmf ? 'XŞTMF' : 'SÖMTİ';
+    var senedHtml = sened.length
+      ? ('<ul style="margin:8px 0 0 18px;padding:0;">'+sened.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
+      : '<div class="abi-note">Seçilmiş kateqoriyalara görə əlavə sənəd tələb olunmur.</div>';
+    abiAddBotCard(
+      '<div class="abi-q">Tələb olunan sənədlər</div>'+
+      senedHtml+
+      '<div class="abi-note" style="margin-top:10px;">📌 Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə kargüzarlıq edilməsi bildirilsin.</div>'+
       '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
     );
   }
