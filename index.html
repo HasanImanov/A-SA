@@ -2210,10 +2210,13 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpAddUserCard(yes?'Bəli':'Xeyr');
     if(yes){
       elpAddBotCard('<div class="abi-note">⚠️ Vətəndaşa 15 iş günü ərzində bildiriş gələcəyi barədə məlumat verin.</div>');
+      elpAskDogumVefat();
     } else {
-      elpAddBotCard('<div class="abi-note">⚠️ Vətəndaşa bildirin ki, qurumuna yaxınlaşıb Təminat xərcliyini hazırlayıb DSMF-ə göndərsinlər.</div>');
+      elpAddBotCard(
+        '<div class="abi-note">⚠️ Vətəndaşa bildirin ki, Təminat xərcliyi gəldikdən sonra ərizəsi götürüləcək.</div>'+
+        '<button class="abi-restart-btn" onclick="elpStart()">🔄 Yenidən başla</button>'
+      );
     }
-    elpAskDogumVefat();
   }
 
   function elpAskDogumVefat(){
