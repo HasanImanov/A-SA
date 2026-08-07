@@ -1412,7 +1412,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
           '<input type="number" id="abi-p1cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-          '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış ər və ya arvad'+
+          '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
         '</label>'+
         '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
         '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
@@ -1464,7 +1464,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
-    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış ər/arvad: 1'); }
+    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
 
     if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
@@ -1941,7 +1941,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<input type="number" id="abi-cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış ər və ya arvad'+
+        '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
       '</label>'+
       '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
       '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
@@ -1989,7 +1989,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
-    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış ər/arvad: 1'); }
+    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
 
     if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
