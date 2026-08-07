@@ -2032,7 +2032,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQPasQuestion(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    abiAskQurum();
+    if(yes){
+      abiAskQurum();
+    } else {
+      abiAddBotCard('<div class="abi-note">⚠️ Zəhmət olmasa əvvəlcə PAS-a daxil olub pensiyanı hansı qurumdan aldığını yoxlayın, sonra davam edin.</div>');
+      abiAskPasQuestion();
+    }
   }
   function abiAskQurum(){
     abiAddBotCard(
