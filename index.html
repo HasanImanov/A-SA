@@ -1412,7 +1412,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
           '<input type="number" id="abi-p1cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-          '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Pensiya hüququ yaranmış ər və ya arvad'+
+          '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış ər və ya arvad'+
         '</label>'+
         '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
         '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
@@ -1461,7 +1461,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
-    if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
+    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
@@ -1898,7 +1898,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
-      'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
+      'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
       (catmayan>0
         ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
@@ -1938,7 +1938,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<input type="number" id="abi-cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Pensiya hüququ yaranmış ər və ya arvad'+
+        '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış ər və ya arvad'+
       '</label>'+
       '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
       '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
@@ -1983,7 +1983,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
-    if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
+    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
@@ -2066,32 +2066,39 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
 
   function abiShowSenedSiyahisi(){
-    var sened = [];
+    var esasSened = [];
+    var tovsiyeSened = [];
     if(abi.usaqKategoriyaVar){
-      sened.push('Ölüm haqqında şəhadətnamə');
-      sened.push('Doğum haqqında şəhadətnamə');
+      esasSened.push('Ölüm haqqında şəhadətnamə');
+      esasSened.push('Doğum haqqında şəhadətnamə');
     }
     if(abi.erArvadKategoriyaVar){
-      sened.push('Nikah haqqında şəhadətnamə');
-      sened.push('Ölüm haqqında şəhadətnamə');
+      esasSened.push('Nikah haqqında şəhadətnamə');
+      esasSened.push('Ölüm haqqında şəhadətnamə');
     }
     if(abi.qurumXstmf && abi.xstmfHerbi){
-      sened.push('Ailə tərkibi haqqında DİN-dən və ya MyGov-dan arayış');
+      tovsiyeSened.push('Ailə tərkibi haqqında DİN-dən və ya MyGov-dan arayış');
     }
     // Təkrarlananları çıxart
-    sened = sened.filter(function(s,i){ return sened.indexOf(s)===i; });
+    esasSened = esasSened.filter(function(s,i){ return esasSened.indexOf(s)===i; });
+    tovsiyeSened = tovsiyeSened.filter(function(s,i){ return tovsiyeSened.indexOf(s)===i; });
     var kargQurum = abi.qurumXstmf ? 'XŞTMF' : 'SÖMTİ';
-    var senedHtml = sened.length
-      ? ('<ul style="margin:8px 0 0 18px;padding:0;">'+sened.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
-      : '<div class="abi-note">Seçilmiş kateqoriyalara görə əlavə sənəd tələb olunmur.</div>';
+    var sistemAdi = (abi.qurumXstmf && abi.xstmfHerbi) ? 'VQAS' : 'ƏMAS';
+    var senedHtml = esasSened.length
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Əsas sənədlər</div><ul style="margin:0 0 8px 18px;padding:0;">'+esasSened.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
+      : '<div class="abi-note">Seçilmiş kateqoriyalara görə əsas sənəd tələb olunmur.</div>';
+    var tovsiyeHtml = tovsiyeSened.length
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:8px 0 2px;">Tövsiyə olunan sənədlər</div><ul style="margin:0 0 0 18px;padding:0;">'+tovsiyeSened.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
+      : '';
     var soyadQeyd = abi.tehsilQizVar
       ? '<div class="abi-note" style="margin-top:8px;">⚠️ Əgər 23 yaşadək əyani təhsil alan övlad ərə getdiyinə görə soyadını dəyişibsə, sənəd siyahısına <b>Nikah haqqında şəhadətnamə</b> də əlavə edilməlidir.</div>'
       : '';
     abiAddBotCard(
       '<div class="abi-q">Tələb olunan sənədlər</div>'+
       senedHtml+
+      tovsiyeHtml+
       soyadQeyd+
-      '<div class="abi-note" style="margin-top:10px;">⚠️ Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə ƏMAS üzərindən kargüzarlıq edilsin.</div>'+
+      '<div class="abi-note" style="margin-top:10px;">⚠️ Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə '+sistemAdi+' üzərindən kargüzarlıq edilsin.</div>'+
       '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
     );
   }
@@ -2656,7 +2663,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
-      (kapitalTetbiqOlunur ? ('Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
+      (kapitalTetbiqOlunur ? ('Kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
       (catmayan<=0 ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>') : '')+
       (catmayan>0 ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
       (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
