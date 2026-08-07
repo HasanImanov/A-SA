@@ -1430,34 +1430,40 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var kateqoriyalar = [];
     var say = 0;
-    var secilenSayi = 0;
 
     var cat1 = document.getElementById('abi-p1cat1').checked;
     var cat1Say = parseInt(document.getElementById('abi-p1cat1-say').value) || 0;
     if(cat1Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
-    if(cat1 && cat1Say>0){ say += cat1Say; secilenSayi++; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
 
     var cat2 = document.getElementById('abi-p1cat2').checked;
     var cat2Say = parseInt(document.getElementById('abi-p1cat2-say').value) || 0;
     if(cat2Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
-    if(cat2 && cat2Say>0){ say += cat2Say; secilenSayi++; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
 
     var cat3 = document.getElementById('abi-p1cat3').checked;
-    if(cat3){ say += 1; secilenSayi++; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
 
     var cat4 = document.getElementById('abi-p1cat4').checked;
     var cat4Say = parseInt(document.getElementById('abi-p1cat4-say').value) || 0;
     if(cat4Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
-    if(cat4 && cat4Say>0){ say += cat4Say; secilenSayi++; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Say); }
 
     var cat5 = document.getElementById('abi-p1cat5').checked;
-    if(cat5){ say += 1; secilenSayi++; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
+
+    // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
+    var cat4Ustelik = cat4Say;
+    if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
+      var eyniSexsdir = confirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?\n\nEyni şəxsdirsə "OK", ayrı şəxsdirsə "Cancel" basın.');
+      if(eyniSexsdir) cat4Ustelik = 0;
+    }
+
+    if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
+    if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
+    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat4 && cat4Say>0){
+      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
+      else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
+    }
+    if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
-    if(secilenSayi>1){
-      var davamEt = confirm('Diqqət: birdən çox kateqoriya seçilib. Eyni şəxsin fərqli kateqoriyalarda təkrar sayılmadığından əminsinizmi?\n\nDavam etmək üçün "OK", yenidən yoxlamaq üçün "Cancel" basın.');
-      if(!davamEt) return;
-    }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
@@ -1946,34 +1952,40 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var kateqoriyalar = [];
     var say = 0;
-    var secilenSayi = 0;
 
     var cat1 = document.getElementById('abi-cat1').checked;
     var cat1Say = parseInt(document.getElementById('abi-cat1-say').value) || 0;
     if(cat1Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
-    if(cat1 && cat1Say>0){ say += cat1Say; secilenSayi++; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
 
     var cat2 = document.getElementById('abi-cat2').checked;
     var cat2Say = parseInt(document.getElementById('abi-cat2-say').value) || 0;
     if(cat2Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
-    if(cat2 && cat2Say>0){ say += cat2Say; secilenSayi++; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
 
     var cat3 = document.getElementById('abi-cat3').checked;
-    if(cat3){ say += 1; secilenSayi++; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
 
     var cat4 = document.getElementById('abi-cat4').checked;
     var cat4Say = parseInt(document.getElementById('abi-cat4-say').value) || 0;
     if(cat4Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
-    if(cat4 && cat4Say>0){ say += cat4Say; secilenSayi++; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Say); }
 
     var cat5 = document.getElementById('abi-cat5').checked;
-    if(cat5){ say += 1; secilenSayi++; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
+
+    // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
+    var cat4Ustelik = cat4Say;
+    if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
+      var eyniSexsdir = confirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?\n\nEyni şəxsdirsə "OK", ayrı şəxsdirsə "Cancel" basın.');
+      if(eyniSexsdir) cat4Ustelik = 0;
+    }
+
+    if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
+    if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
+    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat4 && cat4Say>0){
+      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
+      else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
+    }
+    if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
-    if(secilenSayi>1){
-      var davamEt = confirm('Diqqət: birdən çox kateqoriya seçilib. Eyni şəxsin fərqli kateqoriyalarda təkrar sayılmadığından əminsinizmi?\n\nDavam etmək üçün "OK", yenidən yoxlamaq üçün "Cancel" basın.');
-      if(!davamEt) return;
-    }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
