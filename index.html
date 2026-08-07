@@ -1392,24 +1392,24 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       abiAddBotCard(
         '<div class="abi-q">Pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
         '<div class="abi-input-group single">'+
-          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="abi-p1-mebleg" placeholder="220"/></div>'+
+          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="abi-p1-mebleg" placeholder="220" min="0"/></div>'+
         '</div>'+
         '<div class="abi-note" style="margin-top:4px;">⚠️ PAS-dan pensiya məbləğini daxil edin.</div>'+
         '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat1"/> 18 yaşdan aşağı övlad'+
-          '<input type="number" id="abi-p1cat1-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+          '<input type="number" id="abi-p1cat1-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat2"/> 23 yaşa dək əyani təhsil alan övlad'+
-          '<input type="number" id="abi-p1cat2-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+          '<input type="number" id="abi-p1cat2-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat3" onclick="abiMutexCat(\'abi-p1cat3\',\'abi-p1cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
-          '<input type="number" id="abi-p1cat4-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+          '<input type="number" id="abi-p1cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Pensiya hüququ yaranmış ər və ya arvad'+
@@ -1426,29 +1426,38 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiCalcPensionSplit(btn){
     var card = btn.closest('.abi-card');
     var mebleg = parseFloat(document.getElementById('abi-p1-mebleg').value);
+    if(mebleg<0){ alert('Məbləğ mənfi ola bilməz.'); return; }
 
     var kateqoriyalar = [];
     var say = 0;
+    var secilenSayi = 0;
 
     var cat1 = document.getElementById('abi-p1cat1').checked;
     var cat1Say = parseInt(document.getElementById('abi-p1cat1-say').value) || 0;
-    if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
+    if(cat1Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
+    if(cat1 && cat1Say>0){ say += cat1Say; secilenSayi++; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
 
     var cat2 = document.getElementById('abi-p1cat2').checked;
     var cat2Say = parseInt(document.getElementById('abi-p1cat2-say').value) || 0;
-    if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
+    if(cat2Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
+    if(cat2 && cat2Say>0){ say += cat2Say; secilenSayi++; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
 
     var cat3 = document.getElementById('abi-p1cat3').checked;
-    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat3){ say += 1; secilenSayi++; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
 
     var cat4 = document.getElementById('abi-p1cat4').checked;
     var cat4Say = parseInt(document.getElementById('abi-p1cat4-say').value) || 0;
-    if(cat4 && cat4Say>0){ say += cat4Say; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Say); }
+    if(cat4Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
+    if(cat4 && cat4Say>0){ say += cat4Say; secilenSayi++; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Say); }
 
     var cat5 = document.getElementById('abi-p1cat5').checked;
-    if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
+    if(cat5){ say += 1; secilenSayi++; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    if(secilenSayi>1){
+      var davamEt = confirm('Diqqət: birdən çox kateqoriya seçilib. Eyni şəxsin fərqli kateqoriyalarda təkrar sayılmadığından əminsinizmi?\n\nDavam etmək üçün "OK", yenidən yoxlamaq üçün "Cancel" basın.');
+      if(!davamEt) return;
+    }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
@@ -1904,23 +1913,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
       '<div class="abi-input-group single">'+
-        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
+        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
       '</div>'+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat1"/> 18 yaşdan aşağı övlad'+
-        '<input type="number" id="abi-cat1-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '<input type="number" id="abi-cat1-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat2"/> 23 yaşa dək əyani təhsil alan övlad'+
-        '<input type="number" id="abi-cat2-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '<input type="number" id="abi-cat2-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat3" onclick="abiMutexCat(\'abi-cat3\',\'abi-cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
-        '<input type="number" id="abi-cat4-say" placeholder="say" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '<input type="number" id="abi-cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Pensiya hüququ yaranmış ər və ya arvad'+
@@ -1933,29 +1942,38 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiCalcPensionSplit2(btn){
     var card = btn.closest('.abi-card');
     var mebleg = parseFloat(document.getElementById('abi-p2-mebleg').value);
+    if(mebleg<0){ alert('Məbləğ mənfi ola bilməz.'); return; }
 
     var kateqoriyalar = [];
     var say = 0;
+    var secilenSayi = 0;
 
     var cat1 = document.getElementById('abi-cat1').checked;
     var cat1Say = parseInt(document.getElementById('abi-cat1-say').value) || 0;
-    if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
+    if(cat1Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
+    if(cat1 && cat1Say>0){ say += cat1Say; secilenSayi++; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
 
     var cat2 = document.getElementById('abi-cat2').checked;
     var cat2Say = parseInt(document.getElementById('abi-cat2-say').value) || 0;
-    if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
+    if(cat2Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
+    if(cat2 && cat2Say>0){ say += cat2Say; secilenSayi++; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
 
     var cat3 = document.getElementById('abi-cat3').checked;
-    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat3){ say += 1; secilenSayi++; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
 
     var cat4 = document.getElementById('abi-cat4').checked;
     var cat4Say = parseInt(document.getElementById('abi-cat4-say').value) || 0;
-    if(cat4 && cat4Say>0){ say += cat4Say; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Say); }
+    if(cat4Say<0){ alert('Nəfər sayı mənfi ola bilməz.'); return; }
+    if(cat4 && cat4Say>0){ say += cat4Say; secilenSayi++; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Say); }
 
     var cat5 = document.getElementById('abi-cat5').checked;
-    if(cat5){ say += 1; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
+    if(cat5){ say += 1; secilenSayi++; kateqoriyalar.push('Pensiya hüququ yaranmış ər/arvad: 1'); }
 
     if(!mebleg || say<=0){ alert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    if(secilenSayi>1){
+      var davamEt = confirm('Diqqət: birdən çox kateqoriya seçilib. Eyni şəxsin fərqli kateqoriyalarda təkrar sayılmadığından əminsinizmi?\n\nDavam etmək üçün "OK", yenidən yoxlamaq üçün "Cancel" basın.');
+      if(!davamEt) return;
+    }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
