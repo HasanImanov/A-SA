@@ -1526,6 +1526,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
     abi.herbiOlub = yes;
+    if(!yes){
+      abi.doyusenOrduOlub = false;
+      if(abi.gender==='qadin'){ abiAskUsaqQulluqQuestion(); } else { abiAskTehsil(); }
+      return;
+    }
     abiAskDoyusenOrdu();
   }
   function abiAskDoyusenOrdu(){
@@ -2015,9 +2020,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-result '+cls+'">'+title+'</div>'+
       '<div style="margin-top:10px;">'+detailHtml+'</div>'+
-      extra
+      extra+
+      (isPensiya ? '' : '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>')
     );
-    abiAskPasQuestion();
+    if(isPensiya){ abiAskPasQuestion(); }
   }
 
   function abiAskPasQuestion(){
