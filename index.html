@@ -1849,7 +1849,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(card);
     var ozetParts = [];
     if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
-    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw)+' (2 qat hesablanır)');
     if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
     if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
     if(ahilIlRaw>0||ahilAyRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYM(ahilIlRaw,ahilAyRaw));
@@ -1862,7 +1862,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ageObj = abiYearsDaysDiff(abi.dogum, abi.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
@@ -2616,7 +2616,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpLockCard(card);
     var ozetParts = [];
     if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
-    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw)+' (2 qat hesablanır)');
     if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
     if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
     if(ahilIlRaw>0||ahilAyRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYM(ahilIlRaw,ahilAyRaw));
@@ -2629,7 +2629,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ageObj = abiYearsDaysDiff(elp.dogum, elp.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
