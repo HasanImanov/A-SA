@@ -95,6 +95,9 @@
     #tab-elp{flex:1;display:none;flex-direction:column;}
     #tab-elp.active{display:flex;}
     #elp-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
+    #tab-yg{flex:1;display:none;flex-direction:column;}
+    #tab-yg.active{display:flex;}
+    #yg-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
     #abi-flow{display:flex;flex-direction:column;gap:16px;}
     .abi-bubble{display:flex;gap:10px;align-items:flex-start;animation:fadeIn 0.3s ease;}
     .abi-bubble.user{flex-direction:row-reverse;}
@@ -138,6 +141,7 @@
   <button class="tab-btn" data-tab="erize" onclick="switchTab('erize')">📝 Ərizələr</button>
   <button class="tab-btn" data-tab="abi" onclick="switchTab('abi')">ABİ</button>
   <button class="tab-btn" data-tab="elp" onclick="switchTab('elp')">ƏLİLLİK</button>
+  <button class="tab-btn" data-tab="yg" onclick="switchTab('yg')">YAŞA GÖRƏ</button>
 </div>
 <div id="tab-refiq" class="active">
   <main>
@@ -374,6 +378,13 @@
   <div id="elp-main">
     <div class="arayish-title">Əlilliyə görə pensiya/müavinət təyinatı</div>
     <div id="elp-flow"></div>
+  </div>
+</div>
+
+<div id="tab-yg">
+  <div id="yg-main">
+    <div class="arayish-title">Yaşa görə pensiya/müavinət təyinatı</div>
+    <div id="yg-flow"></div>
   </div>
 </div>
 <script>
@@ -803,6 +814,7 @@
     document.getElementById('tab-erize').classList.toggle('active',tab==='erize');
     document.getElementById('tab-abi').classList.toggle('active',tab==='abi');
     document.getElementById('tab-elp').classList.toggle('active',tab==='elp');
+    document.getElementById('tab-yg').classList.toggle('active',tab==='yg');
   }
   function selectCat(cat){
     document.querySelectorAll('.arayish-form').forEach(function(f){f.classList.remove('active');});
@@ -1209,6 +1221,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   var GIFT_YEAR_CUTOFF = '2019-01-01'; // hədiyyə staj yalnız bu tarixdən sonrakı vəfatlara aiddir
   var abi = {}; // cari sessiyanın cavabları
   var elp = {}; // əlillik pensiyası sessiyasının cavabları
+  var yg = {}; // yaşa görə pensiya sessiyasının cavabları
 
   function abiFlowEl(){ return document.getElementById('abi-flow'); }
 
@@ -2734,16 +2747,795 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     );
   }
 
+  function ygFlowEl(){ return document.getElementById('yg-flow'); }
+  function ygAddBotCard(html){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble bot';
+    wrap.innerHTML='<div class="abi-card bot">'+html+'</div>';
+    ygFlowEl().appendChild(wrap);
+    abiScrollToCard(wrap);
+    return wrap.querySelector('.abi-card');
+  }
+  function ygAddUserCard(text){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble user';
+    wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
+    ygFlowEl().appendChild(wrap);
+    abiScrollToCard(wrap);
+  }
+  function ygLockCard(cardEl){
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ el.disabled = true; el.style.opacity='0.5'; });
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.textContent = '✏️ Düzəliş et';
+    editBtn.className = 'abi-edit-btn';
+    editBtn.style.cssText = 'margin-top:10px;background:none;border:none;color:var(--blue);font-family:\'Nunito\',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;padding:4px 0;opacity:1;';
+    editBtn.onclick = function(){ ygEditCard(cardEl, editBtn); };
+    cardEl.appendChild(editBtn);
+  }
+  function ygEditCard(cardEl, editBtn){
+    var wrap = cardEl.closest('.abi-bubble');
+    var flow = ygFlowEl();
+    while(wrap.nextSibling){ flow.removeChild(wrap.nextSibling); }
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ if(el!==editBtn){ el.disabled = false; el.style.opacity='1'; } });
+    editBtn.remove();
+    abiScrollToCard(wrap);
+  }
+
+  function ygStart(){
+    document.getElementById('yg-flow').innerHTML='';
+    yg = {}; yg.bonusStaj = 0;
+    ygAddBotCard(
+      '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQ1(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQ1(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+
+  function ygQ1(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.hadPension = yes;
+    if(yes){
+      ygAddBotCard(
+        '<div class="abi-q">Pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
+        '<div class="abi-input-group single">'+
+          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="yg-p1-mebleg" placeholder="220" min="0"/></div>'+
+        '</div>'+
+        '<div class="abi-note" style="margin-top:4px;">⚠️ PAS-dan pensiya məbləğini daxil edin.</div>'+
+        '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="yg-p1cat1"/> 18 yaşdan aşağı övlad'+
+          '<input type="number" id="yg-p1cat1-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '</label>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="yg-p1cat2"/> 23 yaşa dək əyani təhsil alan övlad'+
+          '<input type="number" id="yg-p1cat2-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '</label>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="yg-p1cat3" onclick="abiMutexCat(\'yg-p1cat3\',\'yg-p1cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
+        '</label>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="yg-p1cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
+          '<input type="number" id="yg-p1cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '</label>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="yg-p1cat5" onclick="abiMutexCat(\'yg-p1cat5\',\'yg-p1cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
+        '</label>'+
+        '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
+        '<button class="abi-go-btn" style="margin-top:10px;" onclick="ygCalcPensionSplit(this)">Hesabla</button>'
+      );
+    } else {
+      // Pensiya almayıbsa, staj hesablamasına təsir edən amillər (hərbi/uşağa qulluq/təhsil - sual qalır, ədədi manual cəm kimi sonra soruşulur) soruşulur
+      ygAskDogumVefat();
+    }
+  }
+
+  function ygCalcPensionSplit(btn){
+    var card = btn.closest('.abi-card');
+    var mebleg = parseFloat(document.getElementById('yg-p1-mebleg').value);
+    if(mebleg<0){ siteAlert('Məbləğ mənfi ola bilməz.'); return; }
+
+    var cat1 = document.getElementById('yg-p1cat1').checked;
+    var cat1Say = parseInt(document.getElementById('yg-p1cat1-say').value) || 0;
+    if(cat1Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
+    var cat2 = document.getElementById('yg-p1cat2').checked;
+    var cat2Say = parseInt(document.getElementById('yg-p1cat2-say').value) || 0;
+    if(cat2Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
+    var cat3 = document.getElementById('yg-p1cat3').checked;
+
+    var cat4 = document.getElementById('yg-p1cat4').checked;
+    var cat4Say = parseInt(document.getElementById('yg-p1cat4-say').value) || 0;
+    if(cat4Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
+    var cat5 = document.getElementById('yg-p1cat5').checked;
+
+    // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
+    if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
+      siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
+        function(){ ygFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, 0); },
+        function(){ ygFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say); }
+      );
+    } else {
+      ygFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say);
+    }
+  }
+  function ygFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Ustelik){
+    var kateqoriyalar = [];
+    var say = 0;
+    if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
+    if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
+    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat4 && cat4Say>0){
+      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
+      else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
+    }
+    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
+
+    if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    yg.usaqKategoriyaVar = cat1 || cat2 || cat4;
+    yg.tehsilQizVar = cat2;
+    yg.erArvadKategoriyaVar = cat3 || cat5;
+    ygLockCard(card);
+    ygAddUserCard('Məbləğ: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
+    var perPerson = abiRound2(mebleg/say);
+    ygShowFinalResult(perPerson>ABI_LIMIT, 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).');
+  }
+
+  function ygAskDogumVefat(){
+    ygAddBotCard(
+      '<div class="abi-q">Doğum və vəfat tarixini daxil edin</div>'+
+      '<div class="abi-input-group">'+
+        '<div><label>Doğum tarixi</label><input type="text" id="yg-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+        '<div><label>Vəfat tarixi</label><input type="text" id="yg-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="ygSaveDogumVefat(this)">Davam et</button>'
+    );
+  }
+  function ygSaveDogumVefat(btn){
+    var card = btn.closest('.abi-card');
+    var dogumStr = document.getElementById('yg-dogum').value;
+    var vefatStr = document.getElementById('yg-vefat').value;
+    var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
+    if(!dogum || !vefat){ siteAlert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
+    ygLockCard(card);
+    ygAddUserCard('Doğum: '+dogumStr+', Vəfat: '+vefatStr);
+    yg.dogum = dogum; yg.vefat = vefat;
+    ygAskGender();
+  }
+
+  function ygAskGender(){
+    ygAddBotCard(
+      '<div class="abi-q">Mərhum şəxs kişidir, yoxsa qadındır?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQGender(this,true)">Kişi</button>'+
+        '<button class="abi-choice-btn" onclick="ygQGender(this,false)">Qadın</button>'+
+      '</div>'
+    );
+  }
+  function ygQGender(btn, isMale){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(isMale?'Kişi':'Qadın');
+    yg.gender = isMale?'kisi':'qadin';
+    ygAskHerbiQuestion();
+  }
+  function ygAskHerbiQuestion(){
+    ygAddBotCard(
+      '<div class="abi-q">Hərbi xidmətdə olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQHerbi(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQHerbi(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQHerbi(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.herbiOlub = yes;
+    if(!yes){
+      yg.doyusenOrduOlub = false;
+      if(yg.gender==='qadin'){ ygAskUsaqQulluqQuestion(); } else { ygAskTehsil(); }
+      return;
+    }
+    ygAskDoyusenOrdu();
+  }
+  function ygAskDoyusenOrdu(){
+    ygAddBotCard(
+      '<div class="abi-q">Döyüşən ordunun tərkibində olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQDoyusenOrdu(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQDoyusenOrdu(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQDoyusenOrdu(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.doyusenOrduOlub = false; // arayış sualından sonra dəqiqləşəcək
+    if(!yes){
+      if(yg.gender==='qadin'){ ygAskUsaqQulluqQuestion(); } else { ygAskTehsil(); }
+      return;
+    }
+    ygAddBotCard(
+      '<div class="abi-q">Müvafiq nazirliyin arayışı varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQDoyusenOrduArayis(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQDoyusenOrduArayis(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQDoyusenOrduArayis(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.doyusenOrduOlub = yes; // yalnız arayış da varsa input açılacaq
+    if(yg.gender==='qadin'){ ygAskUsaqQulluqQuestion(); } else { ygAskTehsil(); }
+  }
+  function ygAskUsaqQulluqQuestion(){
+    ygAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər (işləmədən) 3 yaşına qədər uşağa qulluq edilibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQUsaqQulluq(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQUsaqQulluq(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQUsaqQulluq(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.usaqQulluqOlub = yes;
+    ygAskTehsil();
+  }
+  function ygAskTehsil(){
+    ygAddBotCard(
+      '<div class="abi-q">2006-cı ilə qədər təhsil olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQTehsil(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQTehsil(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQTehsil(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.tehsilOlub = yes;
+    ygAskXarici();
+  }
+
+  var ABI_XARICI_OLKELER = ['Ermənistan','Belarus','Qazaxıstan','Qırğızıstan','Moldova','Tacikistan','Özbəkistan','Türkiyə'];
+  function ygAskXarici(){
+    ygAddBotCard(
+      '<div class="abi-q">Mərhum şəxs xaricdə işləyibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQXarici(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQXarici(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQXarici(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    if(!yes){ ygAskAhilEarly(); return; }
+    var options = ABI_XARICI_OLKELER.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
+    ygAddBotCard(
+      '<div class="abi-q">Hansı ölkədə işləyib?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Ölkə</label><select id="yg-xarici-olke" style="width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:\'Inter\',sans-serif;color:var(--text);">'+options+'</select></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="ygCalcXarici(this)">Davam et</button>'
+    );
+  }
+  function ygCalcXarici(btn){
+    var card = btn.closest('.abi-card');
+    var olke = document.getElementById('yg-xarici-olke').value;
+    ygLockCard(card);
+    ygAddUserCard(olke);
+    yg.xaricdeIslib = true;
+    yg.xariciOlke = olke;
+    ygAddBotCard('<div class="abi-note">Xaricdə (<b>'+olke+'</b>) işləmə məlumatı qeydə alındı.</div>');
+    ygAskAhilEarly();
+  }
+
+  // Ahıl/əlillik qulluğu — Bəli olsa, notarius təsdiqlənmiş arayış sorğulanır, yalnız o da varsa staj inputu açılır
+  function ygAskAhilEarly(){
+    ygAddBotCard(
+      '<div class="abi-q">Mərhum şəxs ahıl (yaşlı) şəxsə qulluq edibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQAhilEarly(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQAhilEarly(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQAhilEarly(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.ahilOlub = false; // arayış sualından sonra dəqiqləşəcək
+    if(!yes){ ygAskElillikEarly(); return; }
+    ygAddBotCard(
+      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQAhilArayis(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQAhilArayis(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQAhilArayis(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.ahilOlub = yes;
+    ygAskElillikEarly();
+  }
+  function ygAskElillikEarly(){
+    ygAddBotCard(
+      '<div class="abi-q">I dərəcə əlilliyi olan şəxsə qulluq edilibmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQElillikEarly(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQElillikEarly(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQElillikEarly(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.elillikOlub = false; // arayış sualından sonra dəqiqləşəcək
+    if(!yes){ ygDecidePre2006Path(); return; }
+    ygAskElillik18();
+  }
+  function ygAskElillik18(){
+    ygAddBotCard(
+      '<div class="abi-q">18 yaşından aşağı əlilliyi varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQElillik18(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQElillik18(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQElillik18(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.elillik18Olub = yes;
+    ygAddBotCard(
+      '<div class="abi-q">Müddətsiz əlillik sənədi varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQMuddetsizSened(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQMuddetsizSened(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQMuddetsizSened(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      ygAddBotCard('<div class="abi-note">Qeyd: TSEK-ə əlillik sənədi əlavə edildikdən sonra müəyyən staj əlavə edilir.</div>');
+    }
+    ygAddBotCard(
+      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQElillikArayis(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQElillikArayis(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQElillikArayis(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.elillikOlub = yes;
+    ygDecidePre2006Path();
+  }
+
+  // Doğum tarixi 01.01.1990-dan sonradırsa, 2006-dan əvvəlki staj mövzusu ehtimal olunmadığı üçün sual verilmir
+  function ygDecidePre2006Path(){
+    var esik = new Date(1990,0,1).getTime();
+    if(yg.dogum.getTime() < esik){
+      ygAskHasStaj();
+    } else {
+      yg.hasStaj = false;
+      yg.sigortaStajOlub = false;
+      ygAskKapitalCard();
+    }
+  }
+  function ygAskHasStaj(){
+    ygAddBotCard(
+      '<div class="abi-q">Mərhumun əmək kitabçası üzrə rəsmi stajı olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQHasStaj(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQHasStaj(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQHasStaj(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.hasStaj = yes;
+    ygAskSigortaStaj();
+  }
+  function ygAskSigortaStaj(){
+    // Vəfat tarixi 01.07.2018-dən əvvəldirsə, bu tarixə qədər sığorta stajı sualı mənasız olur — sual verilmir
+    var esik2018 = new Date(2018,6,1).getTime();
+    if(yg.vefat.getTime() < esik2018){
+      yg.sigortaStajOlub = false;
+      ygAskKapitalCard();
+      return;
+    }
+    ygAddBotCard(
+      '<div class="abi-q">01.07.2018-ci ilə dək sığorta stajı olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQSigortaStajFinal(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQSigortaStajFinal(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQSigortaStajFinal(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    yg.sigortaStajOlub = yes;
+    ygAskKapitalCard();
+  }
+
+  function ygAskKapitalCard(){
+    var showPre2006 = yg.hasStaj;
+    var pre2006Html = showPre2006
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
+         abiYMInputHTML('yg-kap-evvel','0','0'))
+      : ('<input type="hidden" id="yg-kap-evvel-il" value="0"/><input type="hidden" id="yg-kap-evvel-ay" value="0"/>');
+    var herbiHtml = yg.herbiOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
+         abiYMInputHTML('yg-herbi','2','0'))
+      : ('<input type="hidden" id="yg-herbi-il" value="0"/><input type="hidden" id="yg-herbi-ay" value="0"/>');
+    var doyusenOrduHtml = yg.doyusenOrduOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
+         abiYMInputHTML('yg-doyusen','0','0'))
+      : ('<input type="hidden" id="yg-doyusen-il" value="0"/><input type="hidden" id="yg-doyusen-ay" value="0"/>');
+    var usaqHtml = (yg.gender==='qadin' && yg.usaqQulluqOlub)
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
+         abiYMInputHTML('yg-usaq','6','0'))
+      : ('<input type="hidden" id="yg-usaq-il" value="0"/><input type="hidden" id="yg-usaq-ay" value="0"/>');
+    var tehsilHtml = yg.tehsilOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
+         abiYMInputHTML('yg-tehsil','4','0'))
+      : ('<input type="hidden" id="yg-tehsil-il" value="0"/><input type="hidden" id="yg-tehsil-ay" value="0"/>');
+    var ahilHtml = yg.ahilOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
+         abiYMInputHTML('yg-ahil','0','0'))
+      : ('<input type="hidden" id="yg-ahil-il" value="0"/><input type="hidden" id="yg-ahil-ay" value="0"/>');
+    var elillikQHtml = yg.elillikOlub
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
+         abiYMInputHTML('yg-elillikq','0','0'))
+      : ('<input type="hidden" id="yg-elillikq-il" value="0"/><input type="hidden" id="yg-elillikq-ay" value="0"/>');
+    ygAddBotCard(
+      '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
+      herbiHtml+
+      doyusenOrduHtml+
+      usaqHtml+
+      tehsilHtml+
+      ahilHtml+
+      elillikQHtml+
+      pre2006Html+
+      '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-dan sonrakı staj (varsa, yalnız hüququn yaranması üçün — kapitala təsir etmir)</div>'+
+      abiYMInputHTML('yg-post2006','0','0')+
+      '<div class="abi-input-group single" style="margin-top:10px;">'+
+        '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="yg-kap-sonra" placeholder="0"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="ygCalcFinal(this)">Hesabla</button>'
+    );
+  }
+
+  function ygCalcFinal(btn){
+    var card = btn.closest('.abi-card');
+    var evvelIlRaw = parseFloat(document.getElementById('yg-kap-evvel-il').value)||0;
+    var evvelAyRaw = parseFloat(document.getElementById('yg-kap-evvel-ay').value)||0;
+    var herbiIlRaw = parseFloat(document.getElementById('yg-herbi-il').value)||0;
+    var herbiAyRaw = parseFloat(document.getElementById('yg-herbi-ay').value)||0;
+    var doyusenIlRaw = parseFloat(document.getElementById('yg-doyusen-il').value)||0;
+    var doyusenAyRaw = parseFloat(document.getElementById('yg-doyusen-ay').value)||0;
+    var usaqIlRaw = parseFloat(document.getElementById('yg-usaq-il').value)||0;
+    var usaqAyRaw = parseFloat(document.getElementById('yg-usaq-ay').value)||0;
+    var tehsilIlRaw = parseFloat(document.getElementById('yg-tehsil-il').value)||0;
+    var tehsilAyRaw = parseFloat(document.getElementById('yg-tehsil-ay').value)||0;
+    var ahilIlRaw = parseFloat(document.getElementById('yg-ahil-il').value)||0;
+    var ahilAyRaw = parseFloat(document.getElementById('yg-ahil-ay').value)||0;
+    var elillikqIlRaw = parseFloat(document.getElementById('yg-elillikq-il').value)||0;
+    var elillikqAyRaw = parseFloat(document.getElementById('yg-elillikq-ay').value)||0;
+    var post2006IlRaw = parseFloat(document.getElementById('yg-post2006-il').value)||0;
+    var post2006AyRaw = parseFloat(document.getElementById('yg-post2006-ay').value)||0;
+    var kapSonra = parseFloat(document.getElementById('yg-kap-sonra').value) || 0;
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+      siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
+    }
+    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
+    if(usaqDecimalRaw>6){ usaqDecimalRaw = 6; usaqIlRaw = 6; usaqAyRaw = 0; }
+    ygLockCard(card);
+    var ozetParts = [];
+    if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw)+' (2 qat hesablanır)');
+    if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
+    if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
+    if(ahilIlRaw>0||ahilAyRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYM(ahilIlRaw,ahilAyRaw));
+    if(elillikqIlRaw>0||elillikqAyRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYM(elillikqIlRaw,elillikqAyRaw));
+    if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
+    if(post2006IlRaw>0||post2006AyRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYM(post2006IlRaw,post2006AyRaw));
+    ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
+    ygAddUserCard(ozetParts.join(', '));
+
+    var ageObj = abiYearsDaysDiff(yg.dogum, yg.vefat);
+    var teleb = abiRound2((ageObj.years-15)/3);
+
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
+
+    // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
+    var hediyyeStaj = 0;
+    if(yg.sigortaStajOlub){
+      hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - yg.dogum.getFullYear()) - 15)/3);
+      if(hediyyeStaj<0) hediyyeStaj = 0;
+    }
+    yg.hediyyeStaj = hediyyeStaj;
+
+    var pre2006Effective = Math.max(pre2006StajTotal, hediyyeStaj);
+    var faktikiTotal = abiRound2(pre2006Effective + post2006StajTotal);
+    yg.faktikiStaj = faktikiTotal; yg.telebOlunanStaj = teleb;
+
+    var catmayan = abiRound2(teleb - faktikiTotal);
+    if(catmayan<0) catmayan = 0;
+
+    var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
+    // Kapital (tələb olunan / olan) staj çatıb-çatmamasından asılı olmayaraq hesablanır və göstərilir
+    var multiplier = abiGetKapitalMultiplier(yg.vefat);
+    kapEvvel = abiRound2(pre2006Effective * multiplier);
+    totalKapital = abiRound2(kapEvvel + kapSonra);
+    var boluc = (ageObj.years-15)*4/200*144;
+    gerekenKapital = abiRound2(boluc * 320);
+    if(catmayan<=0){
+      // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
+      tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
+      // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
+      if(tapilanMebleg<320){
+        tapilanMebleg = 320;
+      }
+    }
+    yg.kapitalEvvel = kapEvvel; yg.kapitalSonra = kapSonra; yg.tapilanMebleg = tapilanMebleg;
+    yg.stajCatmir = catmayan>0;
+
+    ygAddBotCard(
+      '<div class="abi-q">Nəticə</div>'+
+      'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
+      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
+      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
+      (catmayan>0
+        ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
+        : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
+      'Olan kapital: <b>'+totalKapital+' AZN</b>'+
+      (catmayan>0
+        ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
+        : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'))+
+      (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
+    );
+
+    if(catmayan>0){
+      // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
+      ygShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
+    } else {
+      ygAskPersonCountForMinPension(tapilanMebleg);
+    }
+  }
+
+
+  function ygAskPersonCountForMinPension(prefillMebleg){
+    ygAddBotCard(
+      '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="yg-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
+      '</div>'+
+      '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-cat1"/> 18 yaşdan aşağı övlad'+
+        '<input type="number" id="yg-cat1-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-cat2"/> 23 yaşa dək əyani təhsil alan övlad'+
+        '<input type="number" id="yg-cat2-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-cat3" onclick="abiMutexCat(\'yg-cat3\',\'yg-cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
+        '<input type="number" id="yg-cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-cat5" onclick="abiMutexCat(\'yg-cat5\',\'yg-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
+      '</label>'+
+      '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
+      '<button class="abi-go-btn" style="margin-top:10px;" onclick="ygCalcPensionSplit2(this)">Hesabla</button>'
+    );
+  }
+
+  function ygCalcPensionSplit2(btn){
+    var card = btn.closest('.abi-card');
+    var mebleg = parseFloat(document.getElementById('yg-p2-mebleg').value);
+    if(mebleg<0){ siteAlert('Məbləğ mənfi ola bilməz.'); return; }
+
+    var cat1 = document.getElementById('yg-cat1').checked;
+    var cat1Say = parseInt(document.getElementById('yg-cat1-say').value) || 0;
+    if(cat1Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
+    var cat2 = document.getElementById('yg-cat2').checked;
+    var cat2Say = parseInt(document.getElementById('yg-cat2-say').value) || 0;
+    if(cat2Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
+    var cat3 = document.getElementById('yg-cat3').checked;
+
+    var cat4 = document.getElementById('yg-cat4').checked;
+    var cat4Say = parseInt(document.getElementById('yg-cat4-say').value) || 0;
+    if(cat4Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
+    var cat5 = document.getElementById('yg-cat5').checked;
+
+    // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
+    if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
+      siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
+        function(){ ygFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, 0); },
+        function(){ ygFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say); }
+      );
+    } else {
+      ygFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say);
+    }
+  }
+  function ygFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Ustelik){
+    var kateqoriyalar = [];
+    var say = 0;
+    if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
+    if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
+    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat4 && cat4Say>0){
+      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
+      else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
+    }
+    if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
+
+    if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    yg.usaqKategoriyaVar = cat1 || cat2 || cat4;
+    yg.tehsilQizVar = cat2;
+    yg.erArvadKategoriyaVar = cat3 || cat5;
+    ygLockCard(card);
+    ygAddUserCard('Minimum pensiya: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
+    var perPerson = abiRound2(mebleg/say);
+    var isPensiya = yg.stajCatmir ? false : (perPerson>ABI_LIMIT);
+    var detail2 = 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).';
+    if(yg.stajCatmir){
+      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.';
+    }
+    ygShowFinalResult(isPensiya, detail2);
+  }
+
+  function ygShowFinalResult(isPensiya, detailHtml){
+    var cls = isPensiya ? 'pensiya' : 'muavinet';
+    var title = isPensiya ? '✅ Pensiya təyin olunacaq' : '📋 Yaşa görə sosial müavinət təyin olunacaq';
+    var extra = '';
+    if(yg.ahilIl) extra += '<div class="abi-note">Ahıl şəxsə qulluq: '+yg.ahilIl+' il</div>';
+    if(yg.elillikIl) extra += '<div class="abi-note">I dərəcə əlilliyi olan şəxsə qulluq: '+yg.elillikIl+' il</div>';
+    ygAddBotCard(
+      '<div class="abi-result '+cls+'">'+title+'</div>'+
+      '<div style="margin-top:10px;">'+detailHtml+'</div>'+
+      extra+
+      (isPensiya ? '' : '<button class="abi-restart-btn" onclick="ygStart()">🔄 Yenidən başla</button>')
+    );
+    if(isPensiya){ ygAskPasQuestion(); }
+  }
+
+  function ygAskPasQuestion(){
+    ygAddBotCard(
+      '<div class="abi-q">⚠️ PAS-da pensiyanı hansı qurumdan aldığına baxdınız mı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQPasQuestion(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQPasQuestion(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQPasQuestion(btn, yes){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(yes?'Bəli':'Xeyr');
+    if(yes){
+      ygAskQurum();
+    } else {
+      ygAddBotCard('<div class="abi-note">⚠️ Zəhmət olmasa əvvəlcə PAS-a daxil olub pensiyanı hansı qurumdan aldığını yoxlayın, sonra davam edin.</div>');
+      ygAskPasQuestion();
+    }
+  }
+  function ygAskQurum(){
+    ygAddBotCard(
+      '<div class="abi-q">Hansı qurumdur?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQQurum(this,true)">XŞTMF</button>'+
+        '<button class="abi-choice-btn" onclick="ygQQurum(this,false)">Ümumi əsaslarla</button>'+
+      '</div>'
+    );
+  }
+  function ygQQurum(btn, isXstmf){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(isXstmf?'XŞTMF':'Ümumi əsaslarla');
+    yg.qurumXstmf = isXstmf;
+    if(isXstmf){
+      ygAskXstmfKateqoriya();
+    } else {
+      ygShowSenedSiyahisi();
+    }
+  }
+  function ygAskXstmfKateqoriya(){
+    ygAddBotCard(
+      '<div class="abi-q">XŞTMF üzrə hansı əsasla?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="ygQXstmfKateqoriya(this,1)">Zərərli peşə və vəzifələrdə çalışdıqları üçün güzəştli şərtlərlə pensiya alan şəxslər vəfat etdikdə ailə üzvlərinə görə</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="ygQXstmfKateqoriya(this,2)">Hərbi rütbəli və onlara bərabər tutulan xüsusi rütbəli şəxslər vəfat etdikdə ailə üzvlərinə görə</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="ygQXstmfKateqoriya(this,3)">Əmək haqqı əsasında hesablanan pensiya alan şəxs vəfat etdikdə ailə üzvlərinə görə</button>'+
+      '</div>'
+    );
+  }
+  function ygQXstmfKateqoriya(btn, secim){
+    ygLockCard(btn.closest('.abi-card'));
+    var mətnler = {1:'Zərərli peşə/vəzifə üzrə güzəştli pensiya', 2:'Hərbi rütbəli şəxs', 3:'Əmək haqqı əsasında pensiya'};
+    ygAddUserCard(mətnler[secim]);
+    yg.xstmfHerbi = (secim===2);
+    ygShowSenedSiyahisi();
+  }
+
+  function ygShowSenedSiyahisi(){
+    var esasSened = [];
+    var tovsiyeSened = [];
+    if(yg.usaqKategoriyaVar){
+      esasSened.push('Ölüm haqqında şəhadətnamə');
+      esasSened.push('Doğum haqqında şəhadətnamə');
+    }
+    if(yg.erArvadKategoriyaVar){
+      esasSened.push('Nikah haqqında şəhadətnamə');
+      esasSened.push('Ölüm haqqında şəhadətnamə');
+    }
+    if(yg.qurumXstmf && yg.xstmfHerbi){
+      tovsiyeSened.push('Ailə tərkibi haqqında DİN-dən və ya MyGov-dan arayış');
+    }
+    // Təkrarlananları çıxart
+    esasSened = esasSened.filter(function(s,i){ return esasSened.indexOf(s)===i; });
+    tovsiyeSened = tovsiyeSened.filter(function(s,i){ return tovsiyeSened.indexOf(s)===i; });
+    var kargQurum = yg.qurumXstmf ? 'XŞTMF' : 'SÖMTİ';
+    var sistemAdi = (yg.qurumXstmf && yg.xstmfHerbi) ? 'VQAS' : 'ƏMAS';
+    var senedHtml = esasSened.length
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Əsas sənədlər</div><ul style="margin:0 0 8px 18px;padding:0;">'+esasSened.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
+      : '<div class="abi-note">Seçilmiş kateqoriyalara görə əsas sənəd tələb olunmur.</div>';
+    var tovsiyeHtml = tovsiyeSened.length
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:8px 0 2px;">Tövsiyə olunan sənədlər</div><ul style="margin:0 0 0 18px;padding:0;">'+tovsiyeSened.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
+      : '';
+    var soyadQeyd = yg.tehsilQizVar
+      ? '<div class="abi-note" style="margin-top:8px;">⚠️ Əgər 23 yaşadək əyani təhsil alan övlad ərə getdiyinə görə soyadını dəyişibsə, sənəd siyahısına <b>Nikah haqqında şəhadətnamə</b> də əlavə edilməlidir.</div>'
+      : '';
+    ygAddBotCard(
+      '<div class="abi-q">Tələb olunan sənədlər</div>'+
+      senedHtml+
+      tovsiyeHtml+
+      soyadQeyd+
+      '<div class="abi-note" style="margin-top:10px;">⚠️ Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə '+sistemAdi+' üzərindən kargüzarlıq edilsin.</div>'+
+      '<button class="abi-restart-btn" onclick="ygStart()">🔄 Yenidən başla</button>'
+    );
+  }
+
+
   // Tab ilk dəfə açılanda axını başlat
   var _abiInitDone = false;
   var _elpInitDone = false;
+  var _ygInitDone = false;
   var _origSwitchTab = switchTab;
   switchTab = function(tab){
     _origSwitchTab(tab);
     if(tab==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
     if(tab==='elp' && !_elpInitDone){ _elpInitDone = true; elpStart(); }
+    if(tab==='yg' && !_ygInitDone){ _ygInitDone = true; ygStart(); }
     var fbFab = document.getElementById('fb-fab');
-    if(fbFab){ fbFab.style.display = (tab==='abi'||tab==='elp') ? 'flex' : 'none'; }
+    if(fbFab){ fbFab.style.display = (tab==='abi'||tab==='elp'||tab==='yg') ? 'flex' : 'none'; }
   };
 
   // ----------------------------
