@@ -1787,6 +1787,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return 722;
   }
 
+  // Tarixə görə pilləli bölücü ədəd (PSK əmsalı) — "boluc" düsturunda sabit 200 əvəzinə istifadə olunur
+  function abiGetBolucDivisor(tarix){
+    var esik20170701 = new Date(2017,6,1).getTime();
+    var esik20210101 = new Date(2021,0,1).getTime();
+    var t = tarix.getTime();
+    if(t <= esik20170701) return 184;
+    if(t <= esik20210101) return 192;
+    return 200;
+  }
+
   function abiAskKapitalCard(){
     var showPre2006 = abi.hasStaj;
     var pre2006Html = showPre2006
@@ -1898,7 +1908,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var multiplier = abiGetKapitalMultiplier(abi.vefat);
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
-    var boluc = (ageObj.years-15)*4/200*144;
+    var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(abi.vefat)*144;
     gerekenKapital = abiRound2(boluc * 320);
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
@@ -2667,7 +2677,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       var multiplier = abiGetKapitalMultiplier(elp.vefat);
       kapEvvel = abiRound2(pre2006Effective * multiplier);
       totalKapital = abiRound2(kapEvvel + kapSonra);
-      var boluc = (ageObj.years-15)*4/200*144;
+      var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
       gerekenKapital = abiRound2(boluc * 320);
       if(catmayan<=0){
         // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
@@ -3288,7 +3298,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var multiplier = abiGetKapitalMultiplier(yg.vefat);
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
-    var boluc = (ageObj.years-15)*4/200*144;
+    var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(yg.vefat)*144;
     gerekenKapital = abiRound2(boluc * 320);
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
