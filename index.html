@@ -1419,10 +1419,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat3" onclick="abiMutexCat(\'abi-p1cat3\',\'abi-p1cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
+          '<select id="abi-p1cat3-derece" style="margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 6px;font-family:\'Inter\',sans-serif;font-size:0.78rem;">'+
+            '<option value="31-60">31-60%</option><option value="61-80">61-80%</option><option value="81-100">81-100%</option>'+
+          '</select>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
-          '<input type="number" id="abi-p1cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+          '<select id="abi-p1cat4-derece" style="border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 6px;font-family:\'Inter\',sans-serif;font-size:0.78rem;">'+
+            '<option value="31-60">31-60%</option><option value="61-80">61-80%</option><option value="81-100">81-100%</option>'+
+          '</select>'+
+          '<input type="number" id="abi-p1cat4-say" placeholder="say" min="0" style="width:56px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
@@ -1431,6 +1437,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
           '<input type="checkbox" id="abi-p1cat6"/> Mərhum ata/anası'+
           '<input type="number" id="abi-p1cat6-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
         '</label>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="abi-p1cat7"/> 8 yaşınadək uşağa baxan və işləməyən ailə üzvü'+
+          '<input type="number" id="abi-p1cat7-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '</label>'+
         '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
         '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
       );
@@ -1438,6 +1448,33 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       // Pensiya almayıbsa, staj hesablamasına təsir edən amillər (hərbi/uşağa qulluq/təhsil - sual qalır, ədədi manual cəm kimi sonra soruşulur) soruşulur
       abiAskDogumVefat();
     }
+  }
+
+  // Hər kateqoriya üçün fərdi pay ilə müvafiq sosial müavinət məbləğini müqayisə edən qeyd qurur
+  function abiBuildMuqayiseNotu(perPerson, cat3, cat3Derece, cat4Ustelik, cat4Derece, cat5, cat6){
+    var setirler = [];
+    if(cat3){
+      var esik1 = ELILLIK_MUAVINET_CEDVEL[cat3Derece];
+      var vs1 = perPerson<esik1 ? ('sosial müavinəti seçə bilər ('+esik1+' AZN daha sərfəlidir)') : 'pensiya daha sərfəlidir';
+      setirler.push('I-II dərəcə əlilliyi olan ər/arvad ('+cat3Derece+'%): əlilliyə görə müavinət '+esik1+' AZN — '+vs1);
+    }
+    if(cat4Ustelik>0){
+      var esik2 = ELILLIK_MUAVINET_CEDVEL[cat4Derece];
+      var vs2 = perPerson<esik2 ? ('sosial müavinəti seçə bilər ('+esik2+' AZN daha sərfəlidir)') : 'pensiya daha sərfəlidir';
+      setirler.push('18 yaşa qədər əlilliyi olan övlad ('+cat4Derece+'%): əlilliyə görə müavinət '+esik2+' AZN — '+vs2);
+    }
+    if(cat5){
+      var vs3 = perPerson<YAS_MUAVINET ? ('sosial müavinəti seçə bilər ('+YAS_MUAVINET+' AZN daha sərfəlidir)') : 'pensiya daha sərfəlidir';
+      setirler.push('Yaşa görə pensiya yaş həddinə çatmış: yaşa görə müavinət '+YAS_MUAVINET+' AZN — '+vs3);
+    }
+    if(cat6){
+      var vs4 = perPerson<YAS_MUAVINET ? ('sosial müavinəti seçə bilər ('+YAS_MUAVINET+' AZN daha sərfəlidir)') : 'pensiya daha sərfəlidir';
+      setirler.push('Mərhum ata/anası: yaşa görə müavinət '+YAS_MUAVINET+' AZN — '+vs4);
+    }
+    if(setirler.length===0) return '';
+    return '<div class="abi-note" style="margin-top:10px;">⚠️ Sosial müavinətlə müqayisə (Əmək pensiyaları haqqında Qanun maddə 14.4/18.2):<ul style="margin:6px 0 0 18px;padding:0;">'+
+      setirler.map(function(s){return '<li>'+s+'</li>';}).join('')+
+      '</ul></div>';
   }
 
   function abiCalcPensionSplit(btn){
@@ -1454,10 +1491,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat2Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
 
     var cat3 = document.getElementById('abi-p1cat3').checked;
+    var cat3Derece = document.getElementById('abi-p1cat3-derece').value;
 
     var cat4 = document.getElementById('abi-p1cat4').checked;
     var cat4Say = parseInt(document.getElementById('abi-p1cat4-say').value) || 0;
     if(cat4Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+    var cat4Derece = document.getElementById('abi-p1cat4-derece').value;
 
     var cat5 = document.getElementById('abi-p1cat5').checked;
 
@@ -1465,28 +1504,33 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var cat6Say = parseInt(document.getElementById('abi-p1cat6-say').value) || 0;
     if(cat6Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
 
+    var cat7 = document.getElementById('abi-p1cat7').checked;
+    var cat7Say = parseInt(document.getElementById('abi-p1cat7-say').value) || 0;
+    if(cat7Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
-        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, 0); },
-        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say); }
+        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, 0); },
+        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, cat4Say); }
       );
     } else {
-      abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say);
+      abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, cat4Say);
     }
   }
-  function abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Ustelik){
+  function abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, cat4Ustelik){
     var kateqoriyalar = [];
     var say = 0;
     if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
     if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
-    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad ('+cat3Derece+'%): 1'); }
     if(cat4 && cat4Say>0){
-      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
+      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad ('+cat4Derece+'%): '+cat4Ustelik); }
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
     if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
     if(cat6 && cat6Say>0){ say += cat6Say; kateqoriyalar.push('Mərhum ata/anası: '+cat6Say); }
+    if(cat7 && cat7Say>0){ say += cat7Say; kateqoriyalar.push('8 yaşınadək uşağa baxan və işləməyən ailə üzvü: '+cat7Say); }
 
     if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
@@ -1495,7 +1539,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(card);
     abiAddUserCard('Məbləğ: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
-    abiShowFinalResult(perPerson>ABI_LIMIT, 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).');
+    var muqayiseNotu = abiBuildMuqayiseNotu(perPerson, cat3, cat3Derece, cat4Ustelik, cat4Derece, cat5, cat6);
+    abiShowFinalResult(perPerson>ABI_LIMIT, 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).'+muqayiseNotu);
   }
 
   function abiAskDogumVefat(){
@@ -1807,6 +1852,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
 
   // Tarixə görə minimum pensiya məbləği (əvvəllər sabit 320 idi)
+  // "Sosial müavinətlər haqqında" Qanunun 7.0.2 (yaşa görə) və 7.0.3 (əlilliyə görə) müavinət məbləğləri —
+  // ailə üzvünə düşən pensiya payı bunlardan azdırsa, o, pensiya əvəzinə müvafiq sosial müavinəti seçə bilər
+  var YAS_MUAVINET = 220;
+  var ELILLIK_MUAVINET_CEDVEL = {'31-60':180, '61-80':250, '81-100':300};
+
   function abiGetMinPensiya(tarix){
     var cedvel = [
       {tarix: new Date(2019,2,1), meblegh: 160},
@@ -1990,10 +2040,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat3" onclick="abiMutexCat(\'abi-cat3\',\'abi-cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
+        '<select id="abi-cat3-derece" style="margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 6px;font-family:\'Inter\',sans-serif;font-size:0.78rem;">'+
+          '<option value="31-60">31-60%</option><option value="61-80">61-80%</option><option value="81-100">81-100%</option>'+
+        '</select>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
-        '<input type="number" id="abi-cat4-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '<select id="abi-cat4-derece" style="border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 6px;font-family:\'Inter\',sans-serif;font-size:0.78rem;">'+
+          '<option value="31-60">31-60%</option><option value="61-80">61-80%</option><option value="81-100">81-100%</option>'+
+        '</select>'+
+        '<input type="number" id="abi-cat4-say" placeholder="say" min="0" style="width:56px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
@@ -2001,6 +2057,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat6"/> Mərhum ata/anası'+
         '<input type="number" id="abi-cat6-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="abi-cat7"/> 8 yaşınadək uşağa baxan və işləməyən ailə üzvü'+
+        '<input type="number" id="abi-cat7-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
       '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
       '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
@@ -2021,10 +2081,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat2Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
 
     var cat3 = document.getElementById('abi-cat3').checked;
+    var cat3Derece = document.getElementById('abi-cat3-derece').value;
 
     var cat4 = document.getElementById('abi-cat4').checked;
     var cat4Say = parseInt(document.getElementById('abi-cat4-say').value) || 0;
     if(cat4Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+    var cat4Derece = document.getElementById('abi-cat4-derece').value;
 
     var cat5 = document.getElementById('abi-cat5').checked;
 
@@ -2032,28 +2094,33 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var cat6Say = parseInt(document.getElementById('abi-cat6-say').value) || 0;
     if(cat6Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
 
+    var cat7 = document.getElementById('abi-cat7').checked;
+    var cat7Say = parseInt(document.getElementById('abi-cat7-say').value) || 0;
+    if(cat7Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
-        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, 0); },
-        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say); }
+        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, 0); },
+        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, cat4Say); }
       );
     } else {
-      abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say);
+      abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, cat4Say);
     }
   }
-  function abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Ustelik){
+  function abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat3Derece, cat4, cat4Say, cat4Derece, cat5, cat6, cat6Say, cat7, cat7Say, cat4Ustelik){
     var kateqoriyalar = [];
     var say = 0;
     if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
     if(cat2 && cat2Say>0){ say += cat2Say; kateqoriyalar.push('23 yaşa dək əyani təhsil alan övlad: '+cat2Say); }
-    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad: 1'); }
+    if(cat3){ say += 1; kateqoriyalar.push('I-II dərəcə əlilliyi olan ər/arvad ('+cat3Derece+'%): 1'); }
     if(cat4 && cat4Say>0){
-      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad: '+cat4Ustelik); }
+      if(cat4Ustelik>0){ say += cat4Ustelik; kateqoriyalar.push('18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad ('+cat4Derece+'%): '+cat4Ustelik); }
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
     if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
     if(cat6 && cat6Say>0){ say += cat6Say; kateqoriyalar.push('Mərhum ata/anası: '+cat6Say); }
+    if(cat7 && cat7Say>0){ say += cat7Say; kateqoriyalar.push('8 yaşınadək uşağa baxan və işləməyən ailə üzvü: '+cat7Say); }
 
     if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
@@ -2063,9 +2130,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
     var isPensiya = abi.stajCatmir ? false : (perPerson>ABI_LIMIT);
-    var detail2 = 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).';
+    var muqayiseNotu = abiBuildMuqayiseNotu(perPerson, cat3, cat3Derece, cat4Ustelik, cat4Derece, cat5, cat6);
+    var detail2 = 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).'+muqayiseNotu;
     if(abi.stajCatmir){
-      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.';
+      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.'+muqayiseNotu;
     }
     abiShowFinalResult(isPensiya, detail2);
   }
