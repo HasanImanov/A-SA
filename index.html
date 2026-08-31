@@ -1797,6 +1797,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return 200;
   }
 
+  // Tarixə görə minimum pensiya məbləği (əvvəllər sabit 320 idi)
+  function abiGetMinPensiya(tarix){
+    var cedvel = [
+      {tarix: new Date(2019,2,1), meblegh: 160},
+      {tarix: new Date(2019,9,1), meblegh: 200},
+      {tarix: new Date(2022,0,1), meblegh: 240},
+      {tarix: new Date(2023,1,1), meblegh: 280},
+      {tarix: new Date(2025,1,1), meblegh: 320}
+    ];
+    var t = tarix.getTime();
+    var netice = cedvel[0].meblegh;
+    for(var i=0;i<cedvel.length;i++){
+      if(t >= cedvel[i].tarix.getTime()) netice = cedvel[i].meblegh;
+    }
+    return netice;
+  }
+
   function abiAskKapitalCard(){
     var showPre2006 = abi.hasStaj;
     var pre2006Html = showPre2006
@@ -1909,13 +1926,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(abi.vefat)*144;
-    gerekenKapital = abiRound2(boluc * 320);
+    var minPensiyaAbi = abiGetMinPensiya(abi.vefat);
+    gerekenKapital = abiRound2(boluc * minPensiyaAbi);
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
-      // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
-      if(tapilanMebleg<320){
-        tapilanMebleg = 320;
+      // Qayda: staj tələbi ödəyir, hesablanan məbləğ tarixə uyğun minimumdan azdır -> minimum tətbiq olunur
+      if(tapilanMebleg<minPensiyaAbi){
+        tapilanMebleg = minPensiyaAbi;
       }
     }
     abi.kapitalEvvel = kapEvvel; abi.kapitalSonra = kapSonra; abi.tapilanMebleg = tapilanMebleg;
@@ -2678,18 +2696,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       kapEvvel = abiRound2(pre2006Effective * multiplier);
       totalKapital = abiRound2(kapEvvel + kapSonra);
       var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
-      gerekenKapital = abiRound2(boluc * 320);
+      var minPensiyaElp = abiGetMinPensiya(elp.vefat);
+      gerekenKapital = abiRound2(boluc * minPensiyaElp);
       if(catmayan<=0){
         // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
         tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
-        // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
-        if(tapilanMebleg<320){
-          tapilanMebleg = 320;
+        // Qayda: staj tələbi ödəyir, hesablanan məbləğ tarixə uyğun minimumdan azdır -> minimum tətbiq olunur
+        if(tapilanMebleg<minPensiyaElp){
+          tapilanMebleg = minPensiyaElp;
         }
       }
     } else if(catmayan<=0){
-      // 81-100% dərəcədə kapital hesablanmır, amma staj ödəyirsə minimum məbləğ avtomatik 320 AZN tətbiq olunur
-      tapilanMebleg = 320;
+      // 81-100% dərəcədə kapital hesablanmır, amma staj ödəyirsə minimum məbləğ avtomatik (tarixə uyğun) tətbiq olunur
+      tapilanMebleg = abiGetMinPensiya(elp.vefat);
     }
     elp.kapitalEvvel = kapEvvel; elp.kapitalSonra = kapSonra; elp.tapilanMebleg = tapilanMebleg;
     elp.stajCatmir = catmayan>0;
@@ -3299,13 +3318,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(yg.vefat)*144;
-    gerekenKapital = abiRound2(boluc * 320);
+    var minPensiyaYg = abiGetMinPensiya(yg.vefat);
+    gerekenKapital = abiRound2(boluc * minPensiyaYg);
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
-      // Qayda: staj tələbi ödəyir, hesablanan məbləğ 320-dən azdır -> 320 AZN tətbiq olunur
-      if(tapilanMebleg<320){
-        tapilanMebleg = 320;
+      // Qayda: staj tələbi ödəyir, hesablanan məbləğ tarixə uyğun minimumdan azdır -> minimum tətbiq olunur
+      if(tapilanMebleg<minPensiyaYg){
+        tapilanMebleg = minPensiyaYg;
       }
     }
     yg.kapitalEvvel = kapEvvel; yg.kapitalSonra = kapSonra; yg.tapilanMebleg = tapilanMebleg;
