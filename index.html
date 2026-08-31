@@ -1427,6 +1427,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
           '<input type="checkbox" id="abi-p1cat5" onclick="abiMutexCat(\'abi-p1cat5\',\'abi-p1cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
         '</label>'+
+        '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+          '<input type="checkbox" id="abi-p1cat6"/> Mərhum ata/anası'+
+          '<input type="number" id="abi-p1cat6-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+        '</label>'+
         '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
         '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
       );
@@ -1457,17 +1461,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var cat5 = document.getElementById('abi-p1cat5').checked;
 
+    var cat6 = document.getElementById('abi-p1cat6').checked;
+    var cat6Say = parseInt(document.getElementById('abi-p1cat6-say').value) || 0;
+    if(cat6Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
-        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, 0); },
-        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say); }
+        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, 0); },
+        function(){ abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say); }
       );
     } else {
-      abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say);
+      abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say);
     }
   }
-  function abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Ustelik){
+  function abiFinishSplit1(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Ustelik){
     var kateqoriyalar = [];
     var say = 0;
     if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
@@ -1478,6 +1486,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
     if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
+    if(cat6 && cat6Say>0){ say += cat6Say; kateqoriyalar.push('Mərhum ata/anası: '+cat6Say); }
 
     if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
@@ -1989,6 +1998,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
       '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="abi-cat6"/> Mərhum ata/anası'+
+        '<input type="number" id="abi-cat6-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
+      '</label>'+
       '<div class="abi-note">⚠️ Eyni şəxs həm əlilliyinə, həm pensiya hüququna görə iki dəfə seçilə bilməz — yalnız biri seçilir.</div>'+
       '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit2(this)">Hesabla</button>'
     );
@@ -2015,17 +2028,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var cat5 = document.getElementById('abi-cat5').checked;
 
+    var cat6 = document.getElementById('abi-cat6').checked;
+    var cat6Say = parseInt(document.getElementById('abi-cat6-say').value) || 0;
+    if(cat6Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
+
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
-        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, 0); },
-        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say); }
+        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, 0); },
+        function(){ abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say); }
       );
     } else {
-      abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Say);
+      abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Say);
     }
   }
-  function abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat4Ustelik){
+  function abiFinishSplit2(btn, card, mebleg, cat1, cat1Say, cat2, cat2Say, cat3, cat4, cat4Say, cat5, cat6, cat6Say, cat4Ustelik){
     var kateqoriyalar = [];
     var say = 0;
     if(cat1 && cat1Say>0){ say += cat1Say; kateqoriyalar.push('18 yaşdan aşağı övlad: '+cat1Say); }
@@ -2036,6 +2053,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       else { kateqoriyalar.push('18 yaşa qədər əlilliyi olan övlad: digər kateqoriyada artıq sayılıb (təkrar sayılmadı)'); }
     }
     if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
+    if(cat6 && cat6Say>0){ say += cat6Say; kateqoriyalar.push('Mərhum ata/anası: '+cat6Say); }
 
     if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
