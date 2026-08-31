@@ -1877,31 +1877,31 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var showPre2006 = abi.hasStaj;
     var pre2006Html = showPre2006
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
-         abiYMInputHTML('abi-kap-evvel','0','0'))
+         abiYMDInputHTML('abi-kap-evvel','0','0','0'))
       : ('<input type="hidden" id="abi-kap-evvel-il" value="0"/><input type="hidden" id="abi-kap-evvel-ay" value="0"/>');
     var herbiHtml = abi.herbiOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
-         abiYMInputHTML('abi-herbi','2','0'))
+         abiYMDInputHTML('abi-herbi','2','0','0'))
       : ('<input type="hidden" id="abi-herbi-il" value="0"/><input type="hidden" id="abi-herbi-ay" value="0"/>');
     var doyusenOrduHtml = abi.doyusenOrduOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
-         abiYMInputHTML('abi-doyusen','0','0'))
+         abiYMDInputHTML('abi-doyusen','0','0','0'))
       : ('<input type="hidden" id="abi-doyusen-il" value="0"/><input type="hidden" id="abi-doyusen-ay" value="0"/>');
     var usaqHtml = (abi.gender==='qadin' && abi.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
-         abiYMInputHTML('abi-usaq','6','0'))
+         abiYMDInputHTML('abi-usaq','6','0','0'))
       : ('<input type="hidden" id="abi-usaq-il" value="0"/><input type="hidden" id="abi-usaq-ay" value="0"/>');
     var tehsilHtml = abi.tehsilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
-         abiYMInputHTML('abi-tehsil','4','0'))
+         abiYMDInputHTML('abi-tehsil','4','0','0'))
       : ('<input type="hidden" id="abi-tehsil-il" value="0"/><input type="hidden" id="abi-tehsil-ay" value="0"/>');
     var ahilHtml = abi.ahilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
-         abiYMInputHTML('abi-ahil','0','0'))
+         abiYMDInputHTML('abi-ahil','0','0','0'))
       : ('<input type="hidden" id="abi-ahil-il" value="0"/><input type="hidden" id="abi-ahil-ay" value="0"/>');
     var elillikQHtml = abi.elillikOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
-         abiYMInputHTML('abi-elillikq','0','0'))
+         abiYMDInputHTML('abi-elillikq','0','0','0'))
       : ('<input type="hidden" id="abi-elillikq-il" value="0"/><input type="hidden" id="abi-elillikq-ay" value="0"/>');
     abiAddBotCard(
       '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
@@ -1913,7 +1913,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       elillikQHtml+
       pre2006Html+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-dan sonrakı staj (varsa, yalnız hüququn yaranması üçün — kapitala təsir etmir)</div>'+
-      abiYMInputHTML('abi-post2006','0','0')+
+      abiYMDInputHTML('abi-post2006','0','0','0')+
       '<div class="abi-input-group single" style="margin-top:10px;">'+
         '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="abi-kap-sonra" placeholder="0"/></div>'+
       '</div>'+
@@ -1925,44 +1925,52 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var card = btn.closest('.abi-card');
     var evvelIlRaw = parseFloat(document.getElementById('abi-kap-evvel-il').value)||0;
     var evvelAyRaw = parseFloat(document.getElementById('abi-kap-evvel-ay').value)||0;
+    var evvelGunRaw = parseFloat(document.getElementById('abi-kap-evvel-gun').value)||0;
     var herbiIlRaw = parseFloat(document.getElementById('abi-herbi-il').value)||0;
     var herbiAyRaw = parseFloat(document.getElementById('abi-herbi-ay').value)||0;
+    var herbiGunRaw = parseFloat(document.getElementById('abi-herbi-gun').value)||0;
     var doyusenIlRaw = parseFloat(document.getElementById('abi-doyusen-il').value)||0;
     var doyusenAyRaw = parseFloat(document.getElementById('abi-doyusen-ay').value)||0;
+    var doyusenGunRaw = parseFloat(document.getElementById('abi-doyusen-gun').value)||0;
     var usaqIlRaw = parseFloat(document.getElementById('abi-usaq-il').value)||0;
     var usaqAyRaw = parseFloat(document.getElementById('abi-usaq-ay').value)||0;
+    var usaqGunRaw = parseFloat(document.getElementById('abi-usaq-gun').value)||0;
     var tehsilIlRaw = parseFloat(document.getElementById('abi-tehsil-il').value)||0;
     var tehsilAyRaw = parseFloat(document.getElementById('abi-tehsil-ay').value)||0;
+    var tehsilGunRaw = parseFloat(document.getElementById('abi-tehsil-gun').value)||0;
     var ahilIlRaw = parseFloat(document.getElementById('abi-ahil-il').value)||0;
     var ahilAyRaw = parseFloat(document.getElementById('abi-ahil-ay').value)||0;
+    var ahilGunRaw = parseFloat(document.getElementById('abi-ahil-gun').value)||0;
     var elillikqIlRaw = parseFloat(document.getElementById('abi-elillikq-il').value)||0;
     var elillikqAyRaw = parseFloat(document.getElementById('abi-elillikq-ay').value)||0;
+    var elillikqGunRaw = parseFloat(document.getElementById('abi-elillikq-gun').value)||0;
     var post2006IlRaw = parseFloat(document.getElementById('abi-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('abi-post2006-ay').value)||0;
+    var post2006GunRaw = parseFloat(document.getElementById('abi-post2006-gun').value)||0;
     var kapSonra = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
-    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
+    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12 + usaqGunRaw/365.25);
     if(usaqDecimalRaw>6){ usaqDecimalRaw = 6; usaqIlRaw = 6; usaqAyRaw = 0; }
     abiLockCard(card);
     var ozetParts = [];
-    if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
-    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw)+' (2 qat hesablanır)');
-    if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
-    if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
-    if(ahilIlRaw>0||ahilAyRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYM(ahilIlRaw,ahilAyRaw));
-    if(elillikqIlRaw>0||elillikqAyRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYM(elillikqIlRaw,elillikqAyRaw));
-    if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
-    if(post2006IlRaw>0||post2006AyRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYM(post2006IlRaw,post2006AyRaw));
+    if(herbiIlRaw>0||herbiAyRaw>0||herbiGunRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYMDraw(herbiIlRaw,herbiAyRaw,herbiGunRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0||doyusenGunRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYMDraw(doyusenIlRaw,doyusenAyRaw,doyusenGunRaw)+' (2 qat hesablanır)');
+    if(usaqIlRaw>0||usaqAyRaw>0||usaqGunRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYMDraw(usaqIlRaw,usaqAyRaw,usaqGunRaw));
+    if(tehsilIlRaw>0||tehsilAyRaw>0||tehsilGunRaw>0) ozetParts.push('Təhsil: '+abiFmtYMDraw(tehsilIlRaw,tehsilAyRaw,tehsilGunRaw));
+    if(ahilIlRaw>0||ahilAyRaw>0||ahilGunRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYMDraw(ahilIlRaw,ahilAyRaw,ahilGunRaw));
+    if(elillikqIlRaw>0||elillikqAyRaw>0||elillikqGunRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYMDraw(elillikqIlRaw,elillikqAyRaw,elillikqGunRaw));
+    if(evvelIlRaw>0||evvelAyRaw>0||evvelGunRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw));
+    if(post2006IlRaw>0||post2006AyRaw>0||post2006GunRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYMDraw(post2006IlRaw,post2006AyRaw,post2006GunRaw));
     ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
     abiAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(abi.dogum, abi.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
-    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
     var hediyyeStaj = 0;
@@ -2668,40 +2676,38 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var showPre2006 = elp.hasStaj;
     var pre2006Html = showPre2006
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
-         abiYMInputHTML('elp-kap-evvel','0','0'))
+         abiYMDInputHTML('elp-kap-evvel','0','0','0'))
       : ('<input type="hidden" id="elp-kap-evvel-il" value="0"/><input type="hidden" id="elp-kap-evvel-ay" value="0"/>');
     var herbiHtml = elp.herbiOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
-         abiYMInputHTML('elp-herbi','2','0'))
+         abiYMDInputHTML('elp-herbi','2','0','0'))
       : ('<input type="hidden" id="elp-herbi-il" value="0"/><input type="hidden" id="elp-herbi-ay" value="0"/>');
     var doyusenOrduHtml = elp.doyusenOrduOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
-         abiYMInputHTML('elp-doyusen','0','0'))
+         abiYMDInputHTML('elp-doyusen','0','0','0'))
       : ('<input type="hidden" id="elp-doyusen-il" value="0"/><input type="hidden" id="elp-doyusen-ay" value="0"/>');
     var usaqHtml = (elp.gender==='qadin' && elp.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
-         abiYMInputHTML('elp-usaq','6','0'))
+         abiYMDInputHTML('elp-usaq','6','0','0'))
       : ('<input type="hidden" id="elp-usaq-il" value="0"/><input type="hidden" id="elp-usaq-ay" value="0"/>');
     var tehsilHtml = elp.tehsilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
-         abiYMInputHTML('elp-tehsil','4','0'))
+         abiYMDInputHTML('elp-tehsil','4','0','0'))
       : ('<input type="hidden" id="elp-tehsil-il" value="0"/><input type="hidden" id="elp-tehsil-ay" value="0"/>');
     var ahilHtml = elp.ahilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
-         abiYMInputHTML('elp-ahil','0','0'))
+         abiYMDInputHTML('elp-ahil','0','0','0'))
       : ('<input type="hidden" id="elp-ahil-il" value="0"/><input type="hidden" id="elp-ahil-ay" value="0"/>');
     var elillikQHtml = elp.elillikOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
-         abiYMInputHTML('elp-elillikq','0','0'))
+         abiYMDInputHTML('elp-elillikq','0','0','0'))
       : ('<input type="hidden" id="elp-elillikq-il" value="0"/><input type="hidden" id="elp-elillikq-ay" value="0"/>');
-    // 81-100% dərəcədə kapital ümumiyyətlə soruşulmur — yalnız staj yoxlanılır
-    var kapitalAsk = (elp.derece!=='81-100')
-      ? ('<div class="abi-input-group single" style="margin-top:10px;">'+
+    // Kapital indi 81-100% dərəcədə də soruşulur — şəxsin kapitalı olsa, staj kifayət olsa belə, kapital hesablamasına təsir edə bilər
+    var kapitalAsk = ('<div class="abi-input-group single" style="margin-top:10px;">'+
           '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="elp-kap-sonra" placeholder="0"/></div>'+
-        '</div>')
-      : ('<input type="hidden" id="elp-kap-sonra" value="0"/>');
+        '</div>');
     elpAddBotCard(
-      '<div class="abi-q">'+(elp.derece==='81-100' ? 'Staj məlumatlarını daxil edin' : '2006-dan sonra kapitalı (varsa) daxil edin')+'</div>'+
+      '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
       herbiHtml+
       doyusenOrduHtml+
       usaqHtml+
@@ -2710,7 +2716,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       elillikQHtml+
       pre2006Html+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-dan sonrakı staj (varsa, yalnız hüququn yaranması üçün)</div>'+
-      abiYMInputHTML('elp-post2006','0','0')+
+      abiYMDInputHTML('elp-post2006','0','0','0')+
       kapitalAsk+
       '<button class="abi-go-btn" onclick="elpCalcFinal(this)">Hesabla</button>'
     );
@@ -2720,44 +2726,52 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var card = btn.closest('.abi-card');
     var evvelIlRaw = parseFloat(document.getElementById('elp-kap-evvel-il').value)||0;
     var evvelAyRaw = parseFloat(document.getElementById('elp-kap-evvel-ay').value)||0;
+    var evvelGunRaw = parseFloat(document.getElementById('elp-kap-evvel-gun').value)||0;
     var herbiIlRaw = parseFloat(document.getElementById('elp-herbi-il').value)||0;
     var herbiAyRaw = parseFloat(document.getElementById('elp-herbi-ay').value)||0;
+    var herbiGunRaw = parseFloat(document.getElementById('elp-herbi-gun').value)||0;
     var doyusenIlRaw = parseFloat(document.getElementById('elp-doyusen-il').value)||0;
     var doyusenAyRaw = parseFloat(document.getElementById('elp-doyusen-ay').value)||0;
+    var doyusenGunRaw = parseFloat(document.getElementById('elp-doyusen-gun').value)||0;
     var usaqIlRaw = parseFloat(document.getElementById('elp-usaq-il').value)||0;
     var usaqAyRaw = parseFloat(document.getElementById('elp-usaq-ay').value)||0;
+    var usaqGunRaw = parseFloat(document.getElementById('elp-usaq-gun').value)||0;
     var tehsilIlRaw = parseFloat(document.getElementById('elp-tehsil-il').value)||0;
     var tehsilAyRaw = parseFloat(document.getElementById('elp-tehsil-ay').value)||0;
+    var tehsilGunRaw = parseFloat(document.getElementById('elp-tehsil-gun').value)||0;
     var ahilIlRaw = parseFloat(document.getElementById('elp-ahil-il').value)||0;
     var ahilAyRaw = parseFloat(document.getElementById('elp-ahil-ay').value)||0;
+    var ahilGunRaw = parseFloat(document.getElementById('elp-ahil-gun').value)||0;
     var elillikqIlRaw = parseFloat(document.getElementById('elp-elillikq-il').value)||0;
     var elillikqAyRaw = parseFloat(document.getElementById('elp-elillikq-ay').value)||0;
+    var elillikqGunRaw = parseFloat(document.getElementById('elp-elillikq-gun').value)||0;
     var post2006IlRaw = parseFloat(document.getElementById('elp-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('elp-post2006-ay').value)||0;
+    var post2006GunRaw = parseFloat(document.getElementById('elp-post2006-gun').value)||0;
     var kapSonra = parseFloat(document.getElementById('elp-kap-sonra').value) || 0;
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
-    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
+    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12 + usaqGunRaw/365.25);
     if(usaqDecimalRaw>6){ usaqDecimalRaw = 6; usaqIlRaw = 6; usaqAyRaw = 0; }
     elpLockCard(card);
     var ozetParts = [];
-    if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
-    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw)+' (2 qat hesablanır)');
-    if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
-    if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
-    if(ahilIlRaw>0||ahilAyRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYM(ahilIlRaw,ahilAyRaw));
-    if(elillikqIlRaw>0||elillikqAyRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYM(elillikqIlRaw,elillikqAyRaw));
-    if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
-    if(post2006IlRaw>0||post2006AyRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYM(post2006IlRaw,post2006AyRaw));
+    if(herbiIlRaw>0||herbiAyRaw>0||herbiGunRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYMDraw(herbiIlRaw,herbiAyRaw,herbiGunRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0||doyusenGunRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYMDraw(doyusenIlRaw,doyusenAyRaw,doyusenGunRaw)+' (2 qat hesablanır)');
+    if(usaqIlRaw>0||usaqAyRaw>0||usaqGunRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYMDraw(usaqIlRaw,usaqAyRaw,usaqGunRaw));
+    if(tehsilIlRaw>0||tehsilAyRaw>0||tehsilGunRaw>0) ozetParts.push('Təhsil: '+abiFmtYMDraw(tehsilIlRaw,tehsilAyRaw,tehsilGunRaw));
+    if(ahilIlRaw>0||ahilAyRaw>0||ahilGunRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYMDraw(ahilIlRaw,ahilAyRaw,ahilGunRaw));
+    if(elillikqIlRaw>0||elillikqAyRaw>0||elillikqGunRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYMDraw(elillikqIlRaw,elillikqAyRaw,elillikqGunRaw));
+    if(evvelIlRaw>0||evvelAyRaw>0||evvelGunRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw));
+    if(post2006IlRaw>0||post2006AyRaw>0||post2006GunRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYMDraw(post2006IlRaw,post2006AyRaw,post2006GunRaw));
     if(elp.derece!=='81-100') ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
     elpAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(elp.dogum, elp.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
-    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
     var hediyyeStaj = 0;
@@ -2775,26 +2789,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(catmayan<0) catmayan = 0;
 
     var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
-    var kapitalTetbiqOlunur = (elp.derece!=='81-100');
-    if(kapitalTetbiqOlunur){
-      // Kapital (tələb olunan / olan) staj çatıb-çatmamasından asılı olmayaraq hesablanır və göstərilir (81-100% dərəcədə heç hesablanmır)
-      var multiplier = abiGetKapitalMultiplier(elp.vefat);
-      kapEvvel = abiRound2(pre2006Effective * multiplier);
-      totalKapital = abiRound2(kapEvvel + kapSonra);
-      var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
-      var minPensiyaElp = abiGetMinPensiya(elp.vefat);
-      gerekenKapital = abiRound2(boluc * minPensiyaElp);
-      if(catmayan<=0){
-        // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
-        tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
-        // Qayda: staj tələbi ödəyir, hesablanan məbləğ tarixə uyğun minimumdan azdır -> minimum tətbiq olunur
-        if(tapilanMebleg<minPensiyaElp){
-          tapilanMebleg = minPensiyaElp;
-        }
+    var kapitalTetbiqOlunur = true; // 81-100% dərəcədə də kapital nəzərə alınır - varsa nəticəni artıra bilər
+    // Kapital (tələb olunan / olan) staj çatıb-çatmamasından asılı olmayaraq hesablanır və göstərilir
+    var multiplier = abiGetKapitalMultiplier(elp.vefat);
+    kapEvvel = abiRound2(pre2006Effective * multiplier);
+    totalKapital = abiRound2(kapEvvel + kapSonra);
+    var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
+    var minPensiyaElp = abiGetMinPensiya(elp.vefat);
+    gerekenKapital = abiRound2(boluc * minPensiyaElp);
+    if(catmayan<=0){
+      // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
+      tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
+      // Qayda: staj tələbi ödəyir, hesablanan məbləğ tarixə uyğun minimumdan azdır -> minimum tətbiq olunur
+      if(tapilanMebleg<minPensiyaElp){
+        tapilanMebleg = minPensiyaElp;
       }
-    } else if(catmayan<=0){
-      // 81-100% dərəcədə kapital hesablanmır, amma staj ödəyirsə minimum məbləğ avtomatik (tarixə uyğun) tətbiq olunur
-      tapilanMebleg = abiGetMinPensiya(elp.vefat);
     }
     elp.kapitalEvvel = kapEvvel; elp.kapitalSonra = kapSonra; elp.tapilanMebleg = tapilanMebleg;
     elp.stajCatmir = catmayan>0;
@@ -3296,31 +3305,31 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var showPre2006 = yg.hasStaj;
     var pre2006Html = showPre2006
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
-         abiYMInputHTML('yg-kap-evvel','0','0'))
+         abiYMDInputHTML('yg-kap-evvel','0','0','0'))
       : ('<input type="hidden" id="yg-kap-evvel-il" value="0"/><input type="hidden" id="yg-kap-evvel-ay" value="0"/>');
     var herbiHtml = yg.herbiOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
-         abiYMInputHTML('yg-herbi','2','0'))
+         abiYMDInputHTML('yg-herbi','2','0','0'))
       : ('<input type="hidden" id="yg-herbi-il" value="0"/><input type="hidden" id="yg-herbi-ay" value="0"/>');
     var doyusenOrduHtml = yg.doyusenOrduOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
-         abiYMInputHTML('yg-doyusen','0','0'))
+         abiYMDInputHTML('yg-doyusen','0','0','0'))
       : ('<input type="hidden" id="yg-doyusen-il" value="0"/><input type="hidden" id="yg-doyusen-ay" value="0"/>');
     var usaqHtml = (yg.gender==='qadin' && yg.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
-         abiYMInputHTML('yg-usaq','6','0'))
+         abiYMDInputHTML('yg-usaq','6','0','0'))
       : ('<input type="hidden" id="yg-usaq-il" value="0"/><input type="hidden" id="yg-usaq-ay" value="0"/>');
     var tehsilHtml = yg.tehsilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
-         abiYMInputHTML('yg-tehsil','4','0'))
+         abiYMDInputHTML('yg-tehsil','4','0','0'))
       : ('<input type="hidden" id="yg-tehsil-il" value="0"/><input type="hidden" id="yg-tehsil-ay" value="0"/>');
     var ahilHtml = yg.ahilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
-         abiYMInputHTML('yg-ahil','0','0'))
+         abiYMDInputHTML('yg-ahil','0','0','0'))
       : ('<input type="hidden" id="yg-ahil-il" value="0"/><input type="hidden" id="yg-ahil-ay" value="0"/>');
     var elillikQHtml = yg.elillikOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
-         abiYMInputHTML('yg-elillikq','0','0'))
+         abiYMDInputHTML('yg-elillikq','0','0','0'))
       : ('<input type="hidden" id="yg-elillikq-il" value="0"/><input type="hidden" id="yg-elillikq-ay" value="0"/>');
     ygAddBotCard(
       '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
@@ -3332,7 +3341,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       elillikQHtml+
       pre2006Html+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-dan sonrakı staj (varsa, yalnız hüququn yaranması üçün — kapitala təsir etmir)</div>'+
-      abiYMInputHTML('yg-post2006','0','0')+
+      abiYMDInputHTML('yg-post2006','0','0','0')+
       '<div class="abi-input-group single" style="margin-top:10px;">'+
         '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="yg-kap-sonra" placeholder="0"/></div>'+
       '</div>'+
@@ -3344,44 +3353,52 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var card = btn.closest('.abi-card');
     var evvelIlRaw = parseFloat(document.getElementById('yg-kap-evvel-il').value)||0;
     var evvelAyRaw = parseFloat(document.getElementById('yg-kap-evvel-ay').value)||0;
+    var evvelGunRaw = parseFloat(document.getElementById('yg-kap-evvel-gun').value)||0;
     var herbiIlRaw = parseFloat(document.getElementById('yg-herbi-il').value)||0;
     var herbiAyRaw = parseFloat(document.getElementById('yg-herbi-ay').value)||0;
+    var herbiGunRaw = parseFloat(document.getElementById('yg-herbi-gun').value)||0;
     var doyusenIlRaw = parseFloat(document.getElementById('yg-doyusen-il').value)||0;
     var doyusenAyRaw = parseFloat(document.getElementById('yg-doyusen-ay').value)||0;
+    var doyusenGunRaw = parseFloat(document.getElementById('yg-doyusen-gun').value)||0;
     var usaqIlRaw = parseFloat(document.getElementById('yg-usaq-il').value)||0;
     var usaqAyRaw = parseFloat(document.getElementById('yg-usaq-ay').value)||0;
+    var usaqGunRaw = parseFloat(document.getElementById('yg-usaq-gun').value)||0;
     var tehsilIlRaw = parseFloat(document.getElementById('yg-tehsil-il').value)||0;
     var tehsilAyRaw = parseFloat(document.getElementById('yg-tehsil-ay').value)||0;
+    var tehsilGunRaw = parseFloat(document.getElementById('yg-tehsil-gun').value)||0;
     var ahilIlRaw = parseFloat(document.getElementById('yg-ahil-il').value)||0;
     var ahilAyRaw = parseFloat(document.getElementById('yg-ahil-ay').value)||0;
+    var ahilGunRaw = parseFloat(document.getElementById('yg-ahil-gun').value)||0;
     var elillikqIlRaw = parseFloat(document.getElementById('yg-elillikq-il').value)||0;
     var elillikqAyRaw = parseFloat(document.getElementById('yg-elillikq-ay').value)||0;
+    var elillikqGunRaw = parseFloat(document.getElementById('yg-elillikq-gun').value)||0;
     var post2006IlRaw = parseFloat(document.getElementById('yg-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('yg-post2006-ay').value)||0;
+    var post2006GunRaw = parseFloat(document.getElementById('yg-post2006-gun').value)||0;
     var kapSonra = parseFloat(document.getElementById('yg-kap-sonra').value) || 0;
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
-    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12);
+    var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12 + usaqGunRaw/365.25);
     if(usaqDecimalRaw>6){ usaqDecimalRaw = 6; usaqIlRaw = 6; usaqAyRaw = 0; }
     ygLockCard(card);
     var ozetParts = [];
-    if(herbiIlRaw>0||herbiAyRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYM(herbiIlRaw,herbiAyRaw));
-    if(doyusenIlRaw>0||doyusenAyRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYM(doyusenIlRaw,doyusenAyRaw)+' (2 qat hesablanır)');
-    if(usaqIlRaw>0||usaqAyRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYM(usaqIlRaw,usaqAyRaw));
-    if(tehsilIlRaw>0||tehsilAyRaw>0) ozetParts.push('Təhsil: '+abiFmtYM(tehsilIlRaw,tehsilAyRaw));
-    if(ahilIlRaw>0||ahilAyRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYM(ahilIlRaw,ahilAyRaw));
-    if(elillikqIlRaw>0||elillikqAyRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYM(elillikqIlRaw,elillikqAyRaw));
-    if(evvelIlRaw>0||evvelAyRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYM(evvelIlRaw,evvelAyRaw));
-    if(post2006IlRaw>0||post2006AyRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYM(post2006IlRaw,post2006AyRaw));
+    if(herbiIlRaw>0||herbiAyRaw>0||herbiGunRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYMDraw(herbiIlRaw,herbiAyRaw,herbiGunRaw));
+    if(doyusenIlRaw>0||doyusenAyRaw>0||doyusenGunRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYMDraw(doyusenIlRaw,doyusenAyRaw,doyusenGunRaw)+' (2 qat hesablanır)');
+    if(usaqIlRaw>0||usaqAyRaw>0||usaqGunRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYMDraw(usaqIlRaw,usaqAyRaw,usaqGunRaw));
+    if(tehsilIlRaw>0||tehsilAyRaw>0||tehsilGunRaw>0) ozetParts.push('Təhsil: '+abiFmtYMDraw(tehsilIlRaw,tehsilAyRaw,tehsilGunRaw));
+    if(ahilIlRaw>0||ahilAyRaw>0||ahilGunRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYMDraw(ahilIlRaw,ahilAyRaw,ahilGunRaw));
+    if(elillikqIlRaw>0||elillikqAyRaw>0||elillikqGunRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYMDraw(elillikqIlRaw,elillikqAyRaw,elillikqGunRaw));
+    if(evvelIlRaw>0||evvelAyRaw>0||evvelGunRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw));
+    if(post2006IlRaw>0||post2006AyRaw>0||post2006GunRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYMDraw(post2006IlRaw,post2006AyRaw,post2006GunRaw));
     ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
     ygAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(yg.dogum, yg.vefat);
     var teleb = abiRound2((ageObj.years-15)/3);
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + (herbiIlRaw + herbiAyRaw/12) + (doyusenIlRaw + doyusenAyRaw/12)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12) + (ahilIlRaw + ahilAyRaw/12) + (elillikqIlRaw + elillikqAyRaw/12));
-    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12);
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
 
     // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
     var hediyyeStaj = 0;
