@@ -1834,11 +1834,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   // Vəfat ilinə görə 2006-dan əvvəlki staj → kapital əmsalı
   function abiGetKapitalMultiplier(vefatDate){
-    var table = {2019:722, 2020:741, 2021:762, 2022:813, 2023:926, 2024:1007, 2025:1029, 2026:1087};
+    // İstehlak qiymətləri indeksi (qəpiyəcən dəqiq) — rəsmi cədvəldən
+    var table = {
+      2006:306.00, 2007:331.40, 2008:386.74, 2009:467.18, 2010:474.19,
+      2011:501.22, 2012:540.81, 2013:546.76, 2014:559.88, 2015:567.72,
+      2016:590.43, 2017:663.64, 2018:701.47, 2019:722.52, 2020:741.30,
+      2021:762.06, 2022:813.12, 2023:926.14, 2024:1007.64, 2025:1029.80,
+      2026:1087.47
+    };
     var y = vefatDate.getFullYear();
     if(table[y]!==undefined) return table[y];
-    if(y>2026) return 1087;
-    return 722;
+    if(y>2026) return table[2026];
+    if(y<2006) return table[2006];
+    return table[2006];
   }
 
   // Tarixə görə pilləli bölücü ədəd (PSK əmsalı) — "boluc" düsturunda sabit 200 əvəzinə istifadə olunur
