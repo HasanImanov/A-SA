@@ -1559,6 +1559,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var vefatStr = document.getElementById('abi-vefat').value;
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
     if(!dogum || !vefat){ siteAlert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
+    if(dogum.getTime() >= vefat.getTime()){ siteAlert('Doğum tarixi vəfat tarixindən əvvəl olmalıdır.'); return; }
     abiLockCard(card);
     abiAddUserCard('Doğum: '+dogumStr+', Vəfat: '+vefatStr);
     abi.dogum = dogum; abi.vefat = vefat;
@@ -2421,6 +2422,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var vefatStr = document.getElementById('elp-elillik').value;
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
     if(!dogum || !vefat){ siteAlert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
+    if(dogum.getTime() >= vefat.getTime()){ siteAlert('Doğum tarixi əlilliyin müəyyən edildiyi tarixdən əvvəl olmalıdır.'); return; }
     elpLockCard(card);
     elpAddUserCard('Doğum: '+dogumStr+', Əlillik tarixi: '+vefatStr);
     elp.dogum = dogum; elp.vefat = vefat;
@@ -3036,6 +3038,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var vefatStr = document.getElementById('yg-vefat').value;
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
     if(!dogum || !vefat){ siteAlert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
+    if(dogum.getTime() >= vefat.getTime()){ siteAlert('Doğum tarixi vəfat tarixindən əvvəl olmalıdır.'); return; }
     ygLockCard(card);
     ygAddUserCard('Doğum: '+dogumStr+', Vəfat: '+vefatStr);
     yg.dogum = dogum; yg.vefat = vefat;
