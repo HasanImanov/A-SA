@@ -1886,31 +1886,31 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var pre2006Html = showPre2006
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
          abiYMDInputHTML('abi-kap-evvel','0','0','0'))
-      : ('<input type="hidden" id="abi-kap-evvel-il" value="0"/><input type="hidden" id="abi-kap-evvel-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-kap-evvel-il" value="0"/><input type="hidden" id="abi-kap-evvel-ay" value="0"/><input type="hidden" id="abi-kap-evvel-gun" value="0"/>');
     var herbiHtml = abi.herbiOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
          abiYMDInputHTML('abi-herbi','2','0','0'))
-      : ('<input type="hidden" id="abi-herbi-il" value="0"/><input type="hidden" id="abi-herbi-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-herbi-il" value="0"/><input type="hidden" id="abi-herbi-ay" value="0"/><input type="hidden" id="abi-herbi-gun" value="0"/>');
     var doyusenOrduHtml = abi.doyusenOrduOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
          abiYMDInputHTML('abi-doyusen','0','0','0'))
-      : ('<input type="hidden" id="abi-doyusen-il" value="0"/><input type="hidden" id="abi-doyusen-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-doyusen-il" value="0"/><input type="hidden" id="abi-doyusen-ay" value="0"/><input type="hidden" id="abi-doyusen-gun" value="0"/>');
     var usaqHtml = (abi.gender==='qadin' && abi.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
          abiYMDInputHTML('abi-usaq','6','0','0'))
-      : ('<input type="hidden" id="abi-usaq-il" value="0"/><input type="hidden" id="abi-usaq-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-usaq-il" value="0"/><input type="hidden" id="abi-usaq-ay" value="0"/><input type="hidden" id="abi-usaq-gun" value="0"/>');
     var tehsilHtml = abi.tehsilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
          abiYMDInputHTML('abi-tehsil','4','0','0'))
-      : ('<input type="hidden" id="abi-tehsil-il" value="0"/><input type="hidden" id="abi-tehsil-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-tehsil-il" value="0"/><input type="hidden" id="abi-tehsil-ay" value="0"/><input type="hidden" id="abi-tehsil-gun" value="0"/>');
     var ahilHtml = abi.ahilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
          abiYMDInputHTML('abi-ahil','0','0','0'))
-      : ('<input type="hidden" id="abi-ahil-il" value="0"/><input type="hidden" id="abi-ahil-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-ahil-il" value="0"/><input type="hidden" id="abi-ahil-ay" value="0"/><input type="hidden" id="abi-ahil-gun" value="0"/>');
     var elillikQHtml = abi.elillikOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
          abiYMDInputHTML('abi-elillikq','0','0','0'))
-      : ('<input type="hidden" id="abi-elillikq-il" value="0"/><input type="hidden" id="abi-elillikq-ay" value="0"/>');
+      : ('<input type="hidden" id="abi-elillikq-il" value="0"/><input type="hidden" id="abi-elillikq-ay" value="0"/><input type="hidden" id="abi-elillikq-gun" value="0"/>');
     abiAddBotCard(
       '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
       herbiHtml+
@@ -2685,31 +2685,31 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var pre2006Html = showPre2006
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
          abiYMDInputHTML('elp-kap-evvel','0','0','0'))
-      : ('<input type="hidden" id="elp-kap-evvel-il" value="0"/><input type="hidden" id="elp-kap-evvel-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-kap-evvel-il" value="0"/><input type="hidden" id="elp-kap-evvel-ay" value="0"/><input type="hidden" id="elp-kap-evvel-gun" value="0"/>');
     var herbiHtml = elp.herbiOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
          abiYMDInputHTML('elp-herbi','2','0','0'))
-      : ('<input type="hidden" id="elp-herbi-il" value="0"/><input type="hidden" id="elp-herbi-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-herbi-il" value="0"/><input type="hidden" id="elp-herbi-ay" value="0"/><input type="hidden" id="elp-herbi-gun" value="0"/>');
     var doyusenOrduHtml = elp.doyusenOrduOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
          abiYMDInputHTML('elp-doyusen','0','0','0'))
-      : ('<input type="hidden" id="elp-doyusen-il" value="0"/><input type="hidden" id="elp-doyusen-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-doyusen-il" value="0"/><input type="hidden" id="elp-doyusen-ay" value="0"/><input type="hidden" id="elp-doyusen-gun" value="0"/>');
     var usaqHtml = (elp.gender==='qadin' && elp.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
          abiYMDInputHTML('elp-usaq','6','0','0'))
-      : ('<input type="hidden" id="elp-usaq-il" value="0"/><input type="hidden" id="elp-usaq-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-usaq-il" value="0"/><input type="hidden" id="elp-usaq-ay" value="0"/><input type="hidden" id="elp-usaq-gun" value="0"/>');
     var tehsilHtml = elp.tehsilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
          abiYMDInputHTML('elp-tehsil','4','0','0'))
-      : ('<input type="hidden" id="elp-tehsil-il" value="0"/><input type="hidden" id="elp-tehsil-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-tehsil-il" value="0"/><input type="hidden" id="elp-tehsil-ay" value="0"/><input type="hidden" id="elp-tehsil-gun" value="0"/>');
     var ahilHtml = elp.ahilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
          abiYMDInputHTML('elp-ahil','0','0','0'))
-      : ('<input type="hidden" id="elp-ahil-il" value="0"/><input type="hidden" id="elp-ahil-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-ahil-il" value="0"/><input type="hidden" id="elp-ahil-ay" value="0"/><input type="hidden" id="elp-ahil-gun" value="0"/>');
     var elillikQHtml = elp.elillikOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
          abiYMDInputHTML('elp-elillikq','0','0','0'))
-      : ('<input type="hidden" id="elp-elillikq-il" value="0"/><input type="hidden" id="elp-elillikq-ay" value="0"/>');
+      : ('<input type="hidden" id="elp-elillikq-il" value="0"/><input type="hidden" id="elp-elillikq-ay" value="0"/><input type="hidden" id="elp-elillikq-gun" value="0"/>');
     // Kapital indi 81-100% dərəcədə də soruşulur — şəxsin kapitalı olsa, staj kifayət olsa belə, kapital hesablamasına təsir edə bilər
     var kapitalAsk = ('<div class="abi-input-group single" style="margin-top:10px;">'+
           '<div><label>2006-dan sonra kapital (AZN, varsa)</label><input type="number" id="elp-kap-sonra" placeholder="0"/></div>'+
@@ -3314,31 +3314,31 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var pre2006Html = showPre2006
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">2006-cı ildən əvvəlki staj (varsa)</div>'+
          abiYMDInputHTML('yg-kap-evvel','0','0','0'))
-      : ('<input type="hidden" id="yg-kap-evvel-il" value="0"/><input type="hidden" id="yg-kap-evvel-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-kap-evvel-il" value="0"/><input type="hidden" id="yg-kap-evvel-ay" value="0"/><input type="hidden" id="yg-kap-evvel-gun" value="0"/>');
     var herbiHtml = yg.herbiOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Hərbi xidmət müddəti</div>'+
          abiYMDInputHTML('yg-herbi','2','0','0'))
-      : ('<input type="hidden" id="yg-herbi-il" value="0"/><input type="hidden" id="yg-herbi-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-herbi-il" value="0"/><input type="hidden" id="yg-herbi-ay" value="0"/><input type="hidden" id="yg-herbi-gun" value="0"/>');
     var doyusenOrduHtml = yg.doyusenOrduOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Döyüşən ordu tərkibində olma müddəti</div>'+
          abiYMDInputHTML('yg-doyusen','0','0','0'))
-      : ('<input type="hidden" id="yg-doyusen-il" value="0"/><input type="hidden" id="yg-doyusen-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-doyusen-il" value="0"/><input type="hidden" id="yg-doyusen-ay" value="0"/><input type="hidden" id="yg-doyusen-gun" value="0"/>');
     var usaqHtml = (yg.gender==='qadin' && yg.usaqQulluqOlub)
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Uşağa qulluq dövrü (maks. 6 il)</div>'+
          abiYMDInputHTML('yg-usaq','6','0','0'))
-      : ('<input type="hidden" id="yg-usaq-il" value="0"/><input type="hidden" id="yg-usaq-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-usaq-il" value="0"/><input type="hidden" id="yg-usaq-ay" value="0"/><input type="hidden" id="yg-usaq-gun" value="0"/>');
     var tehsilHtml = yg.tehsilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Təhsil müddəti</div>'+
          abiYMDInputHTML('yg-tehsil','4','0','0'))
-      : ('<input type="hidden" id="yg-tehsil-il" value="0"/><input type="hidden" id="yg-tehsil-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-tehsil-il" value="0"/><input type="hidden" id="yg-tehsil-ay" value="0"/><input type="hidden" id="yg-tehsil-gun" value="0"/>');
     var ahilHtml = yg.ahilOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">Ahıl şəxsə qulluq müddəti</div>'+
          abiYMDInputHTML('yg-ahil','0','0','0'))
-      : ('<input type="hidden" id="yg-ahil-il" value="0"/><input type="hidden" id="yg-ahil-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-ahil-il" value="0"/><input type="hidden" id="yg-ahil-ay" value="0"/><input type="hidden" id="yg-ahil-gun" value="0"/>');
     var elillikQHtml = yg.elillikOlub
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:10px 0 5px;">I dərəcə əlilliyi olan şəxsə qulluq müddəti</div>'+
          abiYMDInputHTML('yg-elillikq','0','0','0'))
-      : ('<input type="hidden" id="yg-elillikq-il" value="0"/><input type="hidden" id="yg-elillikq-ay" value="0"/>');
+      : ('<input type="hidden" id="yg-elillikq-il" value="0"/><input type="hidden" id="yg-elillikq-ay" value="0"/><input type="hidden" id="yg-elillikq-gun" value="0"/>');
     ygAddBotCard(
       '<div class="abi-q">2006-dan sonra kapitalı (varsa) daxil edin</div>'+
       herbiHtml+
