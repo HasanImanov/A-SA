@@ -116,6 +116,10 @@
     .abi-input-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;}
     .abi-input-group input{width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:'Inter',sans-serif;outline:none;color:var(--text);}
     .abi-input-group input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,168,0.10);}
+    .abi-required-mark{color:#c0392b;font-weight:800;margin-left:2px;}
+    .abi-input-group input.abi-input-error{border-color:#c0392b !important;background:#fdf1f0;}
+    .abi-required-err-msg{color:#c0392b;font-size:0.74rem;font-weight:600;margin-top:4px;display:none;}
+    .abi-required-err-msg.show{display:block;}
     .abi-go-btn{margin-top:12px;background:var(--blue);color:white;border:none;border-radius:10px;padding:10px 20px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.86rem;}
     .abi-go-btn:hover{background:var(--blue-light);}
     .abi-result{border-radius:var(--radius);padding:16px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;margin-top:2px;}
@@ -1354,6 +1358,52 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiScrollToCard(wrap);
   }
   // İki checkbox-un eyni anda seçilməsinin qarşısını alır (eyni şəxs iki kateqoriyada sayılmasın deyə)
+  // Boş buraxıla bilməyən inputları yoxlayır — boş olanı qırmızı edir, altında xəbərdarlıq göstərir.
+  // ids: yoxlanacaq input id-lərinin siyahısı. Hamısı doludursa true, əks halda false qaytarır (davam etməyə icazə vermir).
+  function abiCheckRequired(ids){
+    var hamısıDolu = true;
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el) return;
+      var bosdur = (el.value === undefined || el.value === null || String(el.value).trim() === '');
+      var msgEl = document.getElementById(id+'-err-msg');
+      if(bosdur){
+        hamısıDolu = false;
+        el.classList.add('abi-input-error');
+        if(msgEl) msgEl.classList.add('show');
+      } else {
+        el.classList.remove('abi-input-error');
+        if(msgEl) msgEl.classList.remove('show');
+      }
+    });
+    return hamısıDolu;
+  }
+  // Sahə silinəndə/dəyişəndə qırmızı vəziyyəti təmizləyən köməkçi (oninput ilə çağırılır)
+  function abiClearRequiredErr(el){
+    el.classList.remove('abi-input-error');
+    var msgEl = document.getElementById(el.id+'-err-msg');
+    if(msgEl) msgEl.classList.remove('show');
+  }
+
+  // Checkbox seçilib, amma "say" sahəsi boş/0 qalan kateqoriyaları tapır və xəbərdarlıq göstərir.
+  // items: [[checked, say, adı, sayInputId], ...]. Uyğunsuzluq yoxdursa true qaytarır.
+  function abiCheckCatSayMismatch(items){
+    var problemli = [];
+    items.forEach(function(it){
+      var checked = it[0], say = it[1], ad = it[2], sayId = it[3];
+      if(checked && say<=0){
+        problemli.push(ad);
+        var el = document.getElementById(sayId);
+        if(el) el.classList.add('abi-input-error');
+      }
+    });
+    if(problemli.length>0){
+      siteAlert('Bu kateqoriya(lar) seçilib, amma nəfər sayı yazılmayıb:\n\n' + problemli.map(function(s){return '• '+s;}).join('\n') + '\n\nZəhmət olmasa sayını yazın, ya da seçimi ləğv edin.');
+      return false;
+    }
+    return true;
+  }
+
   function abiMutexCat(bu, o){
     var buEl = document.getElementById(bu);
     var oEl = document.getElementById(o);
@@ -1405,7 +1455,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       abiAddBotCard(
         '<div class="abi-q">Pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
         '<div class="abi-input-group single">'+
-          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="abi-p1-mebleg" placeholder="220" min="0"/></div>'+
+          '<div><label>Pensiyanın məbləği (AZN)<span class="abi-required-mark">*</span></label><input type="number" id="abi-p1-mebleg" placeholder="220" min="0" oninput="abiClearRequiredErr(this)"/><div class="abi-required-err-msg" id="abi-p1-mebleg-err-msg">Boş sahəni doldurun</div></div>'+
         '</div>'+
         '<div class="abi-note" style="margin-top:4px;">⚠️ PAS-dan pensiya məbləğini daxil edin.</div>'+
         '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
@@ -1479,6 +1529,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function abiCalcPensionSplit(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['abi-p1-mebleg'])) return;
     var mebleg = parseFloat(document.getElementById('abi-p1-mebleg').value);
     if(mebleg<0){ siteAlert('Məbləğ mənfi ola bilməz.'); return; }
 
@@ -1508,6 +1559,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var cat7Say = parseInt(document.getElementById('abi-p1cat7-say').value) || 0;
     if(cat7Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
 
+    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','abi-p1cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','abi-p1cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','abi-p1cat4-say'],[cat6,cat6Say,'Mərhum ata/anası','abi-p1cat6-say'],[cat7,cat7Say,'8 yaşınadək uşağa baxan və işləməyən ailə üzvü','abi-p1cat7-say']])) return;
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
@@ -1547,14 +1599,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Doğum və vəfat tarixini daxil edin</div>'+
       '<div class="abi-input-group">'+
-        '<div><label>Doğum tarixi</label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
-        '<div><label>Vəfat tarixi</label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+        '<div><label>Doğum tarixi<span class="abi-required-mark">*</span></label><input type="text" id="abi-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="abi-dogum-err-msg">Boş sahəni doldurun</div></div>'+
+        '<div><label>Vəfat tarixi<span class="abi-required-mark">*</span></label><input type="text" id="abi-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="abi-vefat-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="abiSaveDogumVefat(this)">Davam et</button>'
     );
   }
   function abiSaveDogumVefat(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['abi-dogum','abi-vefat'])) return;
     var dogumStr = document.getElementById('abi-dogum').value;
     var vefatStr = document.getElementById('abi-vefat').value;
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
@@ -2044,7 +2097,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
       '<div class="abi-input-group single">'+
-        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
+        '<div><label>Minimum pensiya məbləği (AZN)<span class="abi-required-mark">*</span></label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'" oninput="abiClearRequiredErr(this)"/><div class="abi-required-err-msg" id="abi-p2-mebleg-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
@@ -2086,6 +2139,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function abiCalcPensionSplit2(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['abi-p2-mebleg'])) return;
     var mebleg = parseFloat(document.getElementById('abi-p2-mebleg').value);
     if(mebleg<0){ siteAlert('Məbləğ mənfi ola bilməz.'); return; }
 
@@ -2115,6 +2169,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var cat7Say = parseInt(document.getElementById('abi-cat7-say').value) || 0;
     if(cat7Say<0){ siteAlert('Nəfər sayı mənfi ola bilməz.'); return; }
 
+    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','abi-cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','abi-cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','abi-cat4-say'],[cat6,cat6Say,'Mərhum ata/anası','abi-cat6-say'],[cat7,cat7Say,'8 yaşınadək uşağa baxan və işləməyən ailə üzvü','abi-cat7-say']])) return;
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
@@ -2410,14 +2465,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpAddBotCard(
       '<div class="abi-q">Doğum və əlilliyin müəyyən edildiyi tarixi daxil edin</div>'+
       '<div class="abi-input-group">'+
-        '<div><label>Doğum tarixi</label><input type="text" id="elp-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
-        '<div><label>Əlilliyin müəyyən edildiyi tarix</label><input type="text" id="elp-elillik" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+        '<div><label>Doğum tarixi<span class="abi-required-mark">*</span></label><input type="text" id="elp-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="elp-dogum-err-msg">Boş sahəni doldurun</div></div>'+
+        '<div><label>Əlilliyin müəyyən edildiyi tarix<span class="abi-required-mark">*</span></label><input type="text" id="elp-elillik" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="elp-elillik-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="elpSaveDogumVefat(this)">Davam et</button>'
     );
   }
   function elpSaveDogumVefat(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['elp-dogum','elp-elillik'])) return;
     var dogumStr = document.getElementById('elp-dogum').value;
     var vefatStr = document.getElementById('elp-elillik').value;
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
@@ -2938,7 +2994,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ygAddBotCard(
         '<div class="abi-q">Pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
         '<div class="abi-input-group single">'+
-          '<div><label>Pensiyanın məbləği (AZN)</label><input type="number" id="yg-p1-mebleg" placeholder="220" min="0"/></div>'+
+          '<div><label>Pensiyanın məbləği (AZN)<span class="abi-required-mark">*</span></label><input type="number" id="yg-p1-mebleg" placeholder="220" min="0" oninput="abiClearRequiredErr(this)"/><div class="abi-required-err-msg" id="yg-p1-mebleg-err-msg">Boş sahəni doldurun</div></div>'+
         '</div>'+
         '<div class="abi-note" style="margin-top:4px;">⚠️ PAS-dan pensiya məbləğini daxil edin.</div>'+
         '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
@@ -2971,6 +3027,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function ygCalcPensionSplit(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['yg-p1-mebleg'])) return;
     var mebleg = parseFloat(document.getElementById('yg-p1-mebleg').value);
     if(mebleg<0){ siteAlert('Məbləğ mənfi ola bilməz.'); return; }
 
@@ -2990,6 +3047,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var cat5 = document.getElementById('yg-p1cat5').checked;
 
+    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','yg-p1cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','yg-p1cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','yg-p1cat4-say'],[cat6,cat6Say,'Mərhum ata/anası','yg-p1cat6-say'],[cat7,cat7Say,'8 yaşınadək uşağa baxan və işləməyən ailə üzvü','yg-p1cat7-say']])) return;
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
@@ -3026,14 +3084,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygAddBotCard(
       '<div class="abi-q">Doğum və vəfat tarixini daxil edin</div>'+
       '<div class="abi-input-group">'+
-        '<div><label>Doğum tarixi</label><input type="text" id="yg-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
-        '<div><label>Vəfat tarixi</label><input type="text" id="yg-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+        '<div><label>Doğum tarixi<span class="abi-required-mark">*</span></label><input type="text" id="yg-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="yg-dogum-err-msg">Boş sahəni doldurun</div></div>'+
+        '<div><label>Vəfat tarixi<span class="abi-required-mark">*</span></label><input type="text" id="yg-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="yg-vefat-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="ygSaveDogumVefat(this)">Davam et</button>'
     );
   }
   function ygSaveDogumVefat(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['yg-dogum','yg-vefat'])) return;
     var dogumStr = document.getElementById('yg-dogum').value;
     var vefatStr = document.getElementById('yg-vefat').value;
     var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
@@ -3474,7 +3533,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygAddBotCard(
       '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
       '<div class="abi-input-group single">'+
-        '<div><label>Minimum pensiya məbləği (AZN)</label><input type="number" id="yg-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'"/></div>'+
+        '<div><label>Minimum pensiya məbləği (AZN)<span class="abi-required-mark">*</span></label><input type="number" id="yg-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'" oninput="abiClearRequiredErr(this)"/><div class="abi-required-err-msg" id="yg-p2-mebleg-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
@@ -3502,6 +3561,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function ygCalcPensionSplit2(btn){
     var card = btn.closest('.abi-card');
+    if(!abiCheckRequired(['yg-p2-mebleg'])) return;
     var mebleg = parseFloat(document.getElementById('yg-p2-mebleg').value);
     if(mebleg<0){ siteAlert('Məbləğ mənfi ola bilməz.'); return; }
 
@@ -3521,6 +3581,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var cat5 = document.getElementById('yg-cat5').checked;
 
+    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','yg-cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','yg-cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','yg-cat4-say'],[cat6,cat6Say,'Mərhum ata/anası','yg-cat6-say'],[cat7,cat7Say,'8 yaşınadək uşağa baxan və işləməyən ailə üzvü','yg-cat7-say']])) return;
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
