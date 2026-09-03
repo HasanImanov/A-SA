@@ -1524,9 +1524,26 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<button class="abi-go-btn" style="margin-top:10px;" onclick="abiCalcPensionSplit(this)">Hesabla</button>'
       );
     } else {
-      // Pensiya almayıbsa, staj hesablamasına təsir edən amillər (hərbi/uşağa qulluq/təhsil - sual qalır, ədədi manual cəm kimi sonra soruşulur) soruşulur
-      abiAskDogumVefat();
+      // Pensiya almayıbsa: mərhum şəxs güzəştli şərtlərlə çalışıb, yoxsa mülki olub soruşulur
+      abiAskGuzestliMulki();
     }
+  }
+
+  function abiAskGuzestliMulki(){
+    abiAddBotCard(
+      '<div class="abi-q">Mərhum şəxs güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="abiQGuzestliMulki(this,true)">Güzəştli şərtlərlə çalışırdı</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="abiQGuzestliMulki(this,false)">Mülki</button>'+
+      '</div>'
+    );
+  }
+  function abiQGuzestliMulki(btn, guzestli){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(guzestli ? 'Güzəştli şərtlərlə çalışırdı' : 'Mülki');
+    abi.guzestli = guzestli;
+    // staj hesablamasına təsir edən amillər (hərbi/uşağa qulluq/təhsil) soruşulur
+    abiAskDogumVefat();
   }
 
   // Hər kateqoriya üçün fərdi pay ilə müvafiq sosial müavinət məbləğini müqayisə edən qeyd qurur
@@ -2251,7 +2268,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       extra+
       (isPensiya ? '' : '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>')
     );
-    if(isPensiya){ abiAskPasQuestion(); }
+    if(isPensiya){
+      // Başda "pensiya alan idimi?" sualına "Xeyr" cavabı verilib və mərhum mülki olubsa —
+      // "PAS-da pensiyanı hansı qurumdan aldığına baxdınız mı?" sualı verilmir; sadəcə kargüzarlıq qeydi göstərilir.
+      // (Güzəştli şərtlər üçün köhnə axın saxlanılır — sonra dəqiqləşdiriləcək.)
+      if(abi.hadPension || abi.guzestli){
+        abiAskPasQuestion();
+      } else {
+        abiAddBotCard(
+          '<div class="abi-note">✅ Müvafiq sənədləri qeyd etmişik. SÖMTİ-yə kargüzarlıq edin.</div>'+
+          '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
+        );
+      }
+    }
   }
 
   function abiAskPasQuestion(){
