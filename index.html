@@ -2244,6 +2244,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
+    // Mülki (pensiya almayan) axında sənəd siyahısı üçün dəqiq kateqoriyalar
+    abi.mulkiCat1 = cat1 && cat1Say>0;   // 18 yaşdan aşağı övlad
+    abi.mulkiCat2 = cat2 && cat2Say>0;   // 23 yaşa dək əyani təhsil alan övlad
+    abi.mulkiCat7 = cat7 && cat7Say>0;   // 8 yaşınadək uşağa baxan işləməyən ailə üzvü
     abiLockCard(card);
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
@@ -2275,12 +2279,70 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(abi.hadPension || abi.guzestli){
         abiAskPasQuestion();
       } else {
-        abiAddBotCard(
-          '<div class="abi-note">✅ Müvafiq sənədləri qeyd etmişik. SÖMTİ-yə kargüzarlıq edin.</div>'+
-          '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
-        );
+        abiShowMulkiSenedler();
       }
     }
+  }
+
+  function abiShowMulkiSenedler(){
+    var usaqVar = abi.mulkiCat1 || abi.mulkiCat2 || abi.mulkiCat7;
+    var esas = [];
+    if(usaqVar){
+      esas.push('Ata və ananın (hər ikisinin) şəxsiyyət vəsiqəsi');
+      esas.push('Doğum haqqında şəhadətnamə');
+      esas.push('Ölüm haqqında şəhadətnamə');
+    }
+    var listHtml = esas.length
+      ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Müvafiq sənədlər</div><ul style="margin:0 0 0 18px;padding:0;">'+esas.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
+      : '<div class="abi-note">Seçilmiş kateqoriyalara görə əlavə sənəd qeydə alınmayıb.</div>';
+    var qeyd = abi.mulkiCat2
+      ? '<div class="abi-note" style="margin-top:8px;">⚠️ 23 yaşadək əyani təhsil alan övlad qızdırsa və evlənib soyadını dəyişibsə, əlavə olaraq öz <b>Nikah haqqında şəhadətnaməsi</b> tələb olunur.</div>'
+      : '';
+    abiAddBotCard(
+      '<div class="abi-note">✅ Müvafiq sənədləri qeyd etmişik. SÖMTİ-yə kargüzarlıq edin.</div>'+
+      listHtml + qeyd
+    );
+    if(usaqVar){
+      abiAskMulkiNikah();
+    } else {
+      abiAddBotCard('<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>');
+    }
+  }
+  function abiAskMulkiNikah(){
+    abiAddBotCard(
+      '<div class="abi-q">Rəsmi nikah olubmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQMulkiNikah(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQMulkiNikah(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQMulkiNikah(btn, resmi){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(resmi ? 'Bəli' : 'Xeyr');
+    if(resmi){
+      abiAddBotCard(
+        '<div class="abi-note">➕ Əlavə sənəd: <b>Nikah haqqında şəhadətnamə</b></div>'+
+        '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
+      );
+    } else {
+      abiAddBotCard(
+        '<div class="abi-q">Nikah pozulub, yoxsa qeyri-rəsmidir?</div>'+
+        '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+          '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="abiQMulkiNikahNov(this,true)">Nikah pozulub</button>'+
+          '<button class="abi-choice-btn" style="text-align:left;" onclick="abiQMulkiNikahNov(this,false)">Qeyri-rəsmi nikah</button>'+
+        '</div>'
+      );
+    }
+  }
+  function abiQMulkiNikahNov(btn, pozulub){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(pozulub ? 'Nikah pozulub' : 'Qeyri-rəsmi nikah');
+    var sened = pozulub ? 'Nikahın pozulması haqqında şəhadətnamə' : 'Atalığın müəyyən edilməsi haqqında şəhadətnamə';
+    abiAddBotCard(
+      '<div class="abi-note">➕ Əlavə sənəd: <b>'+sened+'</b></div>'+
+      '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
+    );
   }
 
   function abiAskPasQuestion(){
