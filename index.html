@@ -509,6 +509,9 @@
   async function hazirlaZmuavinat(format) {
     var g=function(id){return (document.getElementById(id)||{}).value||'';};
     var soyad=g('zm-soyad').trim(), ad=g('zm-ad').trim(), ata=g('zm-ata').trim();
+    if(!soyad||!ad||!ata){siteAlert('Zəhmət olmasa soyadı, adı və ata adını doldurun.');return;}
+    if(!g('zm-unvan').trim()){siteAlert('Zəhmət olmasa ünvanı doldurun.');return;}
+    if(!g('zm-novü').trim()){siteAlert('Zəhmət olmasa müavinətin növünü seçin.');return;}
     var fullAd = soyad+' '+ad+' '+ata;
     var unvan = g('zm-unvan').trim();
     var tel = g('zm-tel').trim();
@@ -680,6 +683,11 @@
   async function hazirlaErize(tip, format) {
     var g=function(id){return (document.getElementById(id)||{}).value||'';};
     var soyad=g('df-soyad').trim(),ad=g('df-ad').trim(),ata=g('df-ata').trim();
+    if(!soyad||!ad||!ata){siteAlert('Zəhmət olmasa ərizəçinin soyadı, adı və ata adını doldurun.');return;}
+    if(!g('df-unvan-tam').trim()){siteAlert('Zəhmət olmasa ünvanı doldurun.');return;}
+    if(!g('df-vefat-ad').trim()){siteAlert('Zəhmət olmasa vəfat edənin adını doldurun.');return;}
+    var vtarix=g('df-vefat-tarix').trim();
+    if(!vtarix||vtarix.length<10){siteAlert('Zəhmət olmasa vəfat tarixini tam daxil edin (gg.aa.iiii).');return;}
     var fullAd=soyad+' '+ad+' '+ata;
     var unvanTam=g('df-unvan-tam').trim();
     var hesab=g('df-hesab').trim(),tel=g('df-tel').trim();
@@ -845,9 +853,10 @@
     return map[son]||'ci';
   }
   function n2w(n){
-    var s=String(n);
+    var s=String(n).trim();
+    if(!s||isNaN(parseFloat(s))) return 'sıfır manat';
     var parts=s.split('.');
-    var manats=parseInt(parts[0]);
+    var manats=parseInt(parts[0],10);
     var qepik=0;
     if(parts[1]){
       var q=parts[1].substring(0,2);
@@ -987,6 +996,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
  function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
  async function hazirla(tip, format) {
+  var prefix = tip==='yasa-gore'?'yg':'el';
+  var soyad=(document.getElementById(prefix+'-soyad')||{}).value||'';
+  var ad=(document.getElementById(prefix+'-ad')||{}).value||'';
+  var ata=(document.getElementById(prefix+'-ata')||{}).value||'';
+  var fin=(document.getElementById(prefix+'-fin')||{}).value||'';
+  var meblegV=(document.getElementById(prefix+'-mebleg')||{}).value||'';
+  var tarixV=(document.getElementById(prefix+(tip==='yasa-gore'?'-tarix':''))||{}).value||'';
+  if(!soyad.trim()||!ad.trim()||!ata.trim()){siteAlert('Zəhmət olmasa soyadı, adı və ata adını doldurun.');return;}
+  if(fin.trim().length!==7){siteAlert('FİN kodu tam 7 simvol olmalıdır.');return;}
+  if(!meblegV.trim()||isNaN(parseFloat(meblegV))||parseFloat(meblegV)<=0){siteAlert('Zəhmət olmasa düzgün məbləğ daxil edin.');return;}
   showPdfLoading();
   var loadStart = Date.now();
   try{
@@ -1231,11 +1250,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   // Tarix inputuna rəqəm yazanda nöqtələri (gg.aa.iiii) özü avtomatik qoyur
   function abiMaskDate(el){
-    var digits = el.value.replace(/\D/g,'').slice(0,8);
-    var out = digits;
-    if(digits.length>4){ out = digits.slice(0,2)+'.'+digits.slice(2,4)+'.'+digits.slice(4); }
-    else if(digits.length>2){ out = digits.slice(0,2)+'.'+digits.slice(2); }
-    el.value = out;
+    var v = el.value.replace(/\D/g,'').slice(0,8);
+    var d=v.slice(0,2), m=v.slice(2,4), y=v.slice(4,8);
+    if(d.length===2&&parseInt(d,10)>31) d='31';
+    if(d.length===2&&parseInt(d,10)<1)  d='01';
+    if(m.length===2&&parseInt(m,10)>12) m='12';
+    if(m.length===2&&parseInt(m,10)<1)  m='01';
+    v=d+m+y;
+    if(v.length>=3) v=v.slice(0,2)+'.'+v.slice(2);
+    if(v.length>=6) v=v.slice(0,5)+'.'+v.slice(5,9);
+    el.value = v;
   }
   function abiParseDate(str){
     // gözlənilən format: gg.aa.iiii
@@ -1243,7 +1267,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(p.length!==3) return null;
     var d=parseInt(p[0],10), m=parseInt(p[1],10), y=parseInt(p[2],10);
     if(!d||!m||!y) return null;
-    return new Date(y, m-1, d);
+    var dt = new Date(y, m-1, d);
+    // Tarix overflow yoxlaması: 30.02.2023 → 02.03.2023 olmamalıdır
+    if(dt.getFullYear()!==y || dt.getMonth()!==m-1 || dt.getDate()!==d) return null;
+    return dt;
   }
   function abiAgeAt(birth, death){
     var age = death.getFullYear() - birth.getFullYear();
@@ -1313,7 +1340,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return '<div class="abi-input-group" style="grid-template-columns:1fr 1fr 1fr;">'+
       '<div><label>İl</label><input type="number" id="'+idPrefix+'-il" placeholder="'+yearPlaceholder+'" min="0"/></div>'+
       '<div><label>Ay</label><input type="number" id="'+idPrefix+'-ay" placeholder="'+monthPlaceholder+'" min="0" max="11"/></div>'+
-      '<div><label>Gün</label><input type="number" id="'+idPrefix+'-gun" placeholder="'+dayPlaceholder+'" min="0" max="30"/></div>'+
+      '<div><label>Gün</label><input type="number" id="'+idPrefix+'-gun" placeholder="'+dayPlaceholder+'" min="0" max="31"/></div>'+
     '</div>';
   }
   // İl+ay+gün inputlarını oxuyub decimal il olaraq qaytarır, səhv olsa null
@@ -1324,7 +1351,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var il = parseFloat(ilEl.value); if(isNaN(il)) il = 0;
     var ay = parseFloat(ayEl.value); if(isNaN(ay)) ay = 0;
     var gun = parseFloat(gunEl.value); if(isNaN(gun)) gun = 0;
-    if(il<0 || ay<0 || ay>11 || gun<0 || gun>30) return null;
+    if(il<0 || ay<0 || ay>11 || gun<0 || gun>31) return null;
     return abiRound2(il + ay/12 + gun/365.25);
   }
   function abiFmtYMDraw(il, ay, gun){
@@ -1584,7 +1611,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat6 && cat6Say>0){ say += cat6Say; kateqoriyalar.push('Mərhum ata/anası: '+cat6Say); }
     if(cat7 && cat7Say>0){ say += cat7Say; kateqoriyalar.push('8 yaşınadək uşağa baxan və işləməyən ailə üzvü: '+cat7Say); }
 
-    if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    if(isNaN(mebleg)||mebleg<=0||say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
@@ -2056,7 +2083,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     totalKapital = abiRound2(kapEvvel + kapSonra);
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(abi.vefat)*144;
     var minPensiyaAbi = abiGetMinPensiya(abi.vefat);
-    gerekenKapital = abiRound2(boluc * minPensiyaAbi);
+    gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaAbi));
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -2072,7 +2099,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<div class="abi-q">Nəticə</div>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
-      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
+      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
@@ -2194,7 +2221,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat6 && cat6Say>0){ say += cat6Say; kateqoriyalar.push('Mərhum ata/anası: '+cat6Say); }
     if(cat7 && cat7Say>0){ say += cat7Say; kateqoriyalar.push('8 yaşınadək uşağa baxan və işləməyən ailə üzvü: '+cat7Say); }
 
-    if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    if(isNaN(mebleg)||mebleg<=0||say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
@@ -2723,6 +2750,13 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     elpAskSigortaStaj();
   }
   function elpAskSigortaStaj(){
+    // Əlillik tarixi 01.07.2018-dən əvvəldirsə, sığorta stajı sualı mənasızdır — sual verilmir
+    var esik2018 = new Date(2018,6,1).getTime();
+    if(elp.vefat.getTime() < esik2018){
+      elp.sigortaStajOlub = false;
+      elpAskKapitalCard();
+      return;
+    }
     elpAddBotCard(
       '<div class="abi-q">01.07.2018-ci ilə dək sığorta stajı olubmu?</div>'+
       '<div class="abi-btn-row">'+
@@ -2862,7 +2896,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     totalKapital = abiRound2(kapEvvel + kapSonra);
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
     var minPensiyaElp = abiGetMinPensiya(elp.vefat);
-    gerekenKapital = abiRound2(boluc * minPensiyaElp);
+    gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaElp));
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -2879,7 +2913,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       'Dərəcə: <b>'+elp.derece+'%</b><br/>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
-      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
+      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
@@ -2914,8 +2948,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function elpCalcPensionSplit2(btn){
     var card = btn.closest('.abi-card');
     var mebleg = parseFloat(document.getElementById('elp-p2-mebleg').value);
-    var say = parseFloat(document.getElementById('elp-p2-say').value);
-    if(!mebleg || !say){ siteAlert('Zəhmət olmasa hər iki xananı doldurun.'); return; }
+    var say = parseInt(document.getElementById('elp-p2-say').value, 10);
+    if(isNaN(mebleg)||mebleg<=0){ siteAlert('Zəhmət olmasa düzgün məbləğ daxil edin.'); return; }
+    if(isNaN(say)||say<=0){ siteAlert('Zəhmət olmasa şəxs sayını düzgün daxil edin.'); return; }
     elpLockCard(card);
     elpAddUserCard('Minimum pensiya: '+mebleg+' AZN, Şəxs sayı: '+say);
     var perPerson = abiRound2(mebleg/say);
@@ -3047,7 +3082,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var cat5 = document.getElementById('yg-p1cat5').checked;
 
-    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','yg-p1cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','yg-p1cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','yg-p1cat4-say'],[cat6,cat6Say,'Mərhum ata/anası','yg-p1cat6-say'],[cat7,cat7Say,'8 yaşınadək uşağa baxan və işləməyən ailə üzvü','yg-p1cat7-say']])) return;
+    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','yg-p1cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','yg-p1cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','yg-p1cat4-say']])) return;
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
@@ -3070,7 +3105,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
 
-    if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    if(isNaN(mebleg)||mebleg<=0||say<=0){ siteAlert('Zəhmət olmasa məbləği daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     yg.usaqKategoriyaVar = cat1 || cat2 || cat4;
     yg.tehsilQizVar = cat2;
     yg.erArvadKategoriyaVar = cat3 || cat5;
@@ -3492,7 +3527,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     totalKapital = abiRound2(kapEvvel + kapSonra);
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(yg.vefat)*144;
     var minPensiyaYg = abiGetMinPensiya(yg.vefat);
-    gerekenKapital = abiRound2(boluc * minPensiyaYg);
+    gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaYg));
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -3508,7 +3543,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<div class="abi-q">Nəticə</div>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
-      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(teleb))+'</b><br/>'+
+      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
@@ -3581,7 +3616,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var cat5 = document.getElementById('yg-cat5').checked;
 
-    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','yg-cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','yg-cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','yg-cat4-say'],[cat6,cat6Say,'Mərhum ata/anası','yg-cat6-say'],[cat7,cat7Say,'8 yaşınadək uşağa baxan və işləməyən ailə üzvü','yg-cat7-say']])) return;
+    if(!abiCheckCatSayMismatch([[cat1,cat1Say,'18 yaşdan aşağı övlad','yg-cat1-say'],[cat2,cat2Say,'23 yaşa dək əyani təhsil alan övlad','yg-cat2-say'],[cat4,cat4Say,'18 yaşa qədər əlilliyi olan övlad','yg-cat4-say']])) return;
     // 18 yaşa qədər əlilli övlad, "18 yaşdan aşağı" və ya "əyani təhsil" kateqoriyasında qeyd olunan şəxslə eyni ola bilər — soruşulur
     if(cat4 && cat4Say>0 && ((cat1 && cat1Say>0) || (cat2 && cat2Say>0))){
       siteConfirm('"18 yaşa qədər əlilliyi olan (18-dən sonra davam edən) övlad" — "18 yaşdan aşağı övlad" və ya "23 yaşa dək əyani təhsil alan övlad" kateqoriyasında qeyd olunan şəxslə EYNİDİRMİ?',
@@ -3604,7 +3639,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     if(cat5){ say += 1; kateqoriyalar.push('Yaşa görə əmək pensiyası yaş həddinə çatmış: 1'); }
 
-    if(!mebleg || say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    if(isNaN(mebleg)||mebleg<=0||say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
     yg.usaqKategoriyaVar = cat1 || cat2 || cat4;
     yg.tehsilQizVar = cat2;
     yg.erArvadKategoriyaVar = cat3 || cat5;
