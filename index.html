@@ -2288,6 +2288,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var usaqVar = abi.mulkiCat1 || abi.mulkiCat2 || abi.mulkiCat7;
     var esas = [];
     if(usaqVar){
+      // 18 yaşdan aşağı övlad özü müraciət edə bilmir — sənədləri valideynləri gətirir
       esas.push('Ata və ananın (hər ikisinin) şəxsiyyət vəsiqəsi');
       esas.push('Doğum haqqında şəhadətnamə');
       esas.push('Ölüm haqqında şəhadətnamə');
@@ -2295,22 +2296,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var listHtml = esas.length
       ? ('<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:2px;">Müvafiq sənədlər</div><ul style="margin:0 0 0 18px;padding:0;">'+esas.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul>')
       : '<div class="abi-note">Seçilmiş kateqoriyalara görə əlavə sənəd qeydə alınmayıb.</div>';
-    var qeyd = abi.mulkiCat2
-      ? '<div class="abi-note" style="margin-top:8px;">⚠️ 23 yaşadək əyani təhsil alan övlad qızdırsa və evlənib soyadını dəyişibsə, əlavə olaraq öz <b>Nikah haqqında şəhadətnaməsi</b> tələb olunur.</div>'
-      : '';
     abiAddBotCard(
       '<div class="abi-note">✅ Müvafiq sənədləri qeyd etmişik. SÖMTİ-yə kargüzarlıq edin.</div>'+
-      listHtml + qeyd
+      listHtml
     );
     if(usaqVar){
       abiAskMulkiNikah();
     } else {
-      abiAddBotCard('<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>');
+      abiMulkiFinishBtn();
     }
   }
   function abiAskMulkiNikah(){
     abiAddBotCard(
-      '<div class="abi-q">Rəsmi nikah olubmu?</div>'+
+      '<div class="abi-q">Mərhumun rəsmi nikahı olubmu?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQMulkiNikah(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="abiQMulkiNikah(this,false)">Xeyr</button>'+
@@ -2321,10 +2319,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(resmi ? 'Bəli' : 'Xeyr');
     if(resmi){
-      abiAddBotCard(
-        '<div class="abi-note">➕ Əlavə sənəd: <b>Nikah haqqında şəhadətnamə</b></div>'+
-        '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
-      );
+      abiAddBotCard('<div class="abi-note">➕ Əlavə sənəd: <b>Nikah haqqında şəhadətnamə</b></div>');
+      abiAfterMulkiNikah();
     } else {
       abiAddBotCard(
         '<div class="abi-q">Nikah pozulub, yoxsa qeyri-rəsmidir?</div>'+
@@ -2339,10 +2335,33 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(pozulub ? 'Nikah pozulub' : 'Qeyri-rəsmi nikah');
     var sened = pozulub ? 'Nikahın pozulması haqqında şəhadətnamə' : 'Atalığın müəyyən edilməsi haqqında şəhadətnamə';
-    abiAddBotCard(
-      '<div class="abi-note">➕ Əlavə sənəd: <b>'+sened+'</b></div>'+
-      '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>'
-    );
+    abiAddBotCard('<div class="abi-note">➕ Əlavə sənəd: <b>'+sened+'</b></div>');
+    abiAfterMulkiNikah();
+  }
+  function abiAfterMulkiNikah(){
+    // 23 yaşadək əyani təhsil alan övlad özü müraciət edir — xanımdırsa və evlidirsə öz nikahı da lazımdır
+    if(abi.mulkiCat2){
+      abiAddBotCard(
+        '<div class="abi-q">23 yaşadək əyani təhsil alan övlad xanımdır və evlidirmi?</div>'+
+        '<div class="abi-btn-row">'+
+          '<button class="abi-choice-btn yes" onclick="abiQMulkiTehsilNikah(this,true)">Bəli</button>'+
+          '<button class="abi-choice-btn" onclick="abiQMulkiTehsilNikah(this,false)">Xeyr</button>'+
+        '</div>'
+      );
+    } else {
+      abiMulkiFinishBtn();
+    }
+  }
+  function abiQMulkiTehsilNikah(btn, yes){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(yes ? 'Bəli' : 'Xeyr');
+    if(yes){
+      abiAddBotCard('<div class="abi-note">➕ Əlavə sənəd: övladın öz adına <b>Nikah haqqında şəhadətnamə</b> (soyad dəyişikliyi üçün)</div>');
+    }
+    abiMulkiFinishBtn();
+  }
+  function abiMulkiFinishBtn(){
+    abiAddBotCard('<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>');
   }
 
   function abiAskPasQuestion(){
