@@ -1317,6 +1317,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return {years:years, months:months, days:0};
   }
   function abiFmtYMD(o){ return o.years+' il '+o.months+' ay'; }
+  function abiGunAyIl(d){ var p=function(n){return (n<10?'0':'')+n;}; return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear(); }
 
   // İl+ay cütü olan input qrupu üçün ortaq HTML — hər yerdə eyni görünüşdə olsun deyə
   function abiYMInputHTML(idPrefix, yearPlaceholder, monthPlaceholder){
@@ -2062,6 +2063,53 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     return abiRound2(kap);
   }
 
+  // ── Pensiya yaşı ─────────────────────────────────────────────────────────────
+  // Cinsə və şəxsin pensiya yaşına çatdığı (prospektiv) tarixə görə tələb olunan
+  // pensiya yaşı {il, ay}. Keçid müddəası: hər il 6 ay artım.
+  function abiTelebPensiyaYasi(cins, tarix){
+    var y = tarix.getFullYear();
+    if(cins === 'kishi'){
+      if(y <= 2017) return {il:63, ay:0};
+      if(y === 2018) return {il:63, ay:6};
+      if(y === 2019) return {il:64, ay:0};
+      if(y === 2020) return {il:64, ay:6};
+      return {il:65, ay:0};                 // 2021 və sonrası
+    }
+    // qadın
+    if(y <= 2011) return {il:58, ay:0};
+    if(y === 2012) return {il:58, ay:6};
+    if(y === 2013) return {il:59, ay:0};
+    if(y === 2014) return {il:59, ay:6};
+    if(y >= 2015 && y <= 2017) return {il:60, ay:0};
+    if(y === 2018) return {il:60, ay:6};
+    if(y === 2019) return {il:61, ay:0};
+    if(y === 2020) return {il:61, ay:6};
+    if(y === 2021) return {il:62, ay:0};
+    if(y === 2022) return {il:62, ay:6};
+    if(y === 2023) return {il:63, ay:0};
+    if(y === 2024) return {il:63, ay:6};
+    if(y === 2025) return {il:64, ay:0};
+    if(tarix.getTime() < new Date(2026,6,1).getTime()) return {il:64, ay:6}; // 01.07.2026-a qədər
+    return {il:65, ay:0};                   // 01.07.2026-dan sonra
+  }
+
+  function abiTarixArtir(d, iller, aylar){
+    return new Date(d.getFullYear()+iller, d.getMonth()+aylar, d.getDate());
+  }
+
+  // Doğum tarixi + cins → pensiya yaşına çatma tarixi (sabit nöqtə iterasiyası,
+  // çünki tələb olunan yaş çatma ilindən asılıdır).
+  function abiPensiyaYasiTarixi(cins, dogum){
+    var T = abiTarixArtir(dogum, (cins==='kishi'?63:58), 0);
+    for(var i=0;i<25;i++){
+      var a = abiTelebPensiyaYasi(cins, T);
+      var T2 = abiTarixArtir(dogum, a.il, a.ay);
+      if(T2.getTime() === T.getTime()) return T2;
+      T = T2;
+    }
+    return T;
+  }
+
   function abiAskKapitalCard(){
     var showPre2006 = abi.hasStaj;
     var pre2006Html = showPre2006
@@ -2236,6 +2284,29 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
 
   function abiAskPersonCountForMinPension(prefillMebleg){
+    // Vəfat cari ildən əvvəlki illərdədirsə (il üzrə), bəzi kateqoriyalar üçün
+    // hüququn nə vaxt yarandığını dəqiqləşdirmək üçün təvəllüd/cins soruşulur.
+    var huquqIlSoru = !!(abi.vefat && abi.vefat.getFullYear() < abiCariIndexIl());
+    function cinsSelect(id){
+      return '<select id="'+id+'" style="border:1.5px solid var(--blue-mid);border-radius:8px;padding:4px 6px;font-family:\'Inter\',sans-serif;font-size:0.75rem;">'+
+        '<option value="kishi">kişi</option><option value="qadin">qadın</option></select>';
+    }
+    function dogumInput(id){
+      return '<input type="text" id="'+id+'" placeholder="gg.aa.iiii" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)" style="width:110px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:4px 8px;font-family:\'Inter\',sans-serif;font-size:0.75rem;"/>';
+    }
+    var extraRowStyle = 'padding:0 0 8px 26px;font-size:0.78rem;color:var(--text-muted);display:flex;flex-wrap:wrap;align-items:center;gap:6px;';
+    var abiCat2Extra = huquqIlSoru
+      ? ('<div style="'+extraRowStyle+'">Doğum tarixi '+dogumInput('abi-cat2-dogum')+' Təhsilə başlama tarixi '+dogumInput('abi-cat2-tehsil')+'<span>(18–23 yaş yoxlanır)</span></div>')
+      : '';
+    var abiCat3Extra = huquqIlSoru
+      ? ('<div style="'+extraRowStyle+'">Təvəllüd '+dogumInput('abi-cat3-dogum')+' Cins '+cinsSelect('abi-cat3-cins')+'</div>')
+      : '';
+    var abiCat5Extra = huquqIlSoru
+      ? ('<div style="'+extraRowStyle+'">Təvəllüd '+dogumInput('abi-cat5-dogum')+' Cins '+cinsSelect('abi-cat5-cins')+'</div>')
+      : '';
+    var abiCat6Extra = huquqIlSoru
+      ? ('<div style="'+extraRowStyle+'">Təvəllüd '+dogumInput('abi-cat6-dogum')+' Cins '+cinsSelect('abi-cat6-cins')+'</div>')
+      : '';
     abiAddBotCard(
       '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
       '<div class="abi-input-group single">'+
@@ -2250,12 +2321,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         '<input type="checkbox" id="abi-cat2"/> 23 yaşa dək əyani təhsil alan övlad'+
         '<input type="number" id="abi-cat2-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
+      abiCat2Extra+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat3" onclick="abiMutexCat(\'abi-cat3\',\'abi-cat5\')"/> I-ci/II-ci dərəcə əlilliyi olan ər və ya arvad'+
         '<select id="abi-cat3-derece" style="margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 6px;font-family:\'Inter\',sans-serif;font-size:0.78rem;">'+
           '<option value="31-60">31-60%</option><option value="61-80">61-80%</option><option value="81-100">81-100%</option>'+
         '</select>'+
       '</label>'+
+      abiCat3Extra+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat4"/> 18 yaşa qədər əlilliyi olan və 18 yaşdan sonra əlilliyi davam edən övlad'+
         '<select id="abi-cat4-derece" style="border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 6px;font-family:\'Inter\',sans-serif;font-size:0.78rem;">'+
@@ -2266,10 +2339,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat5" onclick="abiMutexCat(\'abi-cat5\',\'abi-cat3\')"/> Yaşa görə əmək pensiyası yaş həddinə çatmış'+
       '</label>'+
+      abiCat5Extra+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat6"/> Mərhum ata/anası'+
         '<input type="number" id="abi-cat6-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
       '</label>'+
+      abiCat6Extra+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="abi-cat7"/> 8 yaşınadək uşağa baxan və işləməyən ailə üzvü'+
         '<input type="number" id="abi-cat7-say" placeholder="say" min="0" style="width:64px;margin-left:auto;border:1.5px solid var(--blue-mid);border-radius:8px;padding:5px 8px;font-family:\'Inter\',sans-serif;"/>'+
@@ -2337,6 +2412,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(cat7 && cat7Say>0){ say += cat7Say; kateqoriyalar.push('8 yaşınadək uşağa baxan və işləməyən ailə üzvü: '+cat7Say); }
 
     if(isNaN(mebleg)||mebleg<=0||say<=0){ siteAlert('Zəhmət olmasa minimum pensiya məbləğini daxil edin və ən azı bir kateqoriya seçib sayını yazın.'); return; }
+    // 23 yaşa dək əyani təhsil alan övlad — 18-dən yuxarı, 23-ə qədər yaş yoxlanışı (təvəllüd verilibsə)
+    if(cat2 && cat2Say>0){
+      var c2dEl = document.getElementById('abi-cat2-dogum');
+      var c2dogum = c2dEl ? abiParseDate(c2dEl.value) : null;
+      if(c2dogum){
+        var c2yas = abiAgeAt(c2dogum, new Date());
+        if(c2yas<=18 || c2yas>23){
+          siteAlert('23 yaşa dək əyani təhsil alan övlad: hesablanan yaş '+c2yas+' — 18-dən yuxarı, 23-ə qədər olmalıdır. Kateqoriyanı yoxlayın.');
+          return;
+        }
+      }
+    }
     abi.usaqKategoriyaVar = cat1 || cat2 || cat4;
     abi.tehsilQizVar = cat2;
     abi.erArvadKategoriyaVar = cat3 || cat5;
@@ -2346,15 +2433,52 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abi.mulkiCat7 = cat7 && cat7Say>0;   // 8 yaşınadək uşağa baxan işləməyən ailə üzvü
     abiLockCard(card);
     abiAddUserCard('Minimum pensiya: '+mebleg+' AZN<br/>'+kateqoriyalar.join('<br/>')+'<br/>Ümumi şəxs sayı: '+say);
-    var perPerson = abiRound2(mebleg/say);
+
+    // ── Hüququ gec yaranan kateqoriyalar (pensiya yaşına çatma) ──────────────
+    var cariIl = abiCariIndexIl();
+    var vefatIl = abi.vefat ? abi.vefat.getFullYear() : cariIl;
+    var esasHuquqIl = vefatIl;
+    var huquqSetirler = [];
+    function abiCatHuquq(prefix, aktiv, label){
+      if(!aktiv) return;
+      var dEl = document.getElementById('abi-'+prefix+'-dogum');
+      var cEl = document.getElementById('abi-'+prefix+'-cins');
+      if(!dEl || !cEl) return;
+      var dogum = abiParseDate(dEl.value);
+      if(!dogum) return;
+      var t = abiPensiyaYasiTarixi(cEl.value, dogum);
+      var hIl = Math.max(vefatIl, t.getFullYear());
+      if(hIl > esasHuquqIl) esasHuquqIl = hIl;
+      huquqSetirler.push(label+' ('+(cEl.value==='kishi'?'kişi':'qadın')+'): pensiya yaşına çatma <b>'+abiGunAyIl(t)+'</b> → hüquq ili <b>'+hIl+'</b> (o ilin min. pensiyası '+abiGetMinPensiya(new Date(hIl,11,31))+' AZN)');
+    }
+    abiCatHuquq('cat3', cat3, 'Əlilliyi olan ər/arvad');
+    abiCatHuquq('cat5', cat5, 'Yaşa görə yaş həddinə çatmış ər/arvad');
+    abiCatHuquq('cat6', cat6 && cat6Say>0, 'Mərhum ata/anası');
+
+    // Ən yüksək baza: daxil edilən cari məbləğ / mərhumun indeksləşdirilmiş pensiyası /
+    // gec hüquq ilinin minimumu (cari ilə indeksləşdirilmiş) — ən böyüyü götürülür
+    var esasBaza = mebleg, bazaMenbe = 'daxil edilən cari məbləğ';
+    if(!abi.stajCatmir && abi.indexlenmisMebleg && abi.indexlenmisMebleg > esasBaza){
+      esasBaza = abi.indexlenmisMebleg; bazaMenbe = 'mərhumun '+cariIl+'-ə indeksləşdirilmiş pensiyası';
+    }
+    if(esasHuquqIl > vefatIl){
+      var hMinIdx = abiIndexlenmisMebleg(abiGetMinPensiya(new Date(esasHuquqIl,11,31)), new Date(esasHuquqIl,0,1), cariIl);
+      if(hMinIdx > esasBaza){ esasBaza = hMinIdx; bazaMenbe = esasHuquqIl+' hüquq ili minimumu, '+cariIl+'-ə indeksləşdirilmiş'; }
+    }
+
+    var perPerson = abiRound2(esasBaza/say);
     var isPensiya = abi.stajCatmir ? false : (perPerson>ABI_LIMIT);
     var muqayiseNotu = abiBuildMuqayiseNotu(perPerson, cat3, cat3Derece, cat4Ustelik, cat4Derece, cat5, cat6);
     var indexNotu = (!abi.stajCatmir && abi.indexlenmisMebleg && abi.indexlenmisMebleg>abi.tapilanMebleg)
-      ? ('<br/>Mərhumun indeksləşdirilmiş pensiyası ('+abiCariIndexIl()+'): <b>'+abi.indexlenmisMebleg+' AZN</b>')
+      ? ('<br/>Mərhumun indeksləşdirilmiş pensiyası ('+cariIl+'): <b>'+abi.indexlenmisMebleg+' AZN</b>')
       : '';
-    var detail2 = 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).'+indexNotu+muqayiseNotu;
+    var bazaNotu = (esasBaza!==mebleg) ? ('<br/>Hesablamada istifadə olunan (ən yüksək) baza: <b>'+esasBaza+' AZN</b> — '+bazaMenbe) : '';
+    var huquqNotu = huquqSetirler.length
+      ? ('<div class="abi-note" style="margin-top:8px;">Hüququn yaranma ilinin dəqiqləşdirilməsi:<ul style="margin:6px 0 0 18px;padding:0;">'+huquqSetirler.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ul></div>')
+      : '';
+    var detail2 = 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).'+bazaNotu+indexNotu+huquqNotu+muqayiseNotu;
     if(abi.stajCatmir){
-      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.'+muqayiseNotu;
+      detail2 = 'Staj tələbi ödənilmədiyi üçün <b>sosial müavinət</b> təyin olunur.<br/>Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b>.'+huquqNotu+muqayiseNotu;
     }
     abiShowFinalResult(isPensiya, detail2);
   }
