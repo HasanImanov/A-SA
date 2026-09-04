@@ -4019,11 +4019,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
 
-    // Hədiyyə staj: 2018-ə qədər sığorta stajı olubsa hesablanır. Öz stajı (2006-dan əvvəl) hədiyyədən çoxdursa, öz stajı qalır — üstəlik gəlmir, sadəcə böyüyü götürülür.
+    // Yaşa görə hədiyyə staj: 2006-dan sonra staj varsa (sığorta stajı və ya post-2006 staj daxil edilib),
+    // hədiyyə staj sabitdir — hüquq (pensiya yaşına çatma) ilinə görə:
+    //   2025-ci ilə qədər (daxil) → 25 il, 2026-cı ildən → 24 il.
+    // Vətəndaşın öz 2006-ya qədər stajı hədiyyədən çoxdursa, öz stajı qalır (böyüyü götürülür).
     var hediyyeStaj = 0;
-    if(yg.sigortaStajOlub){
-      hediyyeStaj = abiRound2(((GIFT_YEAR_BASE - yg.dogum.getFullYear()) - 15)/3);
-      if(hediyyeStaj<0) hediyyeStaj = 0;
+    var ygHuquqIl = yg.vefat.getFullYear();
+    if(yg.sigortaStajOlub || post2006StajTotal > 0){
+      hediyyeStaj = (ygHuquqIl <= 2025) ? 25 : 24;
     }
     yg.hediyyeStaj = hediyyeStaj;
 
