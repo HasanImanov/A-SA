@@ -3528,16 +3528,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygLockCard(btn.closest('.abi-card'));
     ygAddUserCard(guzestli ? 'Güzəştli şərtlərlə çalışırdı' : 'Mülki');
     yg.guzestli = guzestli;
-    ygAskPensiyaAlan();
-  }
-  function ygAskPensiyaAlan(){
-    ygAddBotCard(
-      '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
-      '<div class="abi-btn-row">'+
-        '<button class="abi-choice-btn yes" onclick="ygQ1(this,true)">Bəli</button>'+
-        '<button class="abi-choice-btn" onclick="ygQ1(this,false)">Xeyr</button>'+
-      '</div>'
-    );
+    yg.hadPension = false;
+    ygAskDogumVefat();
   }
 
   function ygQ1(btn, yes){
@@ -3636,25 +3628,22 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function ygAskDogumVefat(){
     ygAddBotCard(
-      '<div class="abi-q">Doğum və vəfat tarixini daxil edin</div>'+
-      '<div class="abi-input-group">'+
+      '<div class="abi-q">Doğum tarixini daxil edin</div>'+
+      '<div class="abi-input-group single">'+
         '<div><label>Doğum tarixi<span class="abi-required-mark">*</span></label><input type="text" id="yg-dogum" placeholder="01.01.1970" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="yg-dogum-err-msg">Boş sahəni doldurun</div></div>'+
-        '<div><label>Vəfat tarixi<span class="abi-required-mark">*</span></label><input type="text" id="yg-vefat" placeholder="01.01.2024" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this);abiClearRequiredErr(this);"/><div class="abi-required-err-msg" id="yg-vefat-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<button class="abi-go-btn" onclick="ygSaveDogumVefat(this)">Davam et</button>'
     );
   }
   function ygSaveDogumVefat(btn){
     var card = btn.closest('.abi-card');
-    if(!abiCheckRequired(['yg-dogum','yg-vefat'])) return;
+    if(!abiCheckRequired(['yg-dogum'])) return;
     var dogumStr = document.getElementById('yg-dogum').value;
-    var vefatStr = document.getElementById('yg-vefat').value;
-    var dogum = abiParseDate(dogumStr), vefat = abiParseDate(vefatStr);
-    if(!dogum || !vefat){ siteAlert('Tarixləri gg.aa.iiii formatında düzgün daxil edin.'); return; }
-    if(dogum.getTime() >= vefat.getTime()){ siteAlert('Doğum tarixi vəfat tarixindən əvvəl olmalıdır.'); return; }
+    var dogum = abiParseDate(dogumStr);
+    if(!dogum){ siteAlert('Tarixi gg.aa.iiii formatında düzgün daxil edin.'); return; }
     ygLockCard(card);
-    ygAddUserCard('Doğum: '+dogumStr+', Vəfat: '+vefatStr);
-    yg.dogum = dogum; yg.vefat = vefat;
+    ygAddUserCard('Doğum: '+dogumStr);
+    yg.dogum = dogum;
     ygAskGender();
   }
 
@@ -3670,7 +3659,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function ygQGender(btn, isMale){
     ygLockCard(btn.closest('.abi-card'));
     ygAddUserCard(isMale?'Kişi':'Qadın');
-    yg.gender = isMale?'kisi':'qadin';
+    yg.gender = isMale ? 'kishi' : 'qadin';
+    // Yaşa görə axınında hüquq tarixi = şəxsin pensiya yaşına çatdığı tarix (doğum + cins üzrə)
+    yg.vefat = abiPensiyaYasiTarixi(yg.gender, yg.dogum);
+    yg.huquqTarixi = yg.vefat;
+    ygAddBotCard('<div class="abi-note">Pensiya yaşına çatma tarixi: <b>'+abiGunAyIl(yg.vefat)+'</b> — hesablamada hüquq tarixi kimi götürülür.</div>');
     ygAskHerbiQuestion();
   }
   function ygAskHerbiQuestion(){
