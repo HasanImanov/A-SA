@@ -4083,15 +4083,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
       (catmayan>0
         ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
-        : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+ygIndexSetiri))+
-      (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
+        : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+ygIndexSetiri))
     );
 
     if(catmayan>0){
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       ygShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
-      ygAskPersonCountForMinPension(tapilanMebleg);
+      // Yaşa görədə bölüşdürmə/hüquq sahibləri yoxdur — əlillik kimi şəxsin özünə şamil olunur
+      var ygIsPensiya = tapilanMebleg > ABI_LIMIT;
+      var ygFinalDetail = 'Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>.'+
+        (ygIndexlenmis>tapilanMebleg ? '<br/>'+ygIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+ygIndexlenmis+' AZN</b>.' : '');
+      ygShowFinalResult(ygIsPensiya, ygFinalDetail);
     }
   }
 
