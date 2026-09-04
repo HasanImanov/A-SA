@@ -2362,7 +2362,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       abiShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
-      abiAskPersonCountForMinPension(tapilanMebleg);
+      // Minimum pensiya xanası cari ilə indeksləşdirilmiş məbləğlə doldurulur
+      abiAskPersonCountForMinPension(abiIndexlenmis || tapilanMebleg);
     }
   }
 
@@ -2396,7 +2397,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     abiAddBotCard(
       '<div class="abi-q">Minimum pensiyanın məbləğini və hüququ yaranan şəxsləri müəyyən edin</div>'+
       '<div class="abi-input-group single">'+
-        '<div><label>Minimum pensiya məbləği (AZN)<span class="abi-required-mark">*</span></label><input type="number" id="abi-p2-mebleg" placeholder="qanunla müəyyən cari məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'" oninput="abiClearRequiredErr(this)"/><div class="abi-required-err-msg" id="abi-p2-mebleg-err-msg">Boş sahəni doldurun</div></div>'+
+        '<div><label>Minimum pensiya məbləği (cari ilə indeksləşdirilmiş, AZN)<span class="abi-required-mark">*</span></label><input type="number" id="abi-p2-mebleg" placeholder="indeksləşdirilmiş məbləğ" min="0" value="'+(prefillMebleg!==undefined?prefillMebleg:'')+'" oninput="abiClearRequiredErr(this)"/><div class="abi-required-err-msg" id="abi-p2-mebleg-err-msg">Boş sahəni doldurun</div></div>'+
       '</div>'+
       '<div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin:12px 0 6px;">Hüququ yaranan şəxslər (uyğun olanları seçin)</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
