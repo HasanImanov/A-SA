@@ -2034,6 +2034,31 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   // Cari təqvim ili — indeksasiyanın son ili kimi istifadə olunur.
   function abiCariIndexIl(){ return new Date().getFullYear(); }
 
+  // İrəli indeksasiya — addım-addım izahla (əməkdaşa göstərmək üçün)
+  function abiIndexlenmisMeblegIzah(basMebleg, vefatDate, sonIl){
+    var vefatIl = vefatDate.getFullYear();
+    var mebleg = basMebleg, addimlar = [];
+    var vefatMin = abiGetMinPensiya(new Date(vefatIl, 11, 31));
+    if(vefatMin > mebleg){
+      addimlar.push(vefatIl+' minimum pensiyasına qaldırıldı: '+mebleg+' → <b>'+vefatMin+' AZN</b>');
+      mebleg = vefatMin;
+    }
+    for(var il = vefatIl + 1; il <= sonIl; il++){
+      var faiz = ABI_INDEXASIYA_FAIZLERI[il];
+      if(faiz !== undefined){
+        var yeni = abiRound2(mebleg * (1 + faiz/100));
+        addimlar.push(il+': '+mebleg+' × (1 + '+faiz+'%) = <b>'+yeni+' AZN</b>');
+        mebleg = yeni;
+      }
+      var ilMin = abiGetMinPensiya(new Date(il, 11, 31));
+      if(ilMin > mebleg){
+        addimlar.push(il+' minimum pensiyasına qaldırıldı: → <b>'+ilMin+' AZN</b>');
+        mebleg = ilMin;
+      }
+    }
+    return { netice: abiRound2(mebleg), addimlar: addimlar };
+  }
+
   // Pensiya KAPİTALININ illik indeksləşdirmə (keçid) faizləri (%).
   // Açar = keçidin BİTDİYİ il: məs. 2026 -> "2025-dən 2026-ya keçid 5.6%".
   // İllik indeksasiya faizlərindən (ABI_INDEXASIYA_FAIZLERI) AYRI cədvəldir.
@@ -2061,6 +2086,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(faiz !== undefined) kap = abiRound2(kap / (1 + faiz/100));
     }
     return abiRound2(kap);
+  }
+
+  // Geri qaytarma — addım-addım izahla (əməkdaşa göstərmək üçün)
+  function abiGeriKapitalIzah(bugunkuKap, vefatDate, cariIl){
+    var vefatIl = vefatDate.getFullYear();
+    var kap = bugunkuKap, addimlar = [];
+    for(var il = cariIl; il > vefatIl; il--){
+      var faiz = ABI_KAPITAL_INDEX_FAIZLERI[il];
+      if(faiz !== undefined){
+        var yeni = abiRound2(kap / (1 + faiz/100));
+        addimlar.push(il+' → '+(il-1)+': '+kap+' ÷ (1 + '+faiz+'%) = <b>'+yeni+' AZN</b>');
+        kap = yeni;
+      }
+    }
+    return { netice: abiRound2(kap), addimlar: addimlar };
   }
 
   // ── Pensiya yaşı ─────────────────────────────────────────────────────────────
@@ -2256,6 +2296,44 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var abiKapGeriSetiri = (kapSonra!==kapSonraBugun)
       ? ('Daxil edilən kapital (bugünkü): <b>'+kapSonraBugun+' AZN</b><br/>Hüquq ('+abi.vefat.getFullYear()+') ilinə gətirilmiş kapital: <b>'+kapSonra+' AZN</b><br/>')
       : '';
+
+    // ── Əməkdaş üçün addım-addım hesablama izahı ("i" ikonu ilə açılır) ───────
+    (function(){
+      var h = function(t){ return '<div style="font-weight:800;margin:14px 0 4px;color:var(--blue);">'+t+'</div>'; };
+      var box = function(t){ return '<div style="background:var(--blue-pale);border-radius:8px;padding:8px 10px;font-size:0.82rem;margin:4px 0;">'+t+'</div>'; };
+      var vil = abi.vefat.getFullYear();
+      var S = '';
+      S += h('1. Ümumi məlumat')+'<ul><li>Vəfat tarixi: <b>'+abiGunAyIl(abi.vefat)+'</b></li><li>Vəfat anında yaş: <b>'+ageObj.years+' il</b></li></ul>';
+      S += h('2. Staj tələbi')+'<ul>'+
+        '<li>Tələb olunan minimum staj = (yaş − 15) ÷ 3 = ('+ageObj.years+' − 15) ÷ 3 = <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b></li>'+
+        '<li>Faktiki staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b>'+(hediyyeStaj>pre2006StajTotal?' (hədiyyə staj tətbiq olundu)':'')+'</li>'+
+        '<li>'+(catmayan>0?'Staj <b>çatmır</b> → sosial müavinət':'Staj tələbi <b>ödənilir</b>')+'</li></ul>';
+      if(catmayan<=0){
+        S += h('3. Pensiya kapitalı')+'<ul>';
+        S += '<li>2006-dan əvvəlki kapital = '+pre2006Effective.toFixed(2)+' il × '+multiplier+' (İQİ əmsalı, '+vil+') = <b>'+kapEvvel+' AZN</b></li>';
+        if(kapSonra!==kapSonraBugun){
+          var gk = abiGeriKapitalIzah(kapSonraBugun, abi.vefat, abiIndexIl);
+          S += '<li>2006-dan sonrakı kapital PAS-da bu gün: <b>'+kapSonraBugun+' AZN</b></li>';
+          S += '<li>Bu məbləğ hüquq ('+vil+') ilinə geri qaytarılır — hər il keçid faizinə bölünür:'+box(gk.addimlar.join('<br/>'))+'Hüquq ilinə gətirilmiş 2006-sonrası kapital: <b>'+kapSonra+' AZN</b></li>';
+        } else {
+          S += '<li>2006-dan sonrakı kapital: <b>'+kapSonra+' AZN</b></li>';
+        }
+        S += '<li>Ümumi kapital = '+kapEvvel+' + '+kapSonra+' = <b>'+totalKapital+' AZN</b></li></ul>';
+        var xamMebleg = (boluc>0) ? abiRound2(totalKapital/boluc) : 0;
+        S += h('4. Bölücü və hesablanan məbləğ')+'<ul>'+
+          '<li>Bölücü = (yaş − 15) × 4 ÷ '+abiGetBolucDivisor(abi.vefat)+' × 144 = <b>'+abiRound2(boluc)+'</b></li>'+
+          '<li>Hesablanan məbləğ = ümumi kapital ÷ bölücü = '+totalKapital+' ÷ '+abiRound2(boluc)+' = <b>'+xamMebleg+' AZN</b></li>'+
+          (xamMebleg<minPensiyaAbi ? '<li>Bu məbləğ '+vil+' minimumundan ('+minPensiyaAbi+' AZN) azdır → <b>'+minPensiyaAbi+' AZN</b> tətbiq olunur</li>' : '')+
+          '<li>Hüquq ('+vil+') ili məbləği: <b>'+tapilanMebleg+' AZN</b></li></ul>';
+        var gi = abiIndexlenmisMeblegIzah(tapilanMebleg, abi.vefat, abiIndexIl);
+        S += h('5. Bu günə ('+abiIndexIl+') indeksləşdirmə')+
+          '<div style="font-size:0.82rem;">'+vil+' ili məbləği hər il indeksasiya faizi ilə artırılır:</div>'+
+          box(gi.addimlar.length ? gi.addimlar.join('<br/>') : '(bu illər üçün indeksasiya faizi yoxdur)')+
+          '<div style="margin-top:6px;font-size:0.9rem;"><b>'+abiIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: '+gi.netice+' AZN</b></div>';
+      }
+      abi.izahHTML = S;
+      abi.izahBaslik = 'ABİ pensiyasının hesablanması';
+    })();
 
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
@@ -2508,6 +2586,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         'ABİ payını götürən şəxs sayı: <b>'+qalan.length+'</b>'+(qalan.length!==say?' (ilkin '+say+')':'')+'<br/>'+
         'Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).'+huquqNotu+cixanNotu+muqayiseNotu;
     }
+    // İzaha ABİ bölüşdürmə bölməsini əlavə et (əməkdaş "i" ikonu ilə görsün)
+    if(abi.izahHTML){
+      var bh = '<div style="font-weight:800;margin:14px 0 4px;color:var(--blue);">6. ABİ üzrə bölüşdürmə</div><ul>';
+      bh += '<li>Baza (mərhumun bu günə pensiyası): <b>'+baza+' AZN</b></li>';
+      if(sexsler.length) bh += '<li>Hüquq sahibləri: '+sexsler.map(function(p){return p.label+' (öz məbləği '+p.own+' AZN)';}).join('; ')+'</li>';
+      if(cixanlar.length) bh += '<li>Öz pensiyası/müavinəti payından çox olduğu üçün çıxarıldı: '+cixanlar.map(function(p){return p.label+' ('+p.own+' AZN)';}).join('; ')+'</li>';
+      if(!qalan.length){
+        bh += '<li><b>Heç kimə ABİ payı verilmir</b> — hər kəs öz məbləğini saxlayır</li>';
+      } else {
+        bh += '<li>Adam başına = '+baza+' ÷ '+qalan.length+' = <b>'+perPerson+' AZN</b></li>';
+        bh += '<li>'+(perPerson>ABI_LIMIT ? 'Pay '+ABI_LIMIT+' AZN həddindən çoxdur → <b>pensiya</b>' : 'Pay '+ABI_LIMIT+' AZN həddindən azdır → <b>sosial müavinət</b>')+'</li>';
+      }
+      bh += '</ul>';
+      abi.izahHTML += bh;
+    }
     abiShowFinalResult(isPensiya, detail2);
   }
 
@@ -2517,11 +2610,17 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var extra = '';
     if(abi.ahilIl) extra += '<div class="abi-note">Ahıl şəxsə qulluq: '+abi.ahilIl+' il</div>';
     if(abi.elillikIl) extra += '<div class="abi-note">I dərəcə əlilliyi olan şəxsə qulluq: '+abi.elillikIl+' il</div>';
+    var izahBtn = (typeof abi!=='undefined' && abi.izahHTML)
+      ? '<button onclick="abiIzahAc()" title="Ətraflı hesablama qaydası" style="position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--blue-mid);background:#fff;color:var(--blue);font-weight:800;font-style:italic;font-family:Georgia,serif;font-size:0.92rem;cursor:pointer;line-height:1;z-index:2;">i</button>'
+      : '';
     abiAddBotCard(
+      '<div style="position:relative;">'+
+      izahBtn+
       '<div class="abi-result '+cls+'">'+title+'</div>'+
       '<div style="margin-top:10px;">'+detailHtml+'</div>'+
       extra+
-      (isPensiya ? '' : '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>')
+      (isPensiya ? '' : '<button class="abi-restart-btn" onclick="abiStart()">🔄 Yenidən başla</button>')+
+      '</div>'
     );
     if(isPensiya){
       // Başda "pensiya alan idimi?" sualına "Xeyr" cavabı verilib və mərhum mülki olubsa —
@@ -4245,6 +4344,29 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     <button onclick="fbThanksClose()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;width:100%;">Bağla</button>
   </div>
 </div>
+
+<div id="abi-izah-modal" style="display:none;position:fixed;inset:0;background:rgba(20,30,50,0.5);z-index:10001;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:var(--radius);max-width:600px;width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:var(--shadow);font-family:'Inter',sans-serif;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--blue-mid);">
+      <div id="abi-izah-baslik" style="font-weight:800;font-size:1rem;color:var(--text);">Hesablama qaydası</div>
+      <button onclick="abiIzahBagla()" style="border:none;background:none;font-size:1.5rem;cursor:pointer;color:var(--text-muted);line-height:1;">&times;</button>
+    </div>
+    <div id="abi-izah-govde" style="padding:14px 22px;overflow-y:auto;font-size:0.86rem;line-height:1.5;color:var(--text);"></div>
+    <div style="padding:12px 22px;border-top:1px solid var(--blue-mid);text-align:right;">
+      <button onclick="abiIzahBagla()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Bağla</button>
+    </div>
+  </div>
+</div>
+<script>
+  function abiIzahAc(){
+    if(typeof abi==='undefined' || !abi.izahHTML){ return; }
+    document.getElementById('abi-izah-baslik').textContent = abi.izahBaslik || 'Hesablama qaydası';
+    document.getElementById('abi-izah-govde').innerHTML = abi.izahHTML;
+    document.getElementById('abi-izah-modal').style.display = 'flex';
+  }
+  function abiIzahBagla(){ document.getElementById('abi-izah-modal').style.display = 'none'; }
+  document.getElementById('abi-izah-modal').addEventListener('click', function(e){ if(e.target === this) abiIzahBagla(); });
+</script>
 
 <div id="site-modal" style="display:none;position:fixed;inset:0;background:rgba(20,30,50,0.5);z-index:10000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:var(--radius);max-width:420px;width:100%;padding:26px 24px;box-shadow:var(--shadow);font-family:'Inter',sans-serif;text-align:center;">
