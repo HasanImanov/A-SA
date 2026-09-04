@@ -4020,13 +4020,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
 
-    // Yaşa görə hədiyyə staj: 2006-dan sonra staj varsa (sığorta stajı və ya post-2006 staj daxil edilib),
-    // hədiyyə staj sabitdir — hüquq (pensiya yaşına çatma) ilinə görə:
-    //   2025-ci ilə qədər (daxil) → 25 il, 2026-cı ildən → 24 il.
-    // Vətəndaşın öz 2006-ya qədər stajı hədiyyədən çoxdursa, öz stajı qalır (böyüyü götürülür).
+    // Yaşa görə hədiyyə staj: 2006-dan sonra ən azı 1 gün belə staj varsa (sığorta stajı və ya
+    // post-2006 staj daxil edilib) — hədiyyə staj verilir və 25 illik tələb "çatdırılır".
+    // Hədiyyə staj məbləği hüquq (pensiya yaşına çatma) ilinə görə: 31.12.2025-ə qədər → 25 il,
+    // 2026-cı ildən → 24 il. Vətəndaşın öz 2006-ya qədər stajı çoxdursa öz stajı qalır (böyüyü).
+    var post2006Var = (yg.sigortaStajOlub || post2006StajTotal > 0);
     var hediyyeStaj = 0;
     var ygHuquqIl = yg.vefat.getFullYear();
-    if(yg.sigortaStajOlub || post2006StajTotal > 0){
+    if(post2006Var){
       hediyyeStaj = (ygHuquqIl <= 2025) ? 25 : 24;
     }
     yg.hediyyeStaj = hediyyeStaj;
@@ -4035,7 +4036,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var faktikiTotal = abiRound2(pre2006Effective + post2006StajTotal);
     yg.faktikiStaj = faktikiTotal; yg.telebOlunanStaj = teleb;
 
-    var catmayan = abiRound2(teleb - faktikiTotal);
+    // 2006-dan sonra stajı olan şəxsə hədiyyə staj verilir və staj tələbi ödənilmiş sayılır
+    var catmayan = post2006Var ? 0 : abiRound2(teleb - faktikiTotal);
     if(catmayan<0) catmayan = 0;
 
     var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
