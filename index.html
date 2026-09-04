@@ -3517,6 +3517,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     document.getElementById('yg-flow').innerHTML='';
     yg = {}; yg.bonusStaj = 0;
     ygAddBotCard(
+      '<div class="abi-q">Mərhum şəxs güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="ygQGuzestliMulki(this,true)">Güzəştli şərtlərlə çalışırdı</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="ygQGuzestliMulki(this,false)">Mülki</button>'+
+      '</div>'
+    );
+  }
+  function ygQGuzestliMulki(btn, guzestli){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(guzestli ? 'Güzəştli şərtlərlə çalışırdı' : 'Mülki');
+    yg.guzestli = guzestli;
+    ygAskPensiyaAlan();
+  }
+  function ygAskPensiyaAlan(){
+    ygAddBotCard(
       '<div class="abi-q">Mərhum şəxs pensiya alan idimi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQ1(this,true)">Bəli</button>'+
@@ -4028,16 +4043,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     var totalKapital = 0, tapilanMebleg = 0, kapEvvel = 0, gerekenKapital = 0;
     // Kapital (tələb olunan / olan) staj çatıb-çatmamasından asılı olmayaraq hesablanır və göstərilir
-    var multiplier = abiGetKapitalMultiplier(yg.vefat);
+    // Yaşa görə düsturu: illik məbləğ (İQİ əmsalı, hüquq ilinə görə) və sabit 144 bölücü
+    // tapılan = ((2006-cı ilədək staj) × illik məbləğ + 2006-dan sonrakı kapital) ÷ 144
+    var multiplier = abiGetKapitalMultiplier(yg.vefat);   // "bu ilin illik məbləği" (məs. 2026 → 1087.47)
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
     yg.kapitalSonraBugun = kapSonraBugun;
-    var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(yg.vefat)*144;
+    var YG_BOLUC = 144;
     var minPensiyaYg = abiGetMinPensiya(yg.vefat);
-    gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaYg));
+    gerekenKapital = Math.max(0, abiRound2(YG_BOLUC * minPensiyaYg));
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
-      tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
+      tapilanMebleg = (totalKapital>0) ? abiRound2(totalKapital/YG_BOLUC) : 0;
       // Qayda: staj tələbi ödəyir, hesablanan məbləğ tarixə uyğun minimumdan azdır -> minimum tətbiq olunur
       if(tapilanMebleg<minPensiyaYg){
         tapilanMebleg = minPensiyaYg;
