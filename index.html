@@ -4014,7 +4014,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(yg.dogum, yg.vefat);
-    var teleb = abiRound2((ageObj.years-15)/3);
+    // Yaşa görə: staj tələbi sabit 25 il (ABİ/əlillikdəki (yaş−15)/3 düsturu deyil)
+    var teleb = 25;
 
     var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
@@ -4074,7 +4075,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<div class="abi-q">Nəticə</div>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
-      'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b><br/>'+
+      'Tələb olunan staj: <b>25 il</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
