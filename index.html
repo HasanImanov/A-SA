@@ -4198,13 +4198,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var extra = '';
     if(yg.ahilIl) extra += '<div class="abi-note">Ahıl şəxsə qulluq: '+yg.ahilIl+' il</div>';
     if(yg.elillikIl) extra += '<div class="abi-note">I dərəcə əlilliyi olan şəxsə qulluq: '+yg.elillikIl+' il</div>';
+    // İlkin müraciətdir — PAS/qurum sualları yoxdur; kargüzarlıq marşrutu güzəştli/mülki seçiminə görə
+    var ygKargQurum = yg.guzestli ? 'XŞTMF' : 'SÖMTİ';
+    var ygKargNote = (yg.guzestli !== undefined)
+      ? '<div class="abi-note" style="margin-top:10px;">⚠️ Qeyd edilmiş sənədlərlə <b>'+ygKargQurum+'</b>-ə ƏMAS üzərindən kargüzarlıq edilsin.</div>'
+      : '';
     ygAddBotCard(
       '<div class="abi-result '+cls+'">'+title+'</div>'+
       '<div style="margin-top:10px;">'+detailHtml+'</div>'+
       extra+
-      (isPensiya ? '' : '<button class="abi-restart-btn" onclick="ygStart()">🔄 Yenidən başla</button>')
+      ygKargNote+
+      '<button class="abi-restart-btn" onclick="ygStart()">🔄 Yenidən başla</button>'
     );
-    if(isPensiya){ ygAskPasQuestion(); }
   }
 
   function ygAskPasQuestion(){
