@@ -2033,6 +2033,35 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   // Cari təqvim ili — indeksasiyanın son ili kimi istifadə olunur.
   function abiCariIndexIl(){ return new Date().getFullYear(); }
 
+  // Pensiya KAPİTALININ illik indeksləşdirmə (keçid) faizləri (%).
+  // Açar = keçidin BİTDİYİ il: məs. 2026 -> "2025-dən 2026-ya keçid 5.6%".
+  // İllik indeksasiya faizlərindən (ABI_INDEXASIYA_FAIZLERI) AYRI cədvəldir.
+  var ABI_KAPITAL_INDEX_FAIZLERI = {
+    2017: 4.0,
+    2018: 12.4,
+    2019: 3.0,
+    2020: 2.6,
+    2021: 2.8,
+    2022: 6.7,
+    2023: 13.9,
+    2024: 8.8,
+    2025: 2.2,
+    2026: 5.6
+  };
+
+  // Operatorun PAS-dan yazdığı BUGÜNKÜ (cariIl) kapitalı vəfat ilinə "geri qaytarır".
+  // cariIl-dən vefatIl+1-ə qədər hər ilin keçid faizinə bölünür (vəfat ilinin özü daxil deyil).
+  // Məs. 2026-da 10000, vəfat 2023 -> 10000/1.056/1.022/1.088 ≈ 8516.41.
+  function abiGeriKapital(bugunkuKap, vefatDate, cariIl){
+    var vefatIl = vefatDate.getFullYear();
+    var kap = bugunkuKap;
+    for(var il = cariIl; il > vefatIl; il--){
+      var faiz = ABI_KAPITAL_INDEX_FAIZLERI[il];
+      if(faiz !== undefined) kap = abiRound2(kap / (1 + faiz/100));
+    }
+    return abiRound2(kap);
+  }
+
   function abiAskKapitalCard(){
     var showPre2006 = abi.hasStaj;
     var pre2006Html = showPre2006
@@ -2107,7 +2136,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006IlRaw = parseFloat(document.getElementById('abi-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('abi-post2006-ay').value)||0;
     var post2006GunRaw = parseFloat(document.getElementById('abi-post2006-gun').value)||0;
-    var kapSonra = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
+    var kapSonraBugun = parseFloat(document.getElementById('abi-kap-sonra').value) || 0;
+    // Daxil edilən kapital bugünküdür — vəfat ilinə "geri qaytarılır" (yalnız 2006-dan sonrakı kapital)
+    var kapSonra = abiGeriKapital(kapSonraBugun, abi.vefat, abiCariIndexIl());
     if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
@@ -2123,7 +2154,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(elillikqIlRaw>0||elillikqAyRaw>0||elillikqGunRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYMDraw(elillikqIlRaw,elillikqAyRaw,elillikqGunRaw));
     if(evvelIlRaw>0||evvelAyRaw>0||evvelGunRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw));
     if(post2006IlRaw>0||post2006AyRaw>0||post2006GunRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYMDraw(post2006IlRaw,post2006AyRaw,post2006GunRaw));
-    ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
+    ozetParts.push('2006-dan sonra kapital (bugünkü): '+kapSonraBugun+' AZN'+(kapSonra!==kapSonraBugun ? ' → hüquq ('+abi.vefat.getFullYear()+') ilinə: '+kapSonra+' AZN' : ''));
     abiAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(abi.dogum, abi.vefat);
@@ -2152,6 +2183,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var multiplier = abiGetKapitalMultiplier(abi.vefat);
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
+    abi.kapitalSonraBugun = kapSonraBugun;
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(abi.vefat)*144;
     var minPensiyaAbi = abiGetMinPensiya(abi.vefat);
     gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaAbi));
@@ -2173,6 +2205,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var abiIndexSetiri = (catmayan<=0 && abiIndexlenmis>tapilanMebleg)
       ? ('<br/>'+abiIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+abiIndexlenmis+' AZN</b>')
       : '';
+    var abiKapGeriSetiri = (kapSonra!==kapSonraBugun)
+      ? ('Daxil edilən kapital (bugünkü): <b>'+kapSonraBugun+' AZN</b><br/>Hüquq ('+abi.vefat.getFullYear()+') ilinə gətirilmiş kapital: <b>'+kapSonra+' AZN</b><br/>')
+      : '';
 
     abiAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
@@ -2182,6 +2217,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      abiKapGeriSetiri+
       'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
       (catmayan>0
@@ -3023,7 +3059,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006IlRaw = parseFloat(document.getElementById('elp-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('elp-post2006-ay').value)||0;
     var post2006GunRaw = parseFloat(document.getElementById('elp-post2006-gun').value)||0;
-    var kapSonra = parseFloat(document.getElementById('elp-kap-sonra').value) || 0;
+    var kapSonraBugun = parseFloat(document.getElementById('elp-kap-sonra').value) || 0;
+    // Daxil edilən kapital bugünküdür — vəfat ilinə "geri qaytarılır" (yalnız 2006-dan sonrakı kapital)
+    var kapSonra = abiGeriKapital(kapSonraBugun, elp.vefat, abiCariIndexIl());
     if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
@@ -3039,7 +3077,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(elillikqIlRaw>0||elillikqAyRaw>0||elillikqGunRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYMDraw(elillikqIlRaw,elillikqAyRaw,elillikqGunRaw));
     if(evvelIlRaw>0||evvelAyRaw>0||evvelGunRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw));
     if(post2006IlRaw>0||post2006AyRaw>0||post2006GunRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYMDraw(post2006IlRaw,post2006AyRaw,post2006GunRaw));
-    if(elp.derece!=='81-100') ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
+    if(elp.derece!=='81-100') ozetParts.push('2006-dan sonra kapital (bugünkü): '+kapSonraBugun+' AZN'+(kapSonra!==kapSonraBugun ? ' → hüquq ('+elp.vefat.getFullYear()+') ilinə: '+kapSonra+' AZN' : ''));
     elpAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(elp.dogum, elp.vefat);
@@ -3069,6 +3107,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var multiplier = abiGetKapitalMultiplier(elp.vefat);
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
+    elp.kapitalSonraBugun = kapSonraBugun;
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
     var minPensiyaElp = abiGetMinPensiya(elp.vefat);
     gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaElp));
@@ -3090,6 +3129,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var elpIndexSetiri = (catmayan<=0 && elpIndexlenmis>tapilanMebleg)
       ? ('<br/>'+elpIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+elpIndexlenmis+' AZN</b>')
       : '';
+    var elpKapGeriSetiri = (kapSonra!==kapSonraBugun)
+      ? ('Daxil edilən kapital (bugünkü): <b>'+kapSonraBugun+' AZN</b><br/>Hüquq ('+elp.vefat.getFullYear()+') ilinə gətirilmiş kapital: <b>'+kapSonra+' AZN</b><br/>')
+      : '';
 
     elpAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
@@ -3100,7 +3142,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
-      (kapitalTetbiqOlunur ? ('Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
+      (kapitalTetbiqOlunur ? (elpKapGeriSetiri+'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
       (catmayan<=0 ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+elpIndexSetiri) : '')+
       (catmayan>0 ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
       (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
@@ -3664,7 +3706,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006IlRaw = parseFloat(document.getElementById('yg-post2006-il').value)||0;
     var post2006AyRaw = parseFloat(document.getElementById('yg-post2006-ay').value)||0;
     var post2006GunRaw = parseFloat(document.getElementById('yg-post2006-gun').value)||0;
-    var kapSonra = parseFloat(document.getElementById('yg-kap-sonra').value) || 0;
+    var kapSonraBugun = parseFloat(document.getElementById('yg-kap-sonra').value) || 0;
+    // Daxil edilən kapital bugünküdür — vəfat ilinə "geri qaytarılır" (yalnız 2006-dan sonrakı kapital)
+    var kapSonra = abiGeriKapital(kapSonraBugun, yg.vefat, abiCariIndexIl());
     if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
@@ -3680,7 +3724,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(elillikqIlRaw>0||elillikqAyRaw>0||elillikqGunRaw>0) ozetParts.push('I dərəcə əlilliyi olan şəxsə qulluq: '+abiFmtYMDraw(elillikqIlRaw,elillikqAyRaw,elillikqGunRaw));
     if(evvelIlRaw>0||evvelAyRaw>0||evvelGunRaw>0) ozetParts.push('2006-dan əvvəlki staj: '+abiFmtYMDraw(evvelIlRaw,evvelAyRaw,evvelGunRaw));
     if(post2006IlRaw>0||post2006AyRaw>0||post2006GunRaw>0) ozetParts.push('2006-dan sonrakı staj: '+abiFmtYMDraw(post2006IlRaw,post2006AyRaw,post2006GunRaw));
-    ozetParts.push('2006-dan sonra kapital: '+kapSonra+' AZN');
+    ozetParts.push('2006-dan sonra kapital (bugünkü): '+kapSonraBugun+' AZN'+(kapSonra!==kapSonraBugun ? ' → hüquq ('+yg.vefat.getFullYear()+') ilinə: '+kapSonra+' AZN' : ''));
     ygAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(yg.dogum, yg.vefat);
@@ -3709,6 +3753,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var multiplier = abiGetKapitalMultiplier(yg.vefat);
     kapEvvel = abiRound2(pre2006Effective * multiplier);
     totalKapital = abiRound2(kapEvvel + kapSonra);
+    yg.kapitalSonraBugun = kapSonraBugun;
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(yg.vefat)*144;
     var minPensiyaYg = abiGetMinPensiya(yg.vefat);
     gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaYg));
@@ -3730,6 +3775,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ygIndexSetiri = (catmayan<=0 && ygIndexlenmis>tapilanMebleg)
       ? ('<br/>'+ygIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+ygIndexlenmis+' AZN</b>')
       : '';
+    var ygKapGeriSetiri = (kapSonra!==kapSonraBugun)
+      ? ('Daxil edilən kapital (bugünkü): <b>'+kapSonraBugun+' AZN</b><br/>Hüquq ('+yg.vefat.getFullYear()+') ilinə gətirilmiş kapital: <b>'+kapSonra+' AZN</b><br/>')
+      : '';
 
     ygAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
@@ -3739,6 +3787,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      ygKapGeriSetiri+
       'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
       (catmayan>0
