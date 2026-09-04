@@ -2856,6 +2856,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     document.getElementById('elp-flow').innerHTML='';
     elp = {};
     elpAddBotCard(
+      '<div class="abi-q">Mərhum şəxs güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
+      '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
+        '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="elpQGuzestliMulki(this,true)">Güzəştli şərtlərlə çalışırdı</button>'+
+        '<button class="abi-choice-btn" style="text-align:left;" onclick="elpQGuzestliMulki(this,false)">Mülki</button>'+
+      '</div>'
+    );
+  }
+  function elpQGuzestliMulki(btn, guzestli){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(guzestli ? 'Güzəştli şərtlərlə çalışırdı' : 'Mülki');
+    elp.guzestli = guzestli;
+    elpAskDerece();
+  }
+  function elpAskDerece(){
+    elpAddBotCard(
       '<div class="abi-q">Əlillik dərəcəsi neçədir?</div>'+
       '<div class="abi-input-group single">'+
         '<div><label>Dərəcə</label><select id="elp-derece" style="width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:10px 12px;font-size:0.9rem;font-family:\'Inter\',sans-serif;color:var(--text);">'+
@@ -3449,9 +3464,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function elpShowFinalResult(isPensiya, detailHtml){
     var cls = isPensiya ? 'pensiya' : 'muavinet';
     var title = isPensiya ? '✅ Əlillik pensiyası təyin olunacaq' : '📋 Əlilliyə görə sosial müavinət təyin olunacaq';
+    var kargQurum = elp.guzestli ? 'XŞTMF' : 'SÖMTİ';
+    var kargNote = (elp.guzestli !== undefined)
+      ? '<div class="abi-note" style="margin-top:10px;">⚠️ Qeyd edilmiş sənədlərlə <b>'+kargQurum+'</b>-ə ƏMAS üzərindən kargüzarlıq edilsin.</div>'
+      : '';
     elpAddBotCard(
       '<div class="abi-result '+cls+'">'+title+'</div>'+
       '<div style="margin-top:10px;">'+detailHtml+'</div>'+
+      kargNote+
       '<button class="abi-restart-btn" onclick="elpStart()">🔄 Yenidən başla</button>'
     );
   }
