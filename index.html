@@ -22,10 +22,10 @@
     .tab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:12px 20px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text-muted);transition:all 0.2s;margin-bottom:-2px;}
     .tab-btn:hover{color:var(--blue);}
     .tab-btn.active{color:var(--blue);border-bottom:3px solid var(--blue);}
-    .tab-select{background:none;border:none;border-bottom:3px solid transparent;padding:12px 20px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text-muted);transition:all 0.2s;margin-bottom:-2px;outline:none;-webkit-appearance:none;appearance:none;}
-    .tab-select:hover{color:var(--blue);}
-    .tab-select.active{color:var(--blue);border-bottom:3px solid var(--blue);}
-    .tab-select option{color:var(--text);font-weight:600;}
+    .subtabs{background:var(--blue-pale);border-bottom:2px solid var(--blue-mid);display:flex;padding:0 24px;gap:4px;}
+    .subtab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:9px 16px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text-muted);transition:all 0.2s;margin-bottom:-2px;}
+    .subtab-btn:hover{color:var(--blue);}
+    .subtab-btn.active{color:var(--blue);border-bottom:3px solid var(--blue);}
     #tab-refiq{flex:1;display:none;flex-direction:column;}
     #tab-refiq.active{display:flex;}
     main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 0;}
@@ -147,12 +147,12 @@
   <button class="tab-btn active" data-tab="refiq" onclick="switchTab('refiq')">💬 AİSA</button>
   <button class="tab-btn" data-tab="arayish" onclick="switchTab('arayish')">📄 Arayışlar</button>
   <button class="tab-btn" data-tab="erize" onclick="switchTab('erize')">📝 Ərizələr</button>
-  <select class="tab-select" id="pensiya-select" onchange="pensiyaSelectChange(this.value)">
-    <option value="" hidden>Pensiya hesablamaları ▾</option>
-    <option value="abi">ABİ</option>
-    <option value="elp">ƏLİLLİK</option>
-    <option value="yg">YAŞA GÖRƏ</option>
-  </select>
+  <button class="tab-btn" data-tab="pensiya" onclick="switchTab('pensiya')">Pensiya</button>
+</div>
+<div class="subtabs" id="pensiya-subtabs" style="display:none;">
+  <button class="subtab-btn" data-tab="abi" onclick="switchTab('abi')">ABİ</button>
+  <button class="subtab-btn" data-tab="elp" onclick="switchTab('elp')">ƏLİLLİK</button>
+  <button class="subtab-btn" data-tab="yg" onclick="switchTab('yg')">YAŞA GÖRƏ</button>
 </div>
 <div id="tab-refiq" class="active">
   <main>
@@ -828,22 +828,27 @@
     el.value=result.join(', ');
   }
 
+  var _sonPensiyaSub = 'abi'; // "Pensiya" seçiləndə açılacaq son alt-bölmə
   function switchTab(tab){
-    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===tab);});
-    document.getElementById('tab-refiq').classList.toggle('active',tab==='refiq');
-    document.getElementById('tab-arayish').classList.toggle('active',tab==='arayish');
-    document.getElementById('tab-erize').classList.toggle('active',tab==='erize');
-    document.getElementById('tab-abi').classList.toggle('active',tab==='abi');
-    document.getElementById('tab-elp').classList.toggle('active',tab==='elp');
-    document.getElementById('tab-yg').classList.toggle('active',tab==='yg');
-    var psel = document.getElementById('pensiya-select');
-    if(psel){
-      var isPensiya = (tab==='abi'||tab==='elp'||tab==='yg');
-      psel.classList.toggle('active', isPensiya);
-      psel.value = isPensiya ? tab : '';
+    // "Pensiya" üst tabı → son (yoxdursa ilk) alt-bölməyə keç
+    if(tab==='pensiya'){ tab = _sonPensiyaSub || 'abi'; }
+    var pensiyaSub = (tab==='abi'||tab==='elp'||tab==='yg');
+    if(pensiyaSub){ _sonPensiyaSub = tab; }
+    document.querySelectorAll('.tab-btn').forEach(function(b){
+      var dt = b.getAttribute('data-tab');
+      b.classList.toggle('active', dt===tab || (pensiyaSub && dt==='pensiya'));
+    });
+    ['refiq','arayish','erize','abi','elp','yg'].forEach(function(t){
+      var el = document.getElementById('tab-'+t);
+      if(el) el.classList.toggle('active', t===tab);
+    });
+    var sub = document.getElementById('pensiya-subtabs');
+    if(sub){
+      sub.style.display = pensiyaSub ? 'flex' : 'none';
+      sub.querySelectorAll('.subtab-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab')===tab); });
     }
+    return tab;
   }
-  function pensiyaSelectChange(v){ if(v) switchTab(v); }
   function selectCat(cat){
     document.querySelectorAll('.arayish-form').forEach(function(f){f.classList.remove('active');});
     if(!cat){document.getElementById('empty-state').style.display='block';return;}
@@ -4330,12 +4335,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   var _ygInitDone = false;
   var _origSwitchTab = switchTab;
   switchTab = function(tab){
-    _origSwitchTab(tab);
-    if(tab==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
-    if(tab==='elp' && !_elpInitDone){ _elpInitDone = true; elpStart(); }
-    if(tab==='yg' && !_ygInitDone){ _ygInitDone = true; ygStart(); }
+    var t = _origSwitchTab(tab) || tab;
+    if(t==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
+    if(t==='elp' && !_elpInitDone){ _elpInitDone = true; elpStart(); }
+    if(t==='yg' && !_ygInitDone){ _ygInitDone = true; ygStart(); }
     var fbFab = document.getElementById('fb-fab');
-    if(fbFab){ fbFab.style.display = (tab==='abi'||tab==='elp'||tab==='yg') ? 'flex' : 'none'; }
+    if(fbFab){ fbFab.style.display = (t==='abi'||t==='elp'||t==='yg') ? 'flex' : 'none'; }
   };
 
   // ----------------------------
