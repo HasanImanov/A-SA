@@ -4573,7 +4573,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   var UDSY_ROLLAR = [
     'Təmsilçi','Təmsilçinin həyat yoldaşı','Təmsilçinin atası','Təmsilçinin anası',
     'Təmsilçinin bacısı','Təmsilçinin qardaşı','Təmsilçinin baldızı','Təmsilçinin qaynı',
-    'Təmsilçinin qayınatası','Təmsilçinin qaynanası'
+    'Təmsilçinin qayınatası','Təmsilçinin qaynanası',
+    'Təmsilçinin 18 yaşından yuxarı oğlu','Təmsilçinin 18 yaşından yuxarı qızı'
   ];
   var UDSY_QULLUQ_STATUSLAR = ['usaq8','qulluq1','qulluqUsaq'];
   function udsyStatusAd(v){
@@ -4626,56 +4627,124 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsyLockCard(btn.closest('.abi-card'));
     udsyAddUserCard(yes?'Bəli':'Xeyr');
     udsy.varElilUsaq = yes;
+    udsyAskP4();
+  }
+  function udsyAskP4(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə pensiya və ya müavinət alan varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP4(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP4(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP4(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varPensiya = yes;
+    udsyAskP5();
+  }
+  function udsyAskP5(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə 23 yaşına qədər əyani təhsil alan varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP5(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP5(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP5(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varTehsil = yes;
+    udsyAskP6();
+  }
+  function udsyAskP6(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə aktiv sahibkarlıq fəaliyyəti ilə məşğul olan varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP6(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP6(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP6(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varSahibkar = yes;
+    if(!yes){ udsyAskBoyukler(); return; }
+    udsyAddBotCard(
+      '<div class="abi-q">Sahibkarın son 12 ayın minimum 11 ayı ödənişi varmı?</div>'+
+      '<div class="abi-note">Monitoring AS-da yoxlayın.</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP6Odenis(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP6Odenis(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP6Odenis(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.sahibkar11 = yes;
+    if(!yes){ udsyImtinaEkle('Aktiv sahibkarlıq fəaliyyəti var, lakin son 12 ayın minimum 11 ayı ödəniş yoxdur (Monitoring AS)'); }
     udsyAskBoyukler();
   }
 
-  // Q9 — Əmək qabiliyyətli ailə üzvləri və hər birinin statusu
+  // Q9a — Əmək qabiliyyətli ailə üzvlərinin sayı
   function udsyAskBoyukler(){
+    udsyAddBotCard(
+      '<div class="abi-q">Əmək qabiliyyətli ailə üzvlərinin sayı neçədir?</div>'+
+      '<div class="abi-input-group single"><div><label>Say (maks. '+UDSY_ROLLAR.length+')</label><input type="number" id="udsy-boyuk-say" min="1" max="'+UDSY_ROLLAR.length+'" placeholder="2"/></div></div>'+
+      '<button class="abi-go-btn" onclick="udsyBoyuklerSay(this)">Davam et</button>'
+    );
+  }
+  function udsyBoyuklerSay(btn){
+    var say = parseInt(document.getElementById('udsy-boyuk-say').value, 10);
+    if(isNaN(say) || say < 1){ siteAlert('Əmək qabiliyyətli ailə üzvlərinin sayını daxil edin.'); return; }
+    if(say > UDSY_ROLLAR.length){ siteAlert('Say '+UDSY_ROLLAR.length+'-dan çox ola bilməz.'); return; }
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard('Əmək qabiliyyətli üzv sayı: '+say);
+    udsy.boyukSay = say;
+    udsyAskBoyuklerStatus(say);
+  }
+
+  // Q9b — Hər üzv üçün ailə üzvü + status seçimi (yalnız say qədər sətir açılır)
+  function udsyAskBoyuklerStatus(say){
+    var rolOpts = '<option value="">— ailə üzvünü seçin —</option>'+
+      UDSY_ROLLAR.map(function(r,i){ return '<option value="'+i+'">'+r+'</option>'; }).join('');
     var stOpts = '<option value="">— status seçin —</option>'+
       UDSY_STATUSLAR.map(function(s){ return '<option value="'+s[0]+'">'+s[1]+'</option>'; }).join('')+
       '<option value="yox">Status yoxdur</option>';
-    var rows = UDSY_ROLLAR.map(function(r,i){
-      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;flex-wrap:wrap;">'+
-        '<label style="display:flex;align-items:center;gap:6px;font-size:0.84rem;min-width:200px;flex:0 0 auto;">'+
-          '<input type="checkbox" id="udsy-rol-'+i+'" onchange="udsyRolToggle('+i+')"/> '+r+
-        '</label>'+
-        '<select id="udsy-rol-'+i+'-st" disabled style="flex:1;min-width:190px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:6px 8px;font-family:\'Inter\',sans-serif;font-size:0.78rem;color:var(--text);">'+stOpts+'</select>'+
+    var selCss = 'flex:1;min-width:180px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:6px 8px;font-family:\'Inter\',sans-serif;font-size:0.78rem;color:var(--text);';
+    var rows = '';
+    for(var i=0;i<say;i++){
+      rows += '<div style="display:flex;gap:8px;padding:6px 0;flex-wrap:wrap;align-items:center;">'+
+        '<span style="font-size:0.8rem;font-weight:700;color:var(--text-muted);min-width:18px;">'+(i+1)+'.</span>'+
+        '<select id="udsy-uzv-'+i+'-rol" style="'+selCss+'">'+rolOpts+'</select>'+
+        '<select id="udsy-uzv-'+i+'-st" style="'+selCss+'">'+stOpts+'</select>'+
       '</div>';
-    }).join('');
+    }
     udsyAddBotCard(
-      '<div class="abi-q">Əmək qabiliyyətli ailə üzvləri və statusları</div>'+
-      '<div class="abi-input-group single"><div><label>Əmək qabiliyyətli ailə üzvlərinin sayı</label><input type="number" id="udsy-boyuk-say" min="1" placeholder="2"/></div></div>'+
-      '<div class="abi-note" style="margin-top:8px;">Sayı yazın, sonra həmin sayda ailə üzvünü seçib hər biri üçün status təyin edin. Yoxlanılmalıdır: "Rəsmi işləyən" — MDSS ödənişləri son 12 ayın 80%-ni; "Sahibkar"/"Kəndli sahibkar" — son 12 ayın min. 11 ayını əhatə etməlidir.</div>'+
-      '<div style="margin-top:10px;">'+rows+'</div>'+
+      '<div class="abi-q">Hər əmək qabiliyyətli üzv üçün ailə üzvünü və statusunu seçin</div>'+
+      '<div class="abi-note">Yoxlanılmalıdır: "Rəsmi işləyən" — MDSS ödənişləri son 12 ayın 80%-ni; "Sahibkar"/"Kəndli sahibkar" — son 12 ayın min. 11 ayını əhatə etməlidir.</div>'+
+      '<div style="margin-top:8px;">'+rows+'</div>'+
       '<button class="abi-go-btn" onclick="udsyQBoyukler(this)">Davam et</button>'
     );
   }
-  function udsyRolToggle(i){
-    var cb = document.getElementById('udsy-rol-'+i);
-    var sel = document.getElementById('udsy-rol-'+i+'-st');
-    sel.disabled = !cb.checked;
-    if(!cb.checked) sel.value = '';
-  }
   function udsyQBoyukler(btn){
-    var say = parseInt(document.getElementById('udsy-boyuk-say').value, 10);
-    if(isNaN(say) || say < 1){ siteAlert('Əmək qabiliyyətli ailə üzvlərinin sayını daxil edin.'); return; }
+    var say = udsy.boyukSay;
     var secilmis = [];
-    UDSY_ROLLAR.forEach(function(r,i){
-      if(document.getElementById('udsy-rol-'+i).checked){
-        secilmis.push({ rol: r, status: document.getElementById('udsy-rol-'+i+'-st').value });
-      }
-    });
-    if(secilmis.length !== say){
-      siteAlert('Seçilmiş ailə üzvlərinin sayı ('+secilmis.length+') göstərilən saya ('+say+') bərabər olmalıdır.');
-      return;
+    for(var i=0;i<say;i++){
+      var rolI = document.getElementById('udsy-uzv-'+i+'-rol').value;
+      var st = document.getElementById('udsy-uzv-'+i+'-st').value;
+      if(rolI === '' || st === ''){ siteAlert('Hər sətir üçün ailə üzvü və status seçin.'); return; }
+      secilmis.push({ rol: UDSY_ROLLAR[parseInt(rolI, 10)], status: st });
     }
-    if(secilmis.some(function(p){ return !p.status; })){
-      siteAlert('Hər seçilmiş ailə üzvü üçün status təyin edin.');
-      return;
-    }
+    var adlar = secilmis.map(function(p){ return p.rol; });
+    var tekrar = adlar.filter(function(r,i){ return adlar.indexOf(r) !== i; });
+    if(tekrar.length){ siteAlert('Eyni ailə üzvü iki dəfə seçilib: '+tekrar[0]); return; }
     udsyLockCard(btn.closest('.abi-card'));
-    udsyAddUserCard('Əmək qabiliyyətli üzvlər ('+say+'): '+secilmis.map(function(p){ return p.rol+' — '+udsyStatusAd(p.status); }).join('; '));
-    udsy.boyukSay = say;
+    udsyAddUserCard(secilmis.map(function(p){ return p.rol+' — '+udsyStatusAd(p.status); }).join('; '));
     udsy.uzvler = secilmis;
     udsyAskGelir();
   }
@@ -4723,6 +4792,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(p.status==='qulluqUsaq' && !udsy.varElilUsaq){
         red.push(p.rol+' — "18 yaşınadək əlil uşağa qulluq" statusu, lakin ailədə belə uşaq yoxdur');
       }
+      if(p.status==='pensiya' && !udsy.varPensiya){
+        red.push(p.rol+' — "Pensiya/müavinət alan" statusu, lakin ailədə pensiya və ya müavinət alan yoxdur');
+      }
+      if(p.status==='tehsil' && !udsy.varTehsil){
+        red.push(p.rol+' — "23 yaşınadək əyani təhsil" statusu, lakin ailədə 23 yaşınadək əyani təhsil alan yoxdur');
+      }
+      if(p.status==='sahibkar'){
+        if(!udsy.varSahibkar){
+          red.push(p.rol+' — "Sahibkar" statusu, lakin ailədə aktiv sahibkarlıq fəaliyyəti ilə məşğul olan yoxdur');
+        } else if(udsy.sahibkar11===false){
+          red.push(p.rol+' — "Sahibkar" statusu, lakin son 12 ayın minimum 11 ayı ödəniş yoxdur (Monitoring AS)');
+        }
+      }
     });
 
     // 3) Hər "qulluq" statusunda ev üzrə yalnız 1 nəfər ola bilər
@@ -4741,48 +4823,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     var ferq = abiRound2(meyar - (udsy.gelir||0));
 
-    // ── Məlumat cədvəli ──
-    var evCavab;
-    if(udsy.ozEvi){ evCavab = 'Bəli (öz evi)'; }
-    else if(udsy.kirayeNov==='kiraye'){ evCavab = 'Xeyr — kirayə'+(udsy.kirayeMuqavile===true?' (notarial müqavilə var)':udsy.kirayeMuqavile===false?' (notarial müqavilə yoxdur)':''); }
-    else if(udsy.kirayeNov==='odenissiz'){ evCavab = 'Xeyr — ödəniş edilmədən yaşanılır'; }
-    else { evCavab = 'Xeyr'; }
-    var rows = [
-      ['Ailə tərkibi', (udsy.aileSay||0)+' nəfər'],
-      ['Yaşadığı ev', evCavab],
-      ['Eyni təyinatlı 2+ mülk', udsy.eyniMulk ? 'Bəli' : 'Xeyr'],
-      ['Adına pay torpağı', udsy.payTorpagi ? ('Bəli'+(udsy.voenVar===true?' — aktiv VÖEN var':udsy.voenVar===false?' — aktiv VÖEN yoxdur':'')) : 'Xeyr'],
-      ['Nəqliyyat vasitəsi / etibarnamə', udsy.neqliyyat ? 'Bəli' : 'Xeyr'],
-      ['Aylıq kommunal '+(udsy.kommunalHedd||0)+' AZN-i keçir', udsy.kommunalKecir ? 'Bəli' : 'Xeyr'],
-      ['Son 1 ildə 3600+ AZN alqı-satqı', udsy.alqiSatqi ? 'Bəli' : 'Xeyr'],
-      ['8 yaşınadək uşaq var', udsy.varUsaq8 ? 'Bəli' : 'Xeyr'],
-      ['1-ci dərəcə əlil var', udsy.varElil1 ? 'Bəli' : 'Xeyr'],
-      ['18 yaşınadək əlil uşaq var', udsy.varElilUsaq ? 'Bəli' : 'Xeyr'],
-      ['Əmək qabiliyyətli üzvlər', (udsy.boyukSay||0)+' nəfər'],
-      ['Ehtiyac meyarı', meyar+' AZN ('+UDSY_MEYAR+' × '+(udsy.aileSay||0)+')'],
-      ['Aylıq gəlir', (udsy.gelir||0)+' AZN'],
-      ['Aztəminatlı', aztiminatli ? ('Bəli — fərq '+ferq+' AZN') : 'Xeyr']
-    ];
-    var tbl = '<table style="border-collapse:collapse;width:100%;font-size:0.85rem;margin-top:6px;">'+
-      rows.map(function(r){ return '<tr>'+
-        '<td style="padding:4px 8px;border-bottom:1px solid var(--blue-mid);color:var(--text-muted);vertical-align:top;">'+r[0]+'</td>'+
-        '<td style="padding:4px 8px;border-bottom:1px solid var(--blue-mid);font-weight:700;">'+r[1]+'</td></tr>'; }).join('')+
-      '</table>';
-    var uzvList = uzvler.length
-      ? ('<div style="margin-top:8px;font-size:0.83rem;"><b>Statuslar:</b><ul style="margin:4px 0 0;padding-left:18px;">'+
-          uzvler.map(function(p){ return '<li>'+p.rol+' — '+udsyStatusAd(p.status)+'</li>'; }).join('')+'</ul></div>')
-      : '';
-
     var neticeBlok = red.length
-      ? ('<div class="abi-result muavinet" style="margin-top:12px;">❌ Qeydiyyatdan keçə bilməz — səbəblər ('+red.length+'):'+
+      ? ('<div class="abi-result muavinet">❌ Qeydiyyatdan keçə bilməz — imtina səbəbləri ('+red.length+'):'+
           '<ul style="margin:8px 0 0;padding-left:20px;font-weight:600;">'+red.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul></div>')
-      : ('<div class="abi-result pensiya" style="margin-top:12px;">✅ ÜDSY qeydiyyatı üçün maneə yoxdur.'+
-          (aztiminatli ? '<br/>Ailə aztəminatlıdır — ehtiyac meyarı ilə fərq: <b>'+ferq+' AZN</b>.' : '')+'</div>');
+      : ('<div class="abi-result pensiya">✅ ÜDSY qeydiyyatı üçün imtina səbəbi yoxdur.'+
+          (aztiminatli
+            ? '<br/>Ailə aztəminatlıdır — ehtiyac meyarı ('+meyar+' AZN) ilə gəlir ('+(udsy.gelir||0)+' AZN) arasında fərq: <b>'+ferq+' AZN</b>.'
+            : '')+'</div>');
 
     udsyAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
-      tbl+
-      uzvList+
       neticeBlok+
       '<button class="abi-restart-btn" style="margin-top:10px;" onclick="udsyStart()">🔄 Yenidən başla</button>'
     );
