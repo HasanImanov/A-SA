@@ -4672,7 +4672,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsyLockCard(btn.closest('.abi-card'));
     udsyAddUserCard(yes?'Bəli':'Xeyr');
     udsy.varSahibkar = yes;
-    if(!yes){ udsyAskBoyukler(); return; }
+    if(!yes){ udsyAskP7(); return; }
     udsyAddBotCard(
       '<div class="abi-q">Sahibkarın son 12 ayın minimum 11 ayı ödənişi varmı?</div>'+
       '<div class="abi-note">Monitoring AS-da yoxlayın.</div>'+
@@ -4687,6 +4687,54 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsyAddUserCard(yes?'Bəli':'Xeyr');
     udsy.sahibkar11 = yes;
     if(!yes){ udsyImtinaEkle('Aktiv sahibkarlıq fəaliyyəti var, lakin son 12 ayın minimum 11 ayı ödəniş yoxdur (Monitoring AS)'); }
+    udsyAskP7();
+  }
+
+  // P7 — Rəsmi işləyən + əmək müqaviləsi / ƏMAS / məxfi qurum
+  function udsyAskP7(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə rəsmi işləyən varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP7(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP7(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP7(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varResmi = yes;
+    if(!yes){ udsyAskBoyukler(); return; }
+    udsyAddBotCard(
+      '<div class="abi-q">Əmək müqaviləsi ƏMAS-da görsənirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP7Emas(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP7Emas(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP7Emas(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.resmiEmas = yes;
+    if(yes){ udsyAskBoyukler(); return; }
+    udsyAddBotCard(
+      '<div class="abi-q">Məxfi qurumdurmu?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP7Mexfi(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP7Mexfi(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP7Mexfi(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.resmiMexfi = yes;
+    if(yes){
+      udsy.resmiSenedler = true;
+    } else {
+      udsyImtinaEkle('Rəsmi işləyən statusu — əmək müqaviləsi ƏMAS-da görünmür və qurum məxfi deyil');
+    }
     udsyAskBoyukler();
   }
 
@@ -4805,6 +4853,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
           red.push(p.rol+' — "Sahibkar" statusu, lakin son 12 ayın minimum 11 ayı ödəniş yoxdur (Monitoring AS)');
         }
       }
+      if(p.status==='resmi' && !udsy.varResmi){
+        red.push(p.rol+' — "Rəsmi işləyən" statusu, lakin ailədə rəsmi işləyən yoxdur');
+      }
     });
 
     // 3) Hər "qulluq" statusunda ev üzrə yalnız 1 nəfər ola bilər
@@ -4823,6 +4874,17 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     var ferq = abiRound2(meyar - (udsy.gelir||0));
 
+    var senedBlok = udsy.resmiSenedler
+      ? ('<div class="abi-note" style="margin-top:12px;font-style:normal;color:var(--text);">'+
+          '<b>Rəsmi işləyən (məxfi qurum) — tələb olunan sənədlər:</b>'+
+          '<ol style="margin:6px 0 0;padding-left:20px;">'+
+            '<li>Əmək müqaviləsinin əsli (düz) və ya notarial qaydada təsdiqi</li>'+
+            '<li>Son 12 aylıq əmək haqqı hesabatı — işə götürən tərəfin möhürü ilə birgə</li>'+
+          '</ol>'+
+          '<div style="margin-top:6px;">⚠️ Bu sənədlərlə <b>MMŞMMF</b>-a kargüzarlıq edilsin.</div>'+
+        '</div>')
+      : '';
+
     var neticeBlok = red.length
       ? ('<div class="abi-result muavinet">❌ Qeydiyyatdan keçə bilməz — imtina səbəbləri ('+red.length+'):'+
           '<ul style="margin:8px 0 0;padding-left:20px;font-weight:600;">'+red.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul></div>')
@@ -4834,6 +4896,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsyAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
       neticeBlok+
+      senedBlok+
       '<button class="abi-restart-btn" style="margin-top:10px;" onclick="udsyStart()">🔄 Yenidən başla</button>'
     );
   }
