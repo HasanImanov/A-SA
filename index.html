@@ -106,7 +106,10 @@
     #tab-yg{flex:1;display:none;flex-direction:column;}
     #tab-yg.active{display:flex;}
     #yg-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
-    #abi-flow{display:flex;flex-direction:column;gap:16px;}
+    #tab-udsy{flex:1;display:none;flex-direction:column;}
+    #tab-udsy.active{display:flex;}
+    #udsy-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
+    #abi-flow,#udsy-flow{display:flex;flex-direction:column;gap:16px;}
     .abi-bubble{display:flex;gap:10px;align-items:flex-start;animation:fadeIn 0.3s ease;}
     .abi-bubble.user{flex-direction:row-reverse;}
     .abi-card{max-width:86%;padding:14px 18px;border-radius:var(--radius);font-size:0.92rem;line-height:1.6;}
@@ -157,6 +160,12 @@
       <option value="abi">ABİ</option>
       <option value="elp">ƏLİLLİK</option>
       <option value="yg">YAŞA GÖRƏ</option>
+    </select>
+  </span>
+  <span class="tab-select-wrap">
+    <select class="tab-select" id="sosial-select" onchange="sosialSelectChange(this.value)">
+      <option value="" hidden>Sosial müavinət</option>
+      <option value="udsy">ÜDSY</option>
     </select>
   </span>
 </div>
@@ -404,6 +413,13 @@
   <div id="yg-main">
     <div class="arayish-title">Yaşa görə pensiya/müavinət təyinatı</div>
     <div id="yg-flow"></div>
+  </div>
+</div>
+
+<div id="tab-udsy">
+  <div id="udsy-main">
+    <div class="arayish-title">Ünvanlı dövlət sosial yardımı (ÜDSY)</div>
+    <div id="udsy-flow"></div>
   </div>
 </div>
 <script>
@@ -836,7 +852,7 @@
 
   function switchTab(tab){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===tab);});
-    ['refiq','arayish','erize','abi','elp','yg'].forEach(function(t){
+    ['refiq','arayish','erize','abi','elp','yg','udsy'].forEach(function(t){
       var el = document.getElementById('tab-'+t);
       if(el) el.classList.toggle('active', t===tab);
     });
@@ -846,9 +862,16 @@
       psel.classList.toggle('active', isPensiya);
       psel.value = isPensiya ? tab : '';
     }
+    var ssel = document.getElementById('sosial-select');
+    if(ssel){
+      var isSosial = (tab==='udsy');
+      ssel.classList.toggle('active', isSosial);
+      ssel.value = isSosial ? tab : '';
+    }
     return tab;
   }
   function pensiyaSelectChange(v){ if(v) switchTab(v); }
+  function sosialSelectChange(v){ if(v) switchTab(v); }
   function selectCat(cat){
     document.querySelectorAll('.arayish-form').forEach(function(f){f.classList.remove('active');});
     if(!cat){document.getElementById('empty-state').style.display='block';return;}
@@ -1829,10 +1852,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQAhilEarly(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    abi.ahilOlub = false; // arayış sualından sonra dəqiqləşəcək
+    abi.ahilOlub = false; // arayış + təsadüf sualından sonra dəqiqləşəcək
     if(!yes){ abiAskElillikEarly(); return; }
     abiAddBotCard(
-      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-q">Arayış və ya məhkəmənin təsdiqləyici sənədi varmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQAhilArayis(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="abiQAhilArayis(this,false)">Xeyr</button>'+
@@ -1842,7 +1865,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQAhilArayis(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    abi.ahilOlub = yes;
+    abi.ahilOlub = false;
+    if(!yes){ abiAskElillikEarly(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Qulluq dövrü mərhum şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQAhilTesaduf(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQAhilTesaduf(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQAhilTesaduf(btn, tesaduf){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(tesaduf?'Bəli':'Xeyr');
+    abi.ahilOlub = !tesaduf; // yalnız işlədiyi dövrə təsadüf etmirsə əlavə staj kimi hesablanır
+    if(tesaduf){
+      abiAddBotCard('<div class="abi-note">Qulluq dövrü işlədiyi dövrə təsadüf etdiyi üçün əlavə staj kimi hesablanmır.</div>');
+    }
     abiAskElillikEarly();
   }
   function abiAskElillikEarly(){
@@ -1889,7 +1928,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       abiAddBotCard('<div class="abi-note">Qeyd: TSEK-ə əlillik sənədi əlavə edildikdən sonra müəyyən staj əlavə edilir.</div>');
     }
     abiAddBotCard(
-      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-q">Arayış və ya məhkəmənin təsdiqləyici sənədi varmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="abiQElillikArayis(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="abiQElillikArayis(this,false)">Xeyr</button>'+
@@ -1899,7 +1938,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function abiQElillikArayis(btn, yes){
     abiLockCard(btn.closest('.abi-card'));
     abiAddUserCard(yes?'Bəli':'Xeyr');
-    abi.elillikOlub = yes;
+    abi.elillikOlub = false;
+    if(!yes){ abiDecidePre2006Path(); return; }
+    abiAddBotCard(
+      '<div class="abi-q">Qulluq dövrü mərhum şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="abiQElillikTesaduf(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="abiQElillikTesaduf(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function abiQElillikTesaduf(btn, tesaduf){
+    abiLockCard(btn.closest('.abi-card'));
+    abiAddUserCard(tesaduf?'Bəli':'Xeyr');
+    abi.elillikOlub = !tesaduf; // yalnız işlədiyi dövrə təsadüf etmirsə əlavə staj kimi hesablanır
+    if(tesaduf){
+      abiAddBotCard('<div class="abi-note">Qulluq dövrü işlədiyi dövrə təsadüf etdiyi üçün əlavə staj kimi hesablanmır.</div>');
+    }
     abiDecidePre2006Path();
   }
 
@@ -2295,6 +2350,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(abi.vefat)*144;
     var minPensiyaAbi = abiGetMinPensiya(abi.vefat);
     gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaAbi));
+
+    // Qayda: staj tələbi ödənilmirsə belə, 2006-dan sonrakı (hüquq ilinə gətirilmiş) kapital
+    // hüquq ilinin minimum pensiyası × 144-dən az deyilsə → minimum pensiya təyin olunur.
+    var minPensiya144Hedd = abiRound2(minPensiyaAbi * 144);
+    var kapitalIleMinPensiya = (catmayan>0 && kapSonra >= minPensiya144Hedd && minPensiya144Hedd>0);
+    abi.kapitalIleMinPensiya = kapitalIleMinPensiya;
+    abi.minPensiya144Hedd = minPensiya144Hedd;
+    var abiPensiyaVar = (catmayan<=0) || kapitalIleMinPensiya;
+
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -2302,15 +2366,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(tapilanMebleg<minPensiyaAbi){
         tapilanMebleg = minPensiyaAbi;
       }
+    } else if(kapitalIleMinPensiya){
+      // Staj yoxdur, amma kapital kifayətdir → hüquq ilinin minimum pensiyası
+      tapilanMebleg = minPensiyaAbi;
     }
     abi.kapitalEvvel = kapEvvel; abi.kapitalSonra = kapSonra; abi.tapilanMebleg = tapilanMebleg;
-    abi.stajCatmir = catmayan>0;
+    abi.stajCatmir = catmayan>0 && !kapitalIleMinPensiya;
 
     // İndeksləşdirilmiş məbləğ (vəfat ilindən cari ilə qədər)
     var abiIndexIl = abiCariIndexIl();
-    var abiIndexlenmis = (catmayan<=0) ? abiIndexlenmisMebleg(tapilanMebleg, abi.vefat, abiIndexIl) : 0;
+    var abiIndexlenmis = abiPensiyaVar ? abiIndexlenmisMebleg(tapilanMebleg, abi.vefat, abiIndexIl) : 0;
     abi.indexlenmisMebleg = abiIndexlenmis;
-    var abiIndexSetiri = (catmayan<=0 && abiIndexlenmis>tapilanMebleg)
+    var abiIndexSetiri = (abiPensiyaVar && abiIndexlenmis>tapilanMebleg)
       ? ('<br/>'+abiIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+abiIndexlenmis+' AZN</b>')
       : '';
     var abiKapGeriSetiri = (kapSonra!==kapSonraBugun)
@@ -2327,8 +2394,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       S += h('2. Staj tələbi')+'<ul>'+
         '<li>Tələb olunan minimum staj = (yaş − 15) ÷ 3 = ('+ageObj.years+' − 15) ÷ 3 = <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b></li>'+
         '<li>Faktiki staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b>'+(hediyyeStaj>pre2006StajTotal?' (hədiyyə staj tətbiq olundu)':'')+'</li>'+
-        '<li>'+(catmayan>0?'Staj <b>çatmır</b> → sosial müavinət':'Staj tələbi <b>ödənilir</b>')+'</li></ul>';
-      if(catmayan<=0){
+        '<li>'+(catmayan>0
+          ? (kapitalIleMinPensiya
+              ? 'Staj <b>çatmır</b>, lakin 2006-dan sonrakı kapital ('+kapSonra+' AZN) hüquq ili minimumu × 144-dən ('+minPensiya144Hedd+' AZN) az deyil → <b>minimum pensiya</b>'
+              : 'Staj <b>çatmır</b> → sosial müavinət')
+          : 'Staj tələbi <b>ödənilir</b>')+'</li></ul>';
+      if(kapitalIleMinPensiya){
+        S += h('3. Kapitala görə minimum pensiya')+'<ul>'+
+          '<li>Staj tələbi ödənilmir, lakin 2006-dan sonrakı kapital hüquq ('+vil+') ilinə gətirilir: <b>'+kapSonra+' AZN</b></li>'+
+          '<li>Hüquq ili minimum pensiyası × 144 = '+minPensiyaAbi+' × 144 = <b>'+minPensiya144Hedd+' AZN</b></li>'+
+          '<li>'+kapSonra+' AZN ≥ '+minPensiya144Hedd+' AZN → hüquq ('+vil+') ili minimum pensiyası <b>'+minPensiyaAbi+' AZN</b> təyin olunur</li></ul>';
+        var giK = abiIndexlenmisMeblegIzah(tapilanMebleg, abi.vefat, abiIndexIl);
+        S += h('4. Bu günə ('+abiIndexIl+') indeksləşdirmə')+
+          box(giK.addimlar.length ? giK.addimlar.join('<br/>') : '(bu illər üçün indeksasiya faizi yoxdur)')+
+          '<div style="margin-top:6px;font-size:0.9rem;"><b>'+abiIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: '+giK.netice+' AZN</b></div>';
+      } else if(catmayan<=0){
         S += h('3. Pensiya kapitalı')+'<ul>';
         S += '<li>2006-dan əvvəlki kapital = '+pre2006Effective.toFixed(2)+' il × '+multiplier+' (İQİ əmsalı, '+vil+') = <b>'+kapEvvel+' AZN</b></li>';
         if(kapSonra!==kapSonraBugun){
@@ -2368,17 +2448,20 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      (kapitalIleMinPensiya
+        ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+        : '')+
       abiKapGeriSetiri+
       'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
-      (catmayan>0
+      (catmayan>0 && !kapitalIleMinPensiya
         ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
         : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+abiIndexSetiri))+
-      (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')+
+      (abiPensiyaVar ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')+
       '</div>'
     );
 
-    if(catmayan>0){
+    if(catmayan>0 && !kapitalIleMinPensiya){
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       abiShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
@@ -3153,10 +3236,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function elpQAhilEarly(btn, yes){
     elpLockCard(btn.closest('.abi-card'));
     elpAddUserCard(yes?'Bəli':'Xeyr');
-    elp.ahilOlub = false; // arayış sualından sonra dəqiqləşəcək
+    elp.ahilOlub = false; // arayış + təsadüf sualından sonra dəqiqləşəcək
     if(!yes){ elpAskElillikEarly(); return; }
     elpAddBotCard(
-      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-q">Arayış və ya məhkəmənin təsdiqləyici sənədi varmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="elpQAhilArayis(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="elpQAhilArayis(this,false)">Xeyr</button>'+
@@ -3166,7 +3249,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function elpQAhilArayis(btn, yes){
     elpLockCard(btn.closest('.abi-card'));
     elpAddUserCard(yes?'Bəli':'Xeyr');
-    elp.ahilOlub = yes;
+    elp.ahilOlub = false;
+    if(!yes){ elpAskElillikEarly(); return; }
+    elpAddBotCard(
+      '<div class="abi-q">Qulluq dövrü şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQAhilTesaduf(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQAhilTesaduf(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQAhilTesaduf(btn, tesaduf){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(tesaduf?'Bəli':'Xeyr');
+    elp.ahilOlub = !tesaduf; // yalnız işlədiyi dövrə təsadüf etmirsə əlavə staj kimi hesablanır
+    if(tesaduf){
+      elpAddBotCard('<div class="abi-note">Qulluq dövrü işlədiyi dövrə təsadüf etdiyi üçün əlavə staj kimi hesablanmır.</div>');
+    }
     elpAskElillikEarly();
   }
   function elpAskElillikEarly(){
@@ -3213,7 +3312,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       elpAddBotCard('<div class="abi-note">Qeyd: TSEK-ə əlillik sənədi əlavə edildikdən sonra müəyyən staj əlavə edilir.</div>');
     }
     elpAddBotCard(
-      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-q">Arayış və ya məhkəmənin təsdiqləyici sənədi varmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="elpQElillikArayis(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="elpQElillikArayis(this,false)">Xeyr</button>'+
@@ -3223,7 +3322,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function elpQElillikArayis(btn, yes){
     elpLockCard(btn.closest('.abi-card'));
     elpAddUserCard(yes?'Bəli':'Xeyr');
-    elp.elillikOlub = yes;
+    elp.elillikOlub = false;
+    if(!yes){ elpDecidePre2006Path(); return; }
+    elpAddBotCard(
+      '<div class="abi-q">Qulluq dövrü şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="elpQElillikTesaduf(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="elpQElillikTesaduf(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function elpQElillikTesaduf(btn, tesaduf){
+    elpLockCard(btn.closest('.abi-card'));
+    elpAddUserCard(tesaduf?'Bəli':'Xeyr');
+    elp.elillikOlub = !tesaduf; // yalnız işlədiyi dövrə təsadüf etmirsə əlavə staj kimi hesablanır
+    if(tesaduf){
+      elpAddBotCard('<div class="abi-note">Qulluq dövrü işlədiyi dövrə təsadüf etdiyi üçün əlavə staj kimi hesablanmır.</div>');
+    }
     elpDecidePre2006Path();
   }
 
@@ -3404,6 +3519,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var boluc = (ageObj.years-15)*4/abiGetBolucDivisor(elp.vefat)*144;
     var minPensiyaElp = abiGetMinPensiya(elp.vefat);
     gerekenKapital = Math.max(0, abiRound2(boluc * minPensiyaElp));
+
+    // Qayda: staj tələbi ödənilmirsə belə, 2006-dan sonrakı (hüquq ilinə gətirilmiş) kapital
+    // hüquq ilinin minimum pensiyası × 144-dən az deyilsə → minimum pensiya təyin olunur.
+    var minPensiya144Hedd = abiRound2(minPensiyaElp * 144);
+    var kapitalIleMinPensiya = (catmayan>0 && kapSonra >= minPensiya144Hedd && minPensiya144Hedd>0);
+    elp.kapitalIleMinPensiya = kapitalIleMinPensiya;
+    elp.minPensiya144Hedd = minPensiya144Hedd;
+    var elpPensiyaVar = (catmayan<=0) || kapitalIleMinPensiya;
+
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0 && boluc>0) ? abiRound2(totalKapital/boluc) : 0;
@@ -3411,15 +3535,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(tapilanMebleg<minPensiyaElp){
         tapilanMebleg = minPensiyaElp;
       }
+    } else if(kapitalIleMinPensiya){
+      // Staj yoxdur, amma kapital kifayətdir → hüquq ilinin minimum pensiyası
+      tapilanMebleg = minPensiyaElp;
     }
     elp.kapitalEvvel = kapEvvel; elp.kapitalSonra = kapSonra; elp.tapilanMebleg = tapilanMebleg;
-    elp.stajCatmir = catmayan>0;
+    elp.stajCatmir = catmayan>0 && !kapitalIleMinPensiya;
 
     // İndeksləşdirilmiş məbləğ (vəfat ilindən cari ilə qədər)
     var elpIndexIl = abiCariIndexIl();
-    var elpIndexlenmis = (catmayan<=0) ? abiIndexlenmisMebleg(tapilanMebleg, elp.vefat, elpIndexIl) : 0;
+    var elpIndexlenmis = elpPensiyaVar ? abiIndexlenmisMebleg(tapilanMebleg, elp.vefat, elpIndexIl) : 0;
     elp.indexlenmisMebleg = elpIndexlenmis;
-    var elpIndexSetiri = (catmayan<=0 && elpIndexlenmis>tapilanMebleg)
+    var elpIndexSetiri = (elpPensiyaVar && elpIndexlenmis>tapilanMebleg)
       ? ('<br/>'+elpIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+elpIndexlenmis+' AZN</b>')
       : '';
     var elpKapGeriSetiri = (kapSonra!==kapSonraBugun)
@@ -3435,13 +3562,16 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      (kapitalIleMinPensiya
+        ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+        : '')+
       (kapitalTetbiqOlunur ? (elpKapGeriSetiri+'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
-      (catmayan<=0 ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+elpIndexSetiri) : '')+
-      (catmayan>0 ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
-      (catmayan<=0 ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
+      (elpPensiyaVar ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+elpIndexSetiri) : '')+
+      (catmayan>0 && !kapitalIleMinPensiya ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
+      (elpPensiyaVar ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
     );
 
-    if(catmayan>0){
+    if(catmayan>0 && !kapitalIleMinPensiya){
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       elpShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
@@ -3815,10 +3945,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function ygQAhilEarly(btn, yes){
     ygLockCard(btn.closest('.abi-card'));
     ygAddUserCard(yes?'Bəli':'Xeyr');
-    yg.ahilOlub = false; // arayış sualından sonra dəqiqləşəcək
+    yg.ahilOlub = false; // arayış + təsadüf sualından sonra dəqiqləşəcək
     if(!yes){ ygAskElillikEarly(); return; }
     ygAddBotCard(
-      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-q">Arayış və ya məhkəmənin təsdiqləyici sənədi varmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQAhilArayis(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQAhilArayis(this,false)">Xeyr</button>'+
@@ -3828,7 +3958,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function ygQAhilArayis(btn, yes){
     ygLockCard(btn.closest('.abi-card'));
     ygAddUserCard(yes?'Bəli':'Xeyr');
-    yg.ahilOlub = yes;
+    yg.ahilOlub = false;
+    if(!yes){ ygAskElillikEarly(); return; }
+    ygAddBotCard(
+      '<div class="abi-q">Qulluq dövrü mərhum şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQAhilTesaduf(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQAhilTesaduf(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQAhilTesaduf(btn, tesaduf){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(tesaduf?'Bəli':'Xeyr');
+    yg.ahilOlub = !tesaduf; // yalnız işlədiyi dövrə təsadüf etmirsə əlavə staj kimi hesablanır
+    if(tesaduf){
+      ygAddBotCard('<div class="abi-note">Qulluq dövrü işlədiyi dövrə təsadüf etdiyi üçün əlavə staj kimi hesablanmır.</div>');
+    }
     ygAskElillikEarly();
   }
   function ygAskElillikEarly(){
@@ -3875,7 +4021,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ygAddBotCard('<div class="abi-note">Qeyd: TSEK-ə əlillik sənədi əlavə edildikdən sonra müəyyən staj əlavə edilir.</div>');
     }
     ygAddBotCard(
-      '<div class="abi-q">Notarius təsdiqlənmiş arayış varmı?</div>'+
+      '<div class="abi-q">Arayış və ya məhkəmənin təsdiqləyici sənədi varmı?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQElillikArayis(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQElillikArayis(this,false)">Xeyr</button>'+
@@ -3885,7 +4031,23 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function ygQElillikArayis(btn, yes){
     ygLockCard(btn.closest('.abi-card'));
     ygAddUserCard(yes?'Bəli':'Xeyr');
-    yg.elillikOlub = yes;
+    yg.elillikOlub = false;
+    if(!yes){ ygDecidePre2006Path(); return; }
+    ygAddBotCard(
+      '<div class="abi-q">Qulluq dövrü mərhum şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="ygQElillikTesaduf(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="ygQElillikTesaduf(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function ygQElillikTesaduf(btn, tesaduf){
+    ygLockCard(btn.closest('.abi-card'));
+    ygAddUserCard(tesaduf?'Bəli':'Xeyr');
+    yg.elillikOlub = !tesaduf; // yalnız işlədiyi dövrə təsadüf etmirsə əlavə staj kimi hesablanır
+    if(tesaduf){
+      ygAddBotCard('<div class="abi-note">Qulluq dövrü işlədiyi dövrə təsadüf etdiyi üçün əlavə staj kimi hesablanmır.</div>');
+    }
     ygDecidePre2006Path();
   }
 
@@ -4071,6 +4233,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var YG_BOLUC = 144;
     var minPensiyaYg = abiGetMinPensiya(yg.vefat);
     gerekenKapital = Math.max(0, abiRound2(YG_BOLUC * minPensiyaYg));
+
+    // Qayda: staj tələbi ödənilmirsə belə, 2006-dan sonrakı (hüquq ilinə gətirilmiş) kapital
+    // hüquq ilinin minimum pensiyası × 144-dən az deyilsə → minimum pensiya təyin olunur.
+    var minPensiya144Hedd = abiRound2(minPensiyaYg * 144);
+    var kapitalIleMinPensiya = (catmayan>0 && kapSonra >= minPensiya144Hedd && minPensiya144Hedd>0);
+    yg.kapitalIleMinPensiya = kapitalIleMinPensiya;
+    yg.minPensiya144Hedd = minPensiya144Hedd;
+    var ygPensiyaVar = (catmayan<=0) || kapitalIleMinPensiya;
+
     if(catmayan<=0){
       // Pensiya məbləği YALNIZ staj tələbi ödəyəndə hesablanır
       tapilanMebleg = (totalKapital>0) ? abiRound2(totalKapital/YG_BOLUC) : 0;
@@ -4078,15 +4249,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       if(tapilanMebleg<minPensiyaYg){
         tapilanMebleg = minPensiyaYg;
       }
+    } else if(kapitalIleMinPensiya){
+      // Staj yoxdur, amma kapital kifayətdir → hüquq ilinin minimum pensiyası
+      tapilanMebleg = minPensiyaYg;
     }
     yg.kapitalEvvel = kapEvvel; yg.kapitalSonra = kapSonra; yg.tapilanMebleg = tapilanMebleg;
-    yg.stajCatmir = catmayan>0;
+    yg.stajCatmir = catmayan>0 && !kapitalIleMinPensiya;
 
     // İndeksləşdirilmiş məbləğ (vəfat ilindən cari ilə qədər)
     var ygIndexIl = abiCariIndexIl();
-    var ygIndexlenmis = (catmayan<=0) ? abiIndexlenmisMebleg(tapilanMebleg, yg.vefat, ygIndexIl) : 0;
+    var ygIndexlenmis = ygPensiyaVar ? abiIndexlenmisMebleg(tapilanMebleg, yg.vefat, ygIndexIl) : 0;
     yg.indexlenmisMebleg = ygIndexlenmis;
-    var ygIndexSetiri = (catmayan<=0 && ygIndexlenmis>tapilanMebleg)
+    var ygIndexSetiri = (ygPensiyaVar && ygIndexlenmis>tapilanMebleg)
       ? ('<br/>'+ygIndexIl+'-cı ilə indeksləşdirilmiş məbləğ: <b>'+ygIndexlenmis+' AZN</b>')
       : '';
     var ygKapGeriSetiri = (kapSonra!==kapSonraBugun)
@@ -4101,15 +4275,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
+      (kapitalIleMinPensiya
+        ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+        : '')+
       ygKapGeriSetiri+
       'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
-      (catmayan>0
+      (catmayan>0 && !kapitalIleMinPensiya
         ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
         : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+ygIndexSetiri))
     );
 
-    if(catmayan>0){
+    if(catmayan>0 && !kapitalIleMinPensiya){
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       ygShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
     } else {
@@ -4330,18 +4507,491 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
 
 
+  // ============================================================
+  //  ÜDSY — Ünvanlı Dövlət Sosial Yardımı (sual-cavab axını)
+  // ============================================================
+  var udsy = {};
+  function udsyFlowEl(){ return document.getElementById('udsy-flow'); }
+  function udsyScrollToCard(wrap){
+    requestAnimationFrame(function(){ wrap.scrollIntoView({behavior:'smooth', block:'start'}); });
+  }
+  function udsyAddBotCard(html){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble bot';
+    wrap.innerHTML='<div class="abi-card bot">'+html+'</div>';
+    udsyFlowEl().appendChild(wrap);
+    udsyScrollToCard(wrap);
+    return wrap.querySelector('.abi-card');
+  }
+  function udsyAddUserCard(text){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble user';
+    wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
+    udsyFlowEl().appendChild(wrap);
+    udsyScrollToCard(wrap);
+  }
+  function udsyLockCard(cardEl){
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ el.disabled = true; el.style.opacity='0.5'; });
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.textContent = '✏️ Düzəliş et';
+    editBtn.className = 'abi-edit-btn';
+    editBtn.style.cssText = 'margin-top:10px;background:none;border:none;color:var(--blue);font-family:\'Nunito\',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;padding:4px 0;opacity:1;';
+    editBtn.onclick = function(){ udsyEditCard(cardEl, editBtn); };
+    cardEl.appendChild(editBtn);
+  }
+  function udsyEditCard(cardEl, editBtn){
+    var wrap = cardEl.closest('.abi-bubble');
+    var flow = udsyFlowEl();
+    while(wrap.nextSibling){ flow.removeChild(wrap.nextSibling); }
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ if(el!==editBtn){ el.disabled = false; el.style.opacity='1'; } });
+    editBtn.remove();
+    udsyScrollToCard(wrap);
+  }
+
+  // İmtina halları — cavablardan asılı olaraq toplanır, sonda nəticədə göstərilir
+  function udsyImtinaEkle(sebeb){
+    if(!udsy.imtina) udsy.imtina = [];
+    if(udsy.imtina.indexOf(sebeb) === -1) udsy.imtina.push(sebeb);
+  }
+  // ── ÜDSY status siyahısı və rollar ──────────────────────────
+  var UDSY_MEYAR = 300; // ehtiyac meyarı — bir nəfər üçün (AZN), sonra dəyişə bilər
+  var UDSY_STATUSLAR = [
+    ['usaq8',      '8 yaşına çatmamış uşağa qulluq edən'],
+    ['resmi',      'Rəsmi işləyən'],
+    ['sahibkar',   'Sahibkar — MDSS son 12 ayın min. 11 ayı ödənilib'],
+    ['elil12',     '1-ci və ya 2-ci dərəcə əlilliyi olan'],
+    ['qulluq1',    '1-ci dərəcə əlilliyi olan şəxsə qulluq edən'],
+    ['qulluqUsaq', '18 yaşına çatmamış əlil uşağa qulluq edən'],
+    ['pensiya',    'Pensiya və ya müavinət alan'],
+    ['tehsil',     '23 yaşınadək əyani təhsil alan'],
+    ['kendli',     'Kəndli sahibkar — son 12 ayın min. 11 ayı ödənilib'],
+    ['issizlik',   'İşsizlikdən sığorta ödənişi alan']
+  ];
+  var UDSY_ROLLAR = [
+    'Təmsilçi','Təmsilçinin həyat yoldaşı','Təmsilçinin atası','Təmsilçinin anası',
+    'Təmsilçinin bacısı','Təmsilçinin qardaşı','Təmsilçinin baldızı','Təmsilçinin qaynı',
+    'Təmsilçinin qayınatası','Təmsilçinin qaynanası'
+  ];
+  var UDSY_QULLUQ_STATUSLAR = ['usaq8','qulluq1','qulluqUsaq'];
+  function udsyStatusAd(v){
+    if(v==='yox') return 'Status yoxdur';
+    for(var i=0;i<UDSY_STATUSLAR.length;i++){ if(UDSY_STATUSLAR[i][0]===v) return UDSY_STATUSLAR[i][1]; }
+    return v||'—';
+  }
+
+  // Q8 — Status ön şərtləri (ailədə 8 yaşınadək uşaq / 1-ci dərəcə əlil / 18 yaşınadək əlil uşaq)
+  function udsyAskP1(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə 8 yaşına çatmamış uşaq varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP1(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP1(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP1(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varUsaq8 = yes;
+    udsyAskP2();
+  }
+  function udsyAskP2(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə 1-ci dərəcə əlilliyi olan şəxs varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP2(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP2(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP2(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varElil1 = yes;
+    udsyAskP3();
+  }
+  function udsyAskP3(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə 18 yaşına çatmamış əlilliyi olan uşaq varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP3(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP3(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP3(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.varElilUsaq = yes;
+    udsyAskBoyukler();
+  }
+
+  // Q9 — Əmək qabiliyyətli ailə üzvləri və hər birinin statusu
+  function udsyAskBoyukler(){
+    var stOpts = '<option value="">— status seçin —</option>'+
+      UDSY_STATUSLAR.map(function(s){ return '<option value="'+s[0]+'">'+s[1]+'</option>'; }).join('')+
+      '<option value="yox">Status yoxdur</option>';
+    var rows = UDSY_ROLLAR.map(function(r,i){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;flex-wrap:wrap;">'+
+        '<label style="display:flex;align-items:center;gap:6px;font-size:0.84rem;min-width:200px;flex:0 0 auto;">'+
+          '<input type="checkbox" id="udsy-rol-'+i+'" onchange="udsyRolToggle('+i+')"/> '+r+
+        '</label>'+
+        '<select id="udsy-rol-'+i+'-st" disabled style="flex:1;min-width:190px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:6px 8px;font-family:\'Inter\',sans-serif;font-size:0.78rem;color:var(--text);">'+stOpts+'</select>'+
+      '</div>';
+    }).join('');
+    udsyAddBotCard(
+      '<div class="abi-q">Əmək qabiliyyətli ailə üzvləri və statusları</div>'+
+      '<div class="abi-input-group single"><div><label>Əmək qabiliyyətli ailə üzvlərinin sayı</label><input type="number" id="udsy-boyuk-say" min="1" placeholder="2"/></div></div>'+
+      '<div class="abi-note" style="margin-top:8px;">Sayı yazın, sonra həmin sayda ailə üzvünü seçib hər biri üçün status təyin edin. Yoxlanılmalıdır: "Rəsmi işləyən" — MDSS ödənişləri son 12 ayın 80%-ni; "Sahibkar"/"Kəndli sahibkar" — son 12 ayın min. 11 ayını əhatə etməlidir.</div>'+
+      '<div style="margin-top:10px;">'+rows+'</div>'+
+      '<button class="abi-go-btn" onclick="udsyQBoyukler(this)">Davam et</button>'
+    );
+  }
+  function udsyRolToggle(i){
+    var cb = document.getElementById('udsy-rol-'+i);
+    var sel = document.getElementById('udsy-rol-'+i+'-st');
+    sel.disabled = !cb.checked;
+    if(!cb.checked) sel.value = '';
+  }
+  function udsyQBoyukler(btn){
+    var say = parseInt(document.getElementById('udsy-boyuk-say').value, 10);
+    if(isNaN(say) || say < 1){ siteAlert('Əmək qabiliyyətli ailə üzvlərinin sayını daxil edin.'); return; }
+    var secilmis = [];
+    UDSY_ROLLAR.forEach(function(r,i){
+      if(document.getElementById('udsy-rol-'+i).checked){
+        secilmis.push({ rol: r, status: document.getElementById('udsy-rol-'+i+'-st').value });
+      }
+    });
+    if(secilmis.length !== say){
+      siteAlert('Seçilmiş ailə üzvlərinin sayı ('+secilmis.length+') göstərilən saya ('+say+') bərabər olmalıdır.');
+      return;
+    }
+    if(secilmis.some(function(p){ return !p.status; })){
+      siteAlert('Hər seçilmiş ailə üzvü üçün status təyin edin.');
+      return;
+    }
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard('Əmək qabiliyyətli üzvlər ('+say+'): '+secilmis.map(function(p){ return p.rol+' — '+udsyStatusAd(p.status); }).join('; '));
+    udsy.boyukSay = say;
+    udsy.uzvler = secilmis;
+    udsyAskGelir();
+  }
+
+  // Q10 — Ailənin aylıq gəliri
+  function udsyAskGelir(){
+    var meyar = UDSY_MEYAR * (parseInt(udsy.aileSay, 10) || 0);
+    udsy.gelirMeyar = meyar;
+    udsyAddBotCard(
+      '<div class="abi-q">Ailənin aylıq ümumi gəliri neçə AZN-dir?</div>'+
+      '<div class="abi-note">Ehtiyac meyarı = '+UDSY_MEYAR+' AZN × '+(udsy.aileSay||0)+' nəfər = <b>'+meyar+' AZN</b>. Gəlir bu məbləği keçirsə, ailə aztəminatlı sayılmır.</div>'+
+      '<div class="abi-input-group single"><div><label>Bütün ailə üzvlərinin aylıq gəliri (AZN)</label><input type="number" id="udsy-gelir" min="0" placeholder="0"/></div></div>'+
+      '<button class="abi-go-btn" onclick="udsyQGelir(this)">Nəticəni göstər</button>'
+    );
+  }
+  function udsyQGelir(btn){
+    var g = parseFloat(document.getElementById('udsy-gelir').value);
+    if(isNaN(g) || g < 0){ siteAlert('Ailənin aylıq gəlirini daxil edin.'); return; }
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard('Aylıq gəlir: '+g+' AZN');
+    udsy.gelir = g;
+    udsyNetice();
+  }
+
+  // ── Yekun nəticə ────────────────────────────────────────────
+  function udsyNetice(){
+    var uzvler = udsy.uzvler || [];
+    var red = (udsy.imtina || []).slice();   // sual 1–7 üzrə sərt imtina halları
+
+    // 1) Hər əmək qabiliyyətli üzvün statusu olmalıdır
+    uzvler.forEach(function(p){
+      if(p.status === 'yox'){
+        red.push(p.rol+' — statusu yoxdur (hər əmək qabiliyyətli üzvün statusu olmalıdır)');
+      }
+    });
+
+    // 2) Status ön şərtləri
+    uzvler.forEach(function(p){
+      if(p.status==='usaq8' && !udsy.varUsaq8){
+        red.push(p.rol+' — "8 yaşınadək uşağa qulluq" statusu, lakin ailədə 8 yaşına çatmamış uşaq yoxdur');
+      }
+      if(p.status==='qulluq1' && !udsy.varElil1){
+        red.push(p.rol+' — "1-ci dərəcə əlilə qulluq" statusu, lakin ailədə 1-ci dərəcə əlilliyi olan şəxs yoxdur');
+      }
+      if(p.status==='qulluqUsaq' && !udsy.varElilUsaq){
+        red.push(p.rol+' — "18 yaşınadək əlil uşağa qulluq" statusu, lakin ailədə belə uşaq yoxdur');
+      }
+    });
+
+    // 3) Hər "qulluq" statusunda ev üzrə yalnız 1 nəfər ola bilər
+    UDSY_QULLUQ_STATUSLAR.forEach(function(st){
+      var n = uzvler.filter(function(p){ return p.status === st; }).length;
+      if(n > 1){
+        red.push('"'+udsyStatusAd(st)+'" statusunda '+n+' nəfər göstərilib — ev üzrə yalnız 1 nəfər ola bilər');
+      }
+    });
+
+    // 4) Gəlir testi — ailə aztəminatlı olmalıdır
+    var meyar = udsy.gelirMeyar || (UDSY_MEYAR * (parseInt(udsy.aileSay,10)||0));
+    var aztiminatli = (udsy.gelir <= meyar);
+    if(!aztiminatli){
+      red.push('Aylıq gəlir ('+udsy.gelir+' AZN) ehtiyac meyarını ('+meyar+' AZN) keçir — ailə aztəminatlı sayılmır');
+    }
+    var ferq = abiRound2(meyar - (udsy.gelir||0));
+
+    // ── Məlumat cədvəli ──
+    var evCavab;
+    if(udsy.ozEvi){ evCavab = 'Bəli (öz evi)'; }
+    else if(udsy.kirayeNov==='kiraye'){ evCavab = 'Xeyr — kirayə'+(udsy.kirayeMuqavile===true?' (notarial müqavilə var)':udsy.kirayeMuqavile===false?' (notarial müqavilə yoxdur)':''); }
+    else if(udsy.kirayeNov==='odenissiz'){ evCavab = 'Xeyr — ödəniş edilmədən yaşanılır'; }
+    else { evCavab = 'Xeyr'; }
+    var rows = [
+      ['Ailə tərkibi', (udsy.aileSay||0)+' nəfər'],
+      ['Yaşadığı ev', evCavab],
+      ['Eyni təyinatlı 2+ mülk', udsy.eyniMulk ? 'Bəli' : 'Xeyr'],
+      ['Adına pay torpağı', udsy.payTorpagi ? ('Bəli'+(udsy.voenVar===true?' — aktiv VÖEN var':udsy.voenVar===false?' — aktiv VÖEN yoxdur':'')) : 'Xeyr'],
+      ['Nəqliyyat vasitəsi / etibarnamə', udsy.neqliyyat ? 'Bəli' : 'Xeyr'],
+      ['Aylıq kommunal '+(udsy.kommunalHedd||0)+' AZN-i keçir', udsy.kommunalKecir ? 'Bəli' : 'Xeyr'],
+      ['Son 1 ildə 3600+ AZN alqı-satqı', udsy.alqiSatqi ? 'Bəli' : 'Xeyr'],
+      ['8 yaşınadək uşaq var', udsy.varUsaq8 ? 'Bəli' : 'Xeyr'],
+      ['1-ci dərəcə əlil var', udsy.varElil1 ? 'Bəli' : 'Xeyr'],
+      ['18 yaşınadək əlil uşaq var', udsy.varElilUsaq ? 'Bəli' : 'Xeyr'],
+      ['Əmək qabiliyyətli üzvlər', (udsy.boyukSay||0)+' nəfər'],
+      ['Ehtiyac meyarı', meyar+' AZN ('+UDSY_MEYAR+' × '+(udsy.aileSay||0)+')'],
+      ['Aylıq gəlir', (udsy.gelir||0)+' AZN'],
+      ['Aztəminatlı', aztiminatli ? ('Bəli — fərq '+ferq+' AZN') : 'Xeyr']
+    ];
+    var tbl = '<table style="border-collapse:collapse;width:100%;font-size:0.85rem;margin-top:6px;">'+
+      rows.map(function(r){ return '<tr>'+
+        '<td style="padding:4px 8px;border-bottom:1px solid var(--blue-mid);color:var(--text-muted);vertical-align:top;">'+r[0]+'</td>'+
+        '<td style="padding:4px 8px;border-bottom:1px solid var(--blue-mid);font-weight:700;">'+r[1]+'</td></tr>'; }).join('')+
+      '</table>';
+    var uzvList = uzvler.length
+      ? ('<div style="margin-top:8px;font-size:0.83rem;"><b>Statuslar:</b><ul style="margin:4px 0 0;padding-left:18px;">'+
+          uzvler.map(function(p){ return '<li>'+p.rol+' — '+udsyStatusAd(p.status)+'</li>'; }).join('')+'</ul></div>')
+      : '';
+
+    var neticeBlok = red.length
+      ? ('<div class="abi-result muavinet" style="margin-top:12px;">❌ Qeydiyyatdan keçə bilməz — səbəblər ('+red.length+'):'+
+          '<ul style="margin:8px 0 0;padding-left:20px;font-weight:600;">'+red.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul></div>')
+      : ('<div class="abi-result pensiya" style="margin-top:12px;">✅ ÜDSY qeydiyyatı üçün maneə yoxdur.'+
+          (aztiminatli ? '<br/>Ailə aztəminatlıdır — ehtiyac meyarı ilə fərq: <b>'+ferq+' AZN</b>.' : '')+'</div>');
+
+    udsyAddBotCard(
+      '<div class="abi-q">Nəticə</div>'+
+      tbl+
+      uzvList+
+      neticeBlok+
+      '<button class="abi-restart-btn" style="margin-top:10px;" onclick="udsyStart()">🔄 Yenidən başla</button>'
+    );
+  }
+
+  function udsyStart(){
+    document.getElementById('udsy-flow').innerHTML='';
+    udsy = { imtina: [] };
+    udsyAddBotCard(
+      '<div class="abi-q">Ailə tərkibi neçə nəfərdir?</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Ailə üzvlərinin sayı</label><input type="number" id="udsy-aile-say" min="1" placeholder="4"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="udsyQ1(this)">Davam et</button>'
+    );
+  }
+
+  function udsyQ1(btn){
+    var card = btn.closest('.abi-card');
+    var say = parseInt(document.getElementById('udsy-aile-say').value, 10);
+    if(isNaN(say) || say < 1){ siteAlert('Zəhmət olmasa ailə üzvlərinin sayını düzgün daxil edin.'); return; }
+    udsyLockCard(card);
+    udsyAddUserCard('Ailə tərkibi: '+say+' nəfər');
+    udsy.aileSay = say;
+    udsyAskEv();
+  }
+
+  // Q2 — Yaşayış sahəsi
+  function udsyAskEv(){
+    udsyAddBotCard(
+      '<div class="abi-q">Yaşadığınız ev öz evinizdir?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQEv(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQEv(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQEv(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.ozEvi = yes;
+    if(yes){ udsyAskEyniMulk(); return; }
+    udsyAskKirayeNov();
+  }
+
+  // Q2b — Kirayə, yoxsa ödənişsiz
+  function udsyAskKirayeNov(){
+    udsyAddBotCard(
+      '<div class="abi-q">Kirayədir, yoxsa ödəniş edilmədən yaşanılır?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn" onclick="udsyQKirayeNov(this,\'kiraye\')">Kirayə</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQKirayeNov(this,\'odenissiz\')">Ödənişsiz</button>'+
+      '</div>'
+    );
+  }
+  function udsyQKirayeNov(btn, nov){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(nov==='kiraye' ? 'Kirayə' : 'Ödəniş edilmədən yaşanılır');
+    udsy.kirayeNov = nov;
+    if(nov==='kiraye'){ udsyAskKirayeMuqavile(); return; }
+    udsyAskEyniMulk();
+  }
+
+  // Q2c — Notarial kirayə müqaviləsi
+  function udsyAskKirayeMuqavile(){
+    udsyAddBotCard(
+      '<div class="abi-q">Notarial qaydada kirayə müqaviləniz varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQKirayeMuqavile(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQKirayeMuqavile(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQKirayeMuqavile(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.kirayeMuqavile = yes;
+    if(!yes){ udsyImtinaEkle('Notarial qaydada təsdiqlənmiş kirayə müqaviləsi yoxdur'); }
+    udsyAskEyniMulk();
+  }
+
+  // Q3 — Eyni təyinatlı mülk
+  function udsyAskEyniMulk(){
+    udsyAddBotCard(
+      '<div class="abi-q">Eyni təyinatlı iki və daha artıq mülkünüz varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQEyniMulk(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQEyniMulk(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQEyniMulk(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.eyniMulk = yes;
+    if(yes){ udsyImtinaEkle('Eyni təyinatlı iki və daha artıq mülk var'); }
+    udsyAskPayTorpagi();
+  }
+
+  // Q4 — Pay torpağı
+  function udsyAskPayTorpagi(){
+    udsyAddBotCard(
+      '<div class="abi-q">Ailədə adına pay torpağı olan varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQPayTorpagi(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQPayTorpagi(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQPayTorpagi(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.payTorpagi = yes;
+    if(yes){ udsyAskVoen(); return; }
+    udsyAskNeqliyyat();
+  }
+
+  // Q4b — Aktiv VÖEN (Monitoring AS)
+  function udsyAskVoen(){
+    udsyAddBotCard(
+      '<div class="abi-q">Monitoring AS-da aktiv VÖEN varmı?</div>'+
+      '<div class="abi-note">Pay torpağı sahibinin adına aktiv VÖEN-i Monitoring AS-da yoxlayın.</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQVoen(this,true)">Var</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQVoen(this,false)">Yox</button>'+
+      '</div>'
+    );
+  }
+  function udsyQVoen(btn, varMi){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(varMi?'Var':'Yox');
+    udsy.voenVar = varMi;
+    if(!varMi){
+      udsyImtinaEkle('Pay torpağı var, lakin Monitoring AS-da aktiv VÖEN yoxdur — müraciətçiyə DVX-da aktiv VÖEN açılacağı barədə məlumat verilməlidir');
+    }
+    udsyAskNeqliyyat();
+  }
+
+  // Q5 — Nəqliyyat vasitəsi / etibarnamə
+  function udsyAskNeqliyyat(){
+    udsyAddBotCard(
+      '<div class="abi-q">İstifadənizdə və ya mülkiyyətinizdə nəqliyyat vasitəsi (reabilitasiya məqsədilə verilənlər istisna) və ya etibarnamə varmı?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQNeqliyyat(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQNeqliyyat(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQNeqliyyat(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.neqliyyat = yes;
+    if(yes){ udsyImtinaEkle('İstifadədə və ya mülkiyyətdə nəqliyyat vasitəsinin (reabilitasiya istisna) və ya etibarnamənin olması imtina səbəbidir'); }
+    udsyAskKommunal();
+  }
+
+  // Q6 — Aylıq kommunal / ödəniş xərcləri (hədd = ailə tərkibi × 45 AZN)
+  function udsyAskKommunal(){
+    var hedd = (parseInt(udsy.aileSay, 10) || 0) * 45;
+    udsy.kommunalHedd = hedd;
+    udsyAddBotCard(
+      '<div class="abi-q">Aylıq ödənişləriniz (kommunal xərcləriniz) '+hedd+' AZN-i keçirmi?</div>'+
+      '<div class="abi-note">Hədd = ailə tərkibi ('+(udsy.aileSay||0)+' nəfər) × 45 AZN = '+hedd+' AZN.</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQKommunal(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQKommunal(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQKommunal(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.kommunalKecir = yes;
+    if(yes){ udsyImtinaEkle('Aylıq kommunal (ödəniş) xərcləri '+udsy.kommunalHedd+' AZN həddini keçir'); }
+    udsyAskAlqiSatqi();
+  }
+
+  // Q7 — Son 1 ildə iri alqı-satqı
+  function udsyAskAlqiSatqi(){
+    udsyAddBotCard(
+      '<div class="abi-q">Son 1 il ərzində 3600 AZN-dən yuxarı alqı-satqı etmisinizmi?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQAlqiSatqi(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQAlqiSatqi(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQAlqiSatqi(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.alqiSatqi = yes;
+    if(yes){ udsyImtinaEkle('Son 1 il ərzində 3600 AZN-dən yuxarı alqı-satqı əməliyyatı'); }
+    udsyAskP1();
+  }
+
   // Tab ilk dəfə açılanda axını başlat
   var _abiInitDone = false;
   var _elpInitDone = false;
   var _ygInitDone = false;
+  var _udsyInitDone = false;
   var _origSwitchTab = switchTab;
   switchTab = function(tab){
     var t = _origSwitchTab(tab) || tab;
     if(t==='abi' && !_abiInitDone){ _abiInitDone = true; abiStart(); }
     if(t==='elp' && !_elpInitDone){ _elpInitDone = true; elpStart(); }
     if(t==='yg' && !_ygInitDone){ _ygInitDone = true; ygStart(); }
+    if(t==='udsy' && !_udsyInitDone){ _udsyInitDone = true; udsyStart(); }
     var fbFab = document.getElementById('fb-fab');
-    if(fbFab){ fbFab.style.display = (t==='abi'||t==='elp'||t==='yg') ? 'flex' : 'none'; }
+    if(fbFab){ fbFab.style.display = (t==='abi'||t==='elp'||t==='yg'||t==='udsy') ? 'flex' : 'none'; }
   };
 
   // ----------------------------
