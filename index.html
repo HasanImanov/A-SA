@@ -4872,7 +4872,6 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(!aztiminatli){
       red.push('Aylıq gəlir ('+udsy.gelir+' AZN) ehtiyac meyarını ('+meyar+' AZN) keçir — ailə aztəminatlı sayılmır');
     }
-    var ferq = abiRound2(meyar - (udsy.gelir||0));
 
     var senedBlok = udsy.resmiSenedler
       ? ('<div class="abi-note" style="margin-top:12px;font-style:normal;color:var(--text);">'+
@@ -4886,12 +4885,14 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       : '';
 
     var neticeBlok = red.length
-      ? ('<div class="abi-result muavinet">❌ Qeydiyyatdan keçə bilməz — imtina səbəbləri ('+red.length+'):'+
+      ? ('<div class="abi-result muavinet">Qeydiyyatdan keçən zaman imtina səbəbləri aşağıdakılardır:'+
           '<ul style="margin:8px 0 0;padding-left:20px;font-weight:600;">'+red.map(function(s){ return '<li>'+s+'</li>'; }).join('')+'</ul></div>')
-      : ('<div class="abi-result pensiya">✅ ÜDSY qeydiyyatı üçün imtina səbəbi yoxdur.'+
-          (aztiminatli
-            ? '<br/>Ailə aztəminatlıdır — ehtiyac meyarı ('+meyar+' AZN) ilə gəlir ('+(udsy.gelir||0)+' AZN) arasında fərq: <b>'+ferq+' AZN</b>.'
-            : '')+'</div>');
+      : ('<div class="abi-result pensiya">✅ Qeydiyyatdan keçə bilərsiniz.'+
+          '<div style="margin-top:8px;font-weight:600;">Qeydiyyatdan keçmək üçün tələb olunan sənədlər:</div>'+
+          '<ol style="margin:6px 0 0;padding-left:20px;font-weight:600;">'+
+            '<li>İcra nümayəndəliyindən ailə tərkibi haqqında arayış</li>'+
+            '<li>Notariusdan təmsilçilik ərizəsi</li>'+
+          '</ol></div>');
 
     udsyAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
