@@ -4713,6 +4713,20 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsy.varResmi = yes;
     if(!yes){ udsyAskBoyukler(); return; }
     udsyAddBotCard(
+      '<div class="abi-q">MDSS ödənişləri 80%-i keçibmi?</div>'+
+      '<div class="abi-note">Hesabat baxışından yoxlayın.</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="udsyQP7Mdss(this,true)">Bəli</button>'+
+        '<button class="abi-choice-btn" onclick="udsyQP7Mdss(this,false)">Xeyr</button>'+
+      '</div>'
+    );
+  }
+  function udsyQP7Mdss(btn, yes){
+    udsyLockCard(btn.closest('.abi-card'));
+    udsyAddUserCard(yes?'Bəli':'Xeyr');
+    udsy.mdss80 = yes;
+    if(!yes){ udsyImtinaEkle('Rəsmi işləyən — MDSS ödənişləri son 12 ayın 80%-ni keçmir'); }
+    udsyAddBotCard(
       '<div class="abi-q">Əmək müqaviləsi ƏMAS-da görsənirmi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="udsyQP7Emas(this,true)">Bəli</button>'+
@@ -4746,17 +4760,22 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
 
   // Q9a — Əmək qabiliyyətli ailə üzvlərinin sayı
+  function udsyMaxBoyukSay(){
+    return Math.min(UDSY_ROLLAR.length, parseInt(udsy.aileSay, 10) || UDSY_ROLLAR.length);
+  }
   function udsyAskBoyukler(){
+    var maxSay = udsyMaxBoyukSay();
     udsyAddBotCard(
       '<div class="abi-q">Əmək qabiliyyətli ailə üzvlərinin sayı neçədir?</div>'+
-      '<div class="abi-input-group single"><div><label>Say (maks. '+UDSY_ROLLAR.length+')</label><input type="number" id="udsy-boyuk-say" min="1" max="'+UDSY_ROLLAR.length+'" placeholder="2"/></div></div>'+
+      '<div class="abi-input-group single"><div><label>Say (maks. '+maxSay+')</label><input type="number" id="udsy-boyuk-say" min="1" max="'+maxSay+'" placeholder="2"/></div></div>'+
       '<button class="abi-go-btn" onclick="udsyBoyuklerSay(this)">Davam et</button>'
     );
   }
   function udsyBoyuklerSay(btn){
     var say = parseInt(document.getElementById('udsy-boyuk-say').value, 10);
+    var maxSay = udsyMaxBoyukSay();
     if(isNaN(say) || say < 1){ siteAlert('Əmək qabiliyyətli ailə üzvlərinin sayını daxil edin.'); return; }
-    if(say > UDSY_ROLLAR.length){ siteAlert('Say '+UDSY_ROLLAR.length+'-dan çox ola bilməz.'); return; }
+    if(say > maxSay){ siteAlert('Say ailə tərkibindən ('+(udsy.aileSay||maxSay)+' nəfər) çox ola bilməz.'); return; }
     udsyLockCard(btn.closest('.abi-card'));
     udsyAddUserCard('Əmək qabiliyyətli üzv sayı: '+say);
     udsy.boyukSay = say;
@@ -4765,14 +4784,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   // Q9b — Hər üzv üçün ailə üzvü + status seçimi (yalnız say qədər sətir açılır)
   function udsyAskBoyuklerStatus(say){
-    var rolOpts = '<option value="">— ailə üzvünü seçin —</option>'+
-      UDSY_ROLLAR.map(function(r,i){ return '<option value="'+i+'">'+r+'</option>'; }).join('');
     var stOpts = '<option value="">— status seçin —</option>'+
       UDSY_STATUSLAR.map(function(s){ return '<option value="'+s[0]+'">'+s[1]+'</option>'; }).join('')+
       '<option value="yox">Status yoxdur</option>';
     var selCss = 'flex:1;min-width:180px;border:1.5px solid var(--blue-mid);border-radius:8px;padding:6px 8px;font-family:\'Inter\',sans-serif;font-size:0.78rem;color:var(--text);';
     var rows = '';
     for(var i=0;i<say;i++){
+      // 1-ci sətirdə ailə üzvü avtomatik "Təmsilçi" (indeks 0) seçilir
+      var rolOpts = '<option value=""'+(i===0?'':' selected')+'>— ailə üzvünü seçin —</option>'+
+        UDSY_ROLLAR.map(function(r,ri){ return '<option value="'+ri+'"'+((i===0&&ri===0)?' selected':'')+'>'+r+'</option>'; }).join('');
       rows += '<div style="display:flex;gap:8px;padding:6px 0;flex-wrap:wrap;align-items:center;">'+
         '<span style="font-size:0.8rem;font-weight:700;color:var(--text-muted);min-width:18px;">'+(i+1)+'.</span>'+
         '<select id="udsy-uzv-'+i+'-rol" style="'+selCss+'">'+rolOpts+'</select>'+
@@ -4781,7 +4801,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     udsyAddBotCard(
       '<div class="abi-q">Hər əmək qabiliyyətli üzv üçün ailə üzvünü və statusunu seçin</div>'+
-      '<div class="abi-note">Yoxlanılmalıdır: "Rəsmi işləyən" — MDSS ödənişləri son 12 ayın 80%-ni; "Sahibkar"/"Kəndli sahibkar" — son 12 ayın min. 11 ayını əhatə etməlidir.</div>'+
+      '<div class="abi-note">Yoxlanılmalıdır: "Sahibkar"/"Kəndli sahibkar" — MDSS ödənişləri son 12 ayın min. 11 ayını əhatə etməlidir.</div>'+
       '<div style="margin-top:8px;">'+rows+'</div>'+
       '<button class="abi-go-btn" onclick="udsyQBoyukler(this)">Davam et</button>'
     );
