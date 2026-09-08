@@ -3666,8 +3666,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   function ygStart(){
     document.getElementById('yg-flow').innerHTML='';
     yg = {}; yg.bonusStaj = 0;
+    yg.hadPension = false;
+    ygAskDogumVefat();
+  }
+  function ygAskGuzestliMulki(){
     ygAddBotCard(
-      '<div class="abi-q">Mərhum şəxs güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
+      '<div class="abi-q">Güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
       '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
         '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="ygQGuzestliMulki(this,true)">Güzəştli şərtlərlə çalışırdı</button>'+
         '<button class="abi-choice-btn" style="text-align:left;" onclick="ygQGuzestliMulki(this,false)">Mülki</button>'+
@@ -3679,7 +3683,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygAddUserCard(guzestli ? 'Güzəştli şərtlərlə çalışırdı' : 'Mülki');
     yg.guzestli = guzestli;
     yg.hadPension = false;
-    ygAskDogumVefat();
+    ygAskGender();
   }
 
   function ygQ1(btn, yes){
@@ -3794,7 +3798,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygLockCard(card);
     ygAddUserCard('Doğum: '+dogumStr);
     yg.dogum = dogum;
-    ygAskGender();
+    ygAskGuzestliMulki();
   }
 
   function ygAskGender(){
