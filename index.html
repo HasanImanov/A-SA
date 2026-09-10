@@ -3821,6 +3821,52 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     yg.vefat = abiPensiyaYasiTarixi(yg.gender, yg.dogum);
     yg.huquqTarixi = yg.vefat;
     ygAddBotCard('<div class="abi-note">Pensiya yaşına çatma tarixi: <b>'+abiGunAyIl(yg.vefat)+'</b> — hesablamada hüquq tarixi kimi götürülür.</div>');
+    ygAskSiyahiOrHerbi();
+  }
+  // 01.01.2018-dən sonra hüquq yaranırsa və güzəştli işləyibsə, hansı siyahı(lar) ilə
+  // işlədiyi soruşulur (Siyahı 1 / Siyahı 2 / Ümumi — bir neçəsi birdən seçilə bilər).
+  function ygAskSiyahiOrHerbi(){
+    var esik2018 = new Date(2018,0,1).getTime();
+    if(!(yg.guzestli && yg.vefat.getTime() >= esik2018)){
+      yg.siyahi1Olub = false; yg.siyahi2Olub = false; yg.siyahiUmumiOlub = false;
+      ygAskHerbiQuestion();
+      return;
+    }
+    ygAddBotCard(
+      '<div class="abi-q">Vətəndaş hansı siyahı ilə işləyib? (uyğun olanları seçin)</div>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-siyahi1-chk" onchange="ygToggleSiyahi(1)"/> 1 nömrəli siyahı'+
+      '</label>'+
+      '<div id="yg-siyahi1-fields" style="display:none;margin-bottom:8px;">'+abiYMDInputHTML('yg-siyahi1','0','0','0')+'</div>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-siyahi2-chk" onchange="ygToggleSiyahi(2)"/> 2 nömrəli siyahı'+
+      '</label>'+
+      '<div id="yg-siyahi2-fields" style="display:none;margin-bottom:8px;">'+abiYMDInputHTML('yg-siyahi2','0','0','0')+'</div>'+
+      '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
+        '<input type="checkbox" id="yg-siyahiUmumi-chk" onchange="ygToggleSiyahi(\'Umumi\')"/> Ümumi'+
+      '</label>'+
+      '<div id="yg-siyahiUmumi-fields" style="display:none;margin-bottom:8px;">'+abiYMDInputHTML('yg-siyahiUmumi','0','0','0')+'</div>'+
+      '<button class="abi-go-btn" onclick="ygSaveSiyahi(this)">Davam et</button>'
+    );
+  }
+  function ygToggleSiyahi(n){
+    var chk = document.getElementById('yg-siyahi'+n+'-chk');
+    document.getElementById('yg-siyahi'+n+'-fields').style.display = chk.checked ? 'block' : 'none';
+  }
+  function ygSaveSiyahi(btn){
+    var card = btn.closest('.abi-card');
+    yg.siyahi1Olub = document.getElementById('yg-siyahi1-chk').checked;
+    yg.siyahi2Olub = document.getElementById('yg-siyahi2-chk').checked;
+    yg.siyahiUmumiOlub = document.getElementById('yg-siyahiUmumi-chk').checked;
+    if(!yg.siyahi1Olub && !yg.siyahi2Olub && !yg.siyahiUmumiOlub){
+      siteAlert('Zəhmət olmasa ən azı bir siyahı seçin.'); return;
+    }
+    var parts = [];
+    if(yg.siyahi1Olub) parts.push('1 nömrəli siyahı');
+    if(yg.siyahi2Olub) parts.push('2 nömrəli siyahı');
+    if(yg.siyahiUmumiOlub) parts.push('Ümumi');
+    ygLockCard(card);
+    ygAddUserCard(parts.join(', '));
     ygAskHerbiQuestion();
   }
   function ygAskHerbiQuestion(){
@@ -4166,6 +4212,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var doyusenIlRaw = parseFloat(document.getElementById('yg-doyusen-il').value)||0;
     var doyusenAyRaw = parseFloat(document.getElementById('yg-doyusen-ay').value)||0;
     var doyusenGunRaw = parseFloat(document.getElementById('yg-doyusen-gun').value)||0;
+    var siyahi1IlRaw = yg.siyahi1Olub ? (parseFloat(document.getElementById('yg-siyahi1-il').value)||0) : 0;
+    var siyahi1AyRaw = yg.siyahi1Olub ? (parseFloat(document.getElementById('yg-siyahi1-ay').value)||0) : 0;
+    var siyahi1GunRaw = yg.siyahi1Olub ? (parseFloat(document.getElementById('yg-siyahi1-gun').value)||0) : 0;
+    var siyahi2IlRaw = yg.siyahi2Olub ? (parseFloat(document.getElementById('yg-siyahi2-il').value)||0) : 0;
+    var siyahi2AyRaw = yg.siyahi2Olub ? (parseFloat(document.getElementById('yg-siyahi2-ay').value)||0) : 0;
+    var siyahi2GunRaw = yg.siyahi2Olub ? (parseFloat(document.getElementById('yg-siyahi2-gun').value)||0) : 0;
+    var siyahiUIlRaw = yg.siyahiUmumiOlub ? (parseFloat(document.getElementById('yg-siyahiUmumi-il').value)||0) : 0;
+    var siyahiUAyRaw = yg.siyahiUmumiOlub ? (parseFloat(document.getElementById('yg-siyahiUmumi-ay').value)||0) : 0;
+    var siyahiUGunRaw = yg.siyahiUmumiOlub ? (parseFloat(document.getElementById('yg-siyahiUmumi-gun').value)||0) : 0;
     var usaqIlRaw = parseFloat(document.getElementById('yg-usaq-il').value)||0;
     var usaqAyRaw = parseFloat(document.getElementById('yg-usaq-ay').value)||0;
     var usaqGunRaw = parseFloat(document.getElementById('yg-usaq-gun').value)||0;
@@ -4184,7 +4239,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var kapSonraBugun = parseFloat(document.getElementById('yg-kap-sonra').value) || 0;
     // Daxil edilən kapital bugünküdür — vəfat ilinə "geri qaytarılır" (yalnız 2006-dan sonrakı kapital)
     var kapSonra = abiGeriKapital(kapSonraBugun, yg.vefat, abiCariIndexIl());
-    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
+    if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || siyahi1IlRaw<0 || siyahi1AyRaw<0 || siyahi1AyRaw>11 || siyahi1GunRaw<0 || siyahi1GunRaw>30 || siyahi2IlRaw<0 || siyahi2AyRaw<0 || siyahi2AyRaw>11 || siyahi2GunRaw<0 || siyahi2GunRaw>30 || siyahiUIlRaw<0 || siyahiUAyRaw<0 || siyahiUAyRaw>11 || siyahiUGunRaw<0 || siyahiUGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
     var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12 + usaqGunRaw/365.25);
@@ -4193,6 +4248,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var ozetParts = [];
     if(herbiIlRaw>0||herbiAyRaw>0||herbiGunRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYMDraw(herbiIlRaw,herbiAyRaw,herbiGunRaw));
     if(doyusenIlRaw>0||doyusenAyRaw>0||doyusenGunRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYMDraw(doyusenIlRaw,doyusenAyRaw,doyusenGunRaw)+' (2 qat hesablanır)');
+    if(siyahi1IlRaw>0||siyahi1AyRaw>0||siyahi1GunRaw>0) ozetParts.push('1 nömrəli siyahı: '+abiFmtYMDraw(siyahi1IlRaw,siyahi1AyRaw,siyahi1GunRaw));
+    if(siyahi2IlRaw>0||siyahi2AyRaw>0||siyahi2GunRaw>0) ozetParts.push('2 nömrəli siyahı: '+abiFmtYMDraw(siyahi2IlRaw,siyahi2AyRaw,siyahi2GunRaw));
+    if(siyahiUIlRaw>0||siyahiUAyRaw>0||siyahiUGunRaw>0) ozetParts.push('Ümumi siyahı: '+abiFmtYMDraw(siyahiUIlRaw,siyahiUAyRaw,siyahiUGunRaw));
     if(usaqIlRaw>0||usaqAyRaw>0||usaqGunRaw>0) ozetParts.push('Uşağa qulluq: '+abiFmtYMDraw(usaqIlRaw,usaqAyRaw,usaqGunRaw));
     if(tehsilIlRaw>0||tehsilAyRaw>0||tehsilGunRaw>0) ozetParts.push('Təhsil: '+abiFmtYMDraw(tehsilIlRaw,tehsilAyRaw,tehsilGunRaw));
     if(ahilIlRaw>0||ahilAyRaw>0||ahilGunRaw>0) ozetParts.push('Ahıl şəxsə qulluq: '+abiFmtYMDraw(ahilIlRaw,ahilAyRaw,ahilGunRaw));
@@ -4206,7 +4264,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     // Yaşa görə: staj tələbi sabit 25 il (ABİ/əlillikdəki (yaş−15)/3 düsturu deyil)
     var teleb = 25;
 
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + (siyahi1IlRaw + siyahi1AyRaw/12 + siyahi1GunRaw/365.25) + (siyahi2IlRaw + siyahi2AyRaw/12 + siyahi2GunRaw/365.25) + (siyahiUIlRaw + siyahiUAyRaw/12 + siyahiUGunRaw/365.25) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
 
     // Yaşa görə hədiyyə staj: 2006-dan sonra ən azı 1 gün belə staj varsa (sığorta stajı və ya
