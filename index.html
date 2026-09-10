@@ -3820,7 +3820,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     // Yaşa görə axınında hüquq tarixi = şəxsin pensiya yaşına çatdığı tarix (doğum + cins üzrə)
     yg.vefat = abiPensiyaYasiTarixi(yg.gender, yg.dogum);
     yg.huquqTarixi = yg.vefat;
-    ygAddBotCard('<div class="abi-note">Pensiya yaşına çatma tarixi: <b>'+abiGunAyIl(yg.vefat)+'</b> — hesablamada hüquq tarixi kimi götürülür.</div>');
+    ygAddBotCard('<div class="abi-note">Standart (mülki) pensiya yaşına çatma tarixi: <b>'+abiGunAyIl(yg.vefat)+'</b>'+(yg.guzestli ? ' — güzəştli siyahı şərtləri ödənilərsə, hesablamanın sonunda daha erkən hüquq tarixi tətbiq oluna bilər.' : ' — hesablamada hüquq tarixi kimi götürülür.')+'</div>');
     ygAskSiyahiOrHerbi();
   }
   // 01.01.2018-dən sonra hüquq yaranırsa və güzəştli işləyibsə, hansı siyahı(lar) ilə
@@ -4237,15 +4237,44 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006AyRaw = parseFloat(document.getElementById('yg-post2006-ay').value)||0;
     var post2006GunRaw = parseFloat(document.getElementById('yg-post2006-gun').value)||0;
     var kapSonraBugun = parseFloat(document.getElementById('yg-kap-sonra').value) || 0;
-    // Daxil edilən kapital bugünküdür — vəfat ilinə "geri qaytarılır" (yalnız 2006-dan sonrakı kapital)
-    var kapSonra = abiGeriKapital(kapSonraBugun, yg.vefat, abiCariIndexIl());
     if(evvelIlRaw<0 || evvelAyRaw<0 || evvelAyRaw>11 || evvelGunRaw<0 || evvelGunRaw>30 || herbiIlRaw<0 || herbiAyRaw<0 || herbiAyRaw>11 || herbiGunRaw<0 || herbiGunRaw>30 || doyusenIlRaw<0 || doyusenAyRaw<0 || doyusenAyRaw>11 || doyusenGunRaw<0 || doyusenGunRaw>30 || siyahi1IlRaw<0 || siyahi1AyRaw<0 || siyahi1AyRaw>11 || siyahi1GunRaw<0 || siyahi1GunRaw>30 || siyahi2IlRaw<0 || siyahi2AyRaw<0 || siyahi2AyRaw>11 || siyahi2GunRaw<0 || siyahi2GunRaw>30 || siyahiUIlRaw<0 || siyahiUAyRaw<0 || siyahiUAyRaw>11 || siyahiUGunRaw<0 || siyahiUGunRaw>30 || usaqIlRaw<0 || usaqAyRaw<0 || usaqAyRaw>11 || usaqGunRaw<0 || usaqGunRaw>30 || tehsilIlRaw<0 || tehsilAyRaw<0 || tehsilAyRaw>11 || tehsilGunRaw<0 || tehsilGunRaw>30 || ahilIlRaw<0 || ahilAyRaw<0 || ahilAyRaw>11 || ahilGunRaw<0 || ahilGunRaw>30 || elillikqIlRaw<0 || elillikqAyRaw<0 || elillikqAyRaw>11 || elillikqGunRaw<0 || elillikqGunRaw>30 || post2006IlRaw<0 || post2006AyRaw<0 || post2006AyRaw>11 || post2006GunRaw<0 || post2006GunRaw>30){
       siteAlert('Zəhmət olmasa il/ay sahələrini düzgün daxil edin (ay 0-11 arası olmalıdır).'); return;
     }
     var usaqDecimalRaw = abiRound2(usaqIlRaw + usaqAyRaw/12 + usaqGunRaw/365.25);
     if(usaqDecimalRaw>6){ usaqDecimalRaw = 6; usaqIlRaw = 6; usaqAyRaw = 0; }
+
+    // Siyahı (güzəştli) əsasında pensiya yaşının azaldılması qaydası — siyahı müddətləri
+    // ümumi stajın TƏRKİB HİSSƏSİDİR (əlavə deyil), yalnız yaş təyini üçün istifadə olunur.
+    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
+    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
+    var siyahi1Decimal = abiRound2(siyahi1IlRaw + siyahi1AyRaw/12 + siyahi1GunRaw/365.25);
+    var siyahi2Decimal = abiRound2(siyahi2IlRaw + siyahi2AyRaw/12 + siyahi2GunRaw/365.25);
+    var siyahiKombine = abiRound2(siyahi1Decimal + siyahi2Decimal);
+    var guzestliYas = null, guzestliTeleb = null, guzestliQaydaMetni = '';
+    if(pre2006StajTotal >= 20 && siyahi1Decimal >= 10){
+      guzestliYas = 52; guzestliTeleb = 20;
+      guzestliQaydaMetni = '2006-cı ilədək 20 il ümumi staj (o cümlədən 10 il 1 nömrəli siyahı üzrə) → 52 yaş';
+    } else if(pre2006StajTotal >= 25 && siyahi2Decimal >= 12.5){
+      guzestliYas = 57; guzestliTeleb = 25;
+      guzestliQaydaMetni = '2006-cı ilədək 25 il ümumi staj (o cümlədən 12 il 6 ay 2 nömrəli siyahı üzrə) → 57 yaş';
+    } else {
+      var minPensiya144HeddProv = abiRound2(abiGetMinPensiya(yg.vefat) * 144);
+      var kapSonraProv = abiGeriKapital(kapSonraBugun, yg.vefat, abiCariIndexIl());
+      if(post2006StajTotal >= 25 && kapSonraProv >= minPensiya144HeddProv && siyahiKombine >= 12.5){
+        guzestliYas = 60; guzestliTeleb = 25;
+        guzestliQaydaMetni = '2006-dan sonra 25 il staj + pensiya kapitalı (hüquq ili minimumu × 144) şərti, o cümlədən 12 il 6 ay 1 və/və ya 2 nömrəli siyahı üzrə → 60 yaş';
+      }
+    }
+    if(guzestliYas !== null){
+      yg.vefat = abiTarixArtir(yg.dogum, guzestliYas, 0);
+      yg.huquqTarixi = yg.vefat;
+      yg.guzestliYasTetbiq = guzestliYas;
+    }
+    // Daxil edilən kapital bugünküdür — vəfat ilinə "geri qaytarılır" (yalnız 2006-dan sonrakı kapital)
+    var kapSonra = abiGeriKapital(kapSonraBugun, yg.vefat, abiCariIndexIl());
     ygLockCard(card);
     var ozetParts = [];
+    if(guzestliYas !== null) ozetParts.push('Güzəştli yaş qaydası tətbiq olundu: '+guzestliQaydaMetni+' (yeni hüquq tarixi: '+abiGunAyIl(yg.vefat)+')');
     if(herbiIlRaw>0||herbiAyRaw>0||herbiGunRaw>0) ozetParts.push('Hərbi xidmət: '+abiFmtYMDraw(herbiIlRaw,herbiAyRaw,herbiGunRaw));
     if(doyusenIlRaw>0||doyusenAyRaw>0||doyusenGunRaw>0) ozetParts.push('Döyüşən ordu: '+abiFmtYMDraw(doyusenIlRaw,doyusenAyRaw,doyusenGunRaw)+' (2 qat hesablanır)');
     if(siyahi1IlRaw>0||siyahi1AyRaw>0||siyahi1GunRaw>0) ozetParts.push('1 nömrəli siyahı: '+abiFmtYMDraw(siyahi1IlRaw,siyahi1AyRaw,siyahi1GunRaw));
@@ -4261,11 +4290,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygAddUserCard(ozetParts.join(', '));
 
     var ageObj = abiYearsDaysDiff(yg.dogum, yg.vefat);
-    // Yaşa görə: staj tələbi sabit 25 il (ABİ/əlillikdəki (yaş−15)/3 düsturu deyil)
-    var teleb = 25;
-
-    var pre2006StajTotal = abiRound2(evvelIlRaw + evvelAyRaw/12 + evvelGunRaw/365.25 + (herbiIlRaw + herbiAyRaw/12 + herbiGunRaw/365.25) + (doyusenIlRaw + doyusenAyRaw/12 + doyusenGunRaw/365.25)*2 + (siyahi1IlRaw + siyahi1AyRaw/12 + siyahi1GunRaw/365.25) + (siyahi2IlRaw + siyahi2AyRaw/12 + siyahi2GunRaw/365.25) + (siyahiUIlRaw + siyahiUAyRaw/12 + siyahiUGunRaw/365.25) + usaqDecimalRaw + (tehsilIlRaw + tehsilAyRaw/12 + tehsilGunRaw/365.25) + (ahilIlRaw + ahilAyRaw/12 + ahilGunRaw/365.25) + (elillikqIlRaw + elillikqAyRaw/12 + elillikqGunRaw/365.25));
-    var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
+    // Yaşa görə: staj tələbi standartda sabit 25 il; güzəştli yaş qaydası tətbiq olunubsa,
+    // həmin qaydanın öz staj tələbi (20/25 il) istifadə olunur.
+    var teleb = (guzestliTeleb !== null) ? guzestliTeleb : 25;
 
     // Yaşa görə hədiyyə staj: 2006-dan sonra ən azı 1 gün belə staj varsa (sığorta stajı və ya
     // post-2006 staj daxil edilib) — hədiyyə staj verilir və 25 illik tələb "çatdırılır".
@@ -4334,9 +4361,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
     ygAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
+      (guzestliYas !== null ? '<span style="color:var(--text-muted);">Güzəştli yaş qaydası: '+guzestliQaydaMetni+'</span><br/>' : '')+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
       (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
-      'Tələb olunan staj: <b>25 il</b><br/>'+
+      'Tələb olunan staj: <b>'+teleb+' il</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
