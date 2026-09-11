@@ -5336,7 +5336,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var isGuz = (mode === 'guzestli');
     var post2006Box = document.getElementById('stajcalc-box-post2006');
     var guzBox = document.getElementById('stajcalc-box-guz');
-    if(post2006Box) post2006Box.style.display = isGuz ? 'none' : '';
+    if(post2006Box) post2006Box.style.display = '';
     if(guzBox) guzBox.style.display = isGuz ? '' : 'none';
     document.querySelectorAll('.stajcalc-guz-col, .stajcalc-guz-head').forEach(function(el){
       el.style.display = isGuz ? '' : 'none';
