@@ -1426,6 +1426,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   // ==================== Stajları hesabla (staj kalkulyatoru) ====================
   var stajRowCount = 0;
   var stajCurrentMode = 'normal';
+  var stajDefaultMode = 'normal';
   function stajFmtDays(days){
     if(days<0) days = 0;
     var il = Math.floor(days/365.25);
@@ -3764,6 +3765,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     document.getElementById('yg-flow').innerHTML='';
     yg = {}; yg.bonusStaj = 0;
     yg.hadPension = false;
+    stajDefaultMode = 'normal';
     ygAskDogumVefat();
   }
   function ygAskGuzestliMulki(){
@@ -3780,8 +3782,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     ygAddUserCard(guzestli ? 'Güzəştli şərtlərlə çalışırdı' : 'Mülki');
     yg.guzestli = guzestli;
     yg.hadPension = false;
+    stajDefaultMode = guzestli ? 'guzestli' : 'normal';
+    if(guzestli) stajModalOpen('guzestli');
     ygAskGender();
   }
+
 
   function ygQ1(btn, yes){
     ygLockCard(btn.closest('.abi-card'));
@@ -3931,7 +3936,6 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     ygAddBotCard(
       '<div class="abi-q">Vətəndaş hansı siyahı ilə işləyib? (uyğun olanları seçin)</div>'+
-      '<button type="button" class="abi-go-btn" style="background:var(--blue-light);max-width:260px;margin-bottom:10px;" onclick="stajModalOpen(\'guzestli\')">🧮 Siyahı üzrə stajı hesabla</button>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
         '<input type="checkbox" id="yg-siyahi1-chk" onchange="ygToggleSiyahi(1)"/> 1 nömrəli siyahı'+
       '</label>'+
@@ -5325,6 +5329,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   // Stajları hesabla (modal)
   // ----------------------------
   function stajModalOpen(mode){
+    mode = mode || stajDefaultMode;
     mode = (mode === 'guzestli') ? 'guzestli' : 'normal';
     stajCurrentMode = mode;
     var modal = document.getElementById('stajcalc-modal');
@@ -5390,7 +5395,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 </script>
 
 <button id="fb-fab" onclick="fbOpen()" style="display:none;position:fixed;bottom:22px;right:22px;z-index:9998;background:var(--blue);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;box-shadow:var(--shadow);cursor:pointer;align-items:center;gap:6px;">💬 Rəy bildir</button>
-<button id="stajcalc-fab" onclick="stajModalOpen('normal')" style="display:none;position:fixed;bottom:22px;right:170px;z-index:9998;background:var(--blue-light);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;box-shadow:var(--shadow);cursor:pointer;align-items:center;gap:6px;">🧮 Staj hesabla</button>
+<button id="stajcalc-fab" onclick="stajModalOpen()" style="display:none;position:fixed;bottom:22px;right:170px;z-index:9998;background:var(--blue-light);color:#fff;border:none;border-radius:999px;padding:12px 18px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;box-shadow:var(--shadow);cursor:pointer;align-items:center;gap:6px;">🧮 Staj hesabla</button>
 
 <div id="stajcalc-modal" style="display:none;position:fixed;inset:0;background:rgba(20,30,50,0.45);z-index:9999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:var(--radius);max-width:960px;width:100%;max-height:88vh;overflow-y:auto;padding:22px;box-shadow:var(--shadow);font-family:'Inter',sans-serif;">
