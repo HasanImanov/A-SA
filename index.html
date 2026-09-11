@@ -3995,24 +3995,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     }
     ygAddBotCard(
       '<div class="abi-q">Vətəndaş hansı siyahı ilə işləyib? (uyğun olanları seçin)</div>'+
+      '<div class="abi-note" style="margin-bottom:10px;">Seçdiyiniz siyahı(lar) üzrə dövrü aşağı-sağdakı <b>"🧮 Staj hesabla"</b> alətində hesablayın — nəticə avtomatik bura köçürüləcək.</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="yg-siyahi1-chk" onchange="ygToggleSiyahi(1)"/> 1 nömrəli siyahı'+
+        '<input type="checkbox" id="yg-siyahi1-chk"/> 1 nömrəli siyahı'+
       '</label>'+
       '<div id="yg-siyahi1-fields" style="display:none;margin-bottom:8px;">'+abiYMDInputHTML('yg-siyahi1','0','0','0')+'</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="yg-siyahi2-chk" onchange="ygToggleSiyahi(2)"/> 2 nömrəli siyahı'+
+        '<input type="checkbox" id="yg-siyahi2-chk"/> 2 nömrəli siyahı'+
       '</label>'+
       '<div id="yg-siyahi2-fields" style="display:none;margin-bottom:8px;">'+abiYMDInputHTML('yg-siyahi2','0','0','0')+'</div>'+
       '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:0.88rem;">'+
-        '<input type="checkbox" id="yg-siyahiUmumi-chk" onchange="ygToggleSiyahi(\'Umumi\')"/> Ümumi'+
+        '<input type="checkbox" id="yg-siyahiUmumi-chk"/> Ümumi'+
       '</label>'+
       '<div id="yg-siyahiUmumi-fields" style="display:none;margin-bottom:8px;">'+abiYMDInputHTML('yg-siyahiUmumi','0','0','0')+'</div>'+
       '<button class="abi-go-btn" onclick="ygSaveSiyahi(this)">Davam et</button>'
     );
-  }
-  function ygToggleSiyahi(n){
-    var chk = document.getElementById('yg-siyahi'+n+'-chk');
-    document.getElementById('yg-siyahi'+n+'-fields').style.display = chk.checked ? 'block' : 'none';
   }
   function ygSaveSiyahi(btn){
     var card = btn.closest('.abi-card');
