@@ -1429,7 +1429,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   var stajRowCount = 0;
   var stajCurrentMode = 'normal';
   var stajDefaultMode = 'normal';
-  var stajTotals = {all:0, pre:0, post:0, sel:0, guz:0};
+  var stajTotals = {all:0, pre:0, post:0, sel:0, guz1:0, guz2:0};
   function stajDaysToYMDParts(days){
     if(days<0) days = 0;
     var il = Math.floor(days/365.25);
@@ -1449,6 +1449,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function stajTransferToForm(which){
     var mod = stajGetActiveModule();
+    if(which==='guz1' || which==='guz2'){
+      if(mod!=='yg'){ siteAlert('Güzəştli siyahı sahələri yalnız Yaşa görə bölməsində mövcuddur.'); return; }
+      var days = (which==='guz1') ? stajTotals.guz1 : stajTotals.guz2;
+      var idPrefix = (which==='guz1') ? 'yg-siyahi1' : 'yg-siyahi2';
+      var ilEl2 = document.getElementById(idPrefix+'-il');
+      var ayEl2 = document.getElementById(idPrefix+'-ay');
+      var gunEl2 = document.getElementById(idPrefix+'-gun');
+      if(!ilEl2 || !ayEl2 || !gunEl2){ siteAlert('Hədəf sahələr tapılmadı — əvvəlcə "Vətəndaş hansı siyahı ilə işləyib?" sualında müvafiq siyahını işarələyin.'); return; }
+      var parts2 = stajDaysToYMDParts(days);
+      ilEl2.value = parts2.il; ayEl2.value = parts2.ay; gunEl2.value = parts2.gun;
+      stajModalClose();
+      return;
+    }
     if(!mod){ siteAlert('Bu funksiya yalnız ABİ, Əlillik və ya Yaşa görə bölmələrində açıq olanda işləyir.'); return; }
     var days = (which==='pre2006') ? stajTotals.pre : stajTotals.post;
     var idPrefix = (which==='pre2006') ? (mod+'-kap-evvel') : (mod+'-post2006');
@@ -1476,7 +1489,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<td><input type="text" id="stajcalc-'+i+'-from" maxlength="10" inputmode="numeric" placeholder="gg.aa.iiii" oninput="abiMaskDate(this);stajRecalcAll();"/></td>'+
       '<td><input type="text" id="stajcalc-'+i+'-to" maxlength="10" inputmode="numeric" placeholder="gg.aa.iiii" oninput="abiMaskDate(this);stajRecalcAll();"/></td>'+
       '<td class="stajcalc-dur" id="stajcalc-'+i+'-dur">—</td>'+
-      '<td class="stajcalc-guz-col" style="text-align:center;display:none;"><label class="staj-toggle-wrap"><input type="checkbox" id="stajcalc-'+i+'-guz" onchange="stajRecalcAll()"/><span class="staj-toggle-slider"></span></label></td>'+
+      '<td class="stajcalc-guz-col" style="text-align:center;display:none;"><label class="staj-toggle-wrap"><input type="checkbox" id="stajcalc-'+i+'-guz1" onchange="stajRecalcAll()"/><span class="staj-toggle-slider"></span></label></td>'+
+      '<td class="stajcalc-guz-col" style="text-align:center;display:none;"><label class="staj-toggle-wrap"><input type="checkbox" id="stajcalc-'+i+'-guz2" onchange="stajRecalcAll()"/><span class="staj-toggle-slider"></span></label></td>'+
       '<td style="text-align:center;"><label class="staj-toggle-wrap"><input type="checkbox" id="stajcalc-'+i+'-sel" onchange="stajRecalcAll()"/><span class="staj-toggle-slider"></span></label></td>'+
     '</tr>';
   }
@@ -1484,9 +1498,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     stajRowCount++;
     var tbody = document.getElementById('stajcalc-tbody');
     if(tbody) tbody.insertAdjacentHTML('beforeend', stajRowHtml(stajRowCount));
-    var guzInput = document.getElementById('stajcalc-'+stajRowCount+'-guz');
-    var guzCell = guzInput ? guzInput.closest('td') : null;
-    if(guzCell) guzCell.style.display = (stajCurrentMode === 'guzestli') ? '' : 'none';
+    ['guz1','guz2'].forEach(function(suf){
+      var input = document.getElementById('stajcalc-'+stajRowCount+'-'+suf);
+      var cell = input ? input.closest('td') : null;
+      if(cell) cell.style.display = (stajCurrentMode === 'guzestli') ? '' : 'none';
+    });
   }
   function stajInitRows(n){
     var tbody = document.getElementById('stajcalc-tbody');
@@ -1501,14 +1517,15 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function stajRecalcAll(){
     var boundary = new Date(2006,0,1).getTime();
-    var allDays=0, preDays=0, postDays=0, selDays=0, guzDays=0;
+    var allDays=0, preDays=0, postDays=0, selDays=0, guz1Days=0, guz2Days=0;
     for(var i=1;i<=stajRowCount;i++){
       var sEl = document.getElementById('stajcalc-'+i+'-from');
       if(!sEl) continue;
       var eEl = document.getElementById('stajcalc-'+i+'-to');
       var durEl = document.getElementById('stajcalc-'+i+'-dur');
       var selEl = document.getElementById('stajcalc-'+i+'-sel');
-      var guzEl = document.getElementById('stajcalc-'+i+'-guz');
+      var guz1El = document.getElementById('stajcalc-'+i+'-guz1');
+      var guz2El = document.getElementById('stajcalc-'+i+'-guz2');
       var s = abiParseDate(sEl.value), e = abiParseDate(eEl.value);
       var sBad = sEl.value.trim()!=='' && !s;
       var eBad = eEl.value.trim()!=='' && (!e || (s && e.getTime()<=s.getTime()));
@@ -1528,19 +1545,22 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       preDays += rowPre;
       postDays += rowPost;
       if(selEl && selEl.checked) selDays += (rowPre + rowPost);
-      if(guzEl && guzEl.checked) guzDays += (rowPre + rowPost);
+      if(guz1El && guz1El.checked) guz1Days += (rowPre + rowPost);
+      if(guz2El && guz2El.checked) guz2Days += (rowPre + rowPost);
     }
     var cemiEl = document.getElementById('stajcalc-total-cemi');
     var preEl = document.getElementById('stajcalc-total-pre2006');
     var postEl = document.getElementById('stajcalc-total-post2006');
     var selTotEl = document.getElementById('stajcalc-total-sel');
-    var guzTotEl = document.getElementById('stajcalc-total-guz');
+    var guz1TotEl = document.getElementById('stajcalc-total-guz1');
+    var guz2TotEl = document.getElementById('stajcalc-total-guz2');
     if(cemiEl) cemiEl.textContent = stajFmtDays(allDays);
     if(preEl) preEl.textContent = stajFmtDays(preDays);
     if(postEl) postEl.textContent = stajFmtDays(postDays);
     if(selTotEl) selTotEl.textContent = stajFmtDays(selDays);
-    if(guzTotEl) guzTotEl.textContent = stajFmtDays(guzDays);
-    stajTotals.all = allDays; stajTotals.pre = preDays; stajTotals.post = postDays; stajTotals.sel = selDays; stajTotals.guz = guzDays;
+    if(guz1TotEl) guz1TotEl.textContent = stajFmtDays(guz1Days);
+    if(guz2TotEl) guz2TotEl.textContent = stajFmtDays(guz2Days);
+    stajTotals.all = allDays; stajTotals.pre = preDays; stajTotals.post = postDays; stajTotals.sel = selDays; stajTotals.guz1 = guz1Days; stajTotals.guz2 = guz2Days;
   }
   // ==================== /Stajları hesabla ====================
 
@@ -5375,9 +5395,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     modal.style.display = 'flex';
     var isGuz = (mode === 'guzestli');
     var post2006Box = document.getElementById('stajcalc-box-post2006');
-    var guzBox = document.getElementById('stajcalc-box-guz');
+    var guzBox1 = document.getElementById('stajcalc-box-guz1');
+    var guzBox2 = document.getElementById('stajcalc-box-guz2');
     if(post2006Box) post2006Box.style.display = '';
-    if(guzBox) guzBox.style.display = isGuz ? '' : 'none';
+    if(guzBox1) guzBox1.style.display = isGuz ? '' : 'none';
+    if(guzBox2) guzBox2.style.display = isGuz ? '' : 'none';
     document.querySelectorAll('.stajcalc-guz-col, .stajcalc-guz-head').forEach(function(el){
       el.style.display = isGuz ? '' : 'none';
     });
@@ -5445,7 +5467,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
       <div style="flex:2;min-width:420px;">
         <table class="stajcalc-table" id="stajcalc-table">
-          <thead><tr><th>Tarixdən</th><th>Tarixədək</th><th>Tarixə görə staj</th><th class="stajcalc-guz-head" style="text-align:center;display:none;">Güzəştli</th><th style="text-align:center;">Seç</th></tr></thead>
+          <thead><tr><th>Tarixdən</th><th>Tarixədək</th><th>Tarixə görə staj</th><th class="stajcalc-guz-head" style="text-align:center;display:none;">1 N.S.</th><th class="stajcalc-guz-head" style="text-align:center;display:none;">2 N.S.</th><th style="text-align:center;">Seç</th></tr></thead>
           <tbody id="stajcalc-tbody"></tbody>
         </table>
         <div style="display:flex;gap:10px;margin-top:14px;">
@@ -5457,7 +5479,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         <div class="stajcalc-summary-box"><div class="stajcalc-summary-title">Cəmi</div><div class="stajcalc-summary-val" id="stajcalc-total-cemi">0 il 0 ay 0 gün</div></div>
         <div class="stajcalc-summary-box"><div class="stajcalc-summary-title">2006-cı ilə qədər</div><div class="stajcalc-summary-val" id="stajcalc-total-pre2006">0 il 0 ay 0 gün</div><button type="button" class="abi-go-btn" style="margin-top:8px;padding:6px 10px;font-size:0.78rem;max-width:160px;" onclick="stajTransferToForm('pre2006')">→ Formaya köçür</button></div>
         <div class="stajcalc-summary-box" id="stajcalc-box-post2006"><div class="stajcalc-summary-title">2006-cı ildən sonra</div><div class="stajcalc-summary-val" id="stajcalc-total-post2006">0 il 0 ay 0 gün</div><button type="button" class="abi-go-btn" style="margin-top:8px;padding:6px 10px;font-size:0.78rem;max-width:160px;" onclick="stajTransferToForm('post2006')">→ Formaya köçür</button></div>
-        <div class="stajcalc-summary-box" id="stajcalc-box-guz" style="display:none;"><div class="stajcalc-summary-title">Güzəştli şərtlərlə staj</div><div class="stajcalc-summary-val" id="stajcalc-total-guz">0 il 0 ay 0 gün</div></div>
+        <div class="stajcalc-summary-box" id="stajcalc-box-guz1" style="display:none;"><div class="stajcalc-summary-title">1 nömrəli siyahı üzrə staj</div><div class="stajcalc-summary-val" id="stajcalc-total-guz1">0 il 0 ay 0 gün</div><button type="button" class="abi-go-btn" style="margin-top:8px;padding:6px 10px;font-size:0.78rem;max-width:160px;" onclick="stajTransferToForm('guz1')">→ Formaya köçür</button></div>
+        <div class="stajcalc-summary-box" id="stajcalc-box-guz2" style="display:none;"><div class="stajcalc-summary-title">2 nömrəli siyahı üzrə staj</div><div class="stajcalc-summary-val" id="stajcalc-total-guz2">0 il 0 ay 0 gün</div><button type="button" class="abi-go-btn" style="margin-top:8px;padding:6px 10px;font-size:0.78rem;max-width:160px;" onclick="stajTransferToForm('guz2')">→ Formaya köçür</button></div>
         <div class="stajcalc-summary-box"><div class="stajcalc-summary-title">Seçilmiş xanalar üzrə</div><div class="stajcalc-summary-val" id="stajcalc-total-sel">0 il 0 ay 0 gün</div></div>
       </div>
     </div>
