@@ -1479,6 +1479,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       var selEl = document.getElementById('stajcalc-'+i+'-sel');
       var guzEl = document.getElementById('stajcalc-'+i+'-guz');
       var s = abiParseDate(sEl.value), e = abiParseDate(eEl.value);
+      var sBad = sEl.value.trim()!=='' && !s;
+      var eBad = eEl.value.trim()!=='' && (!e || (s && e.getTime()<=s.getTime()));
+      sEl.style.borderColor = sBad ? '#c0392b' : '';
+      sEl.style.background = sBad ? '#fdf1f0' : '';
+      eEl.style.borderColor = eBad ? '#c0392b' : '';
+      eEl.style.background = eBad ? '#fdf1f0' : '';
       if(!s || !e || e.getTime() <= s.getTime()){ if(durEl) durEl.textContent = '—'; continue; }
       var diff = abiYearsMonthsDaysDiff(s, e);
       if(durEl) durEl.textContent = diff.years+' il '+diff.months+' ay '+diff.days+' gün';
