@@ -5067,7 +5067,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsy.gelirMeyar = meyar;
     udsyAddBotCard(
       '<div class="abi-q">Ailənin aylıq ümumi gəliri neçə AZN-dir?</div>'+
-      '<div class="abi-note">Ehtiyac meyarı = '+UDSY_MEYAR+' AZN × '+(udsy.aileSay||0)+' nəfər = <b>'+meyar+' AZN</b>. Gəlir bu məbləği keçirsə, ailə aztəminatlı sayılmır.</div>'+
+      '<div class="abi-note">Ehtiyac meyarı = '+UDSY_MEYAR+' AZN × '+(udsy.aileSay||0)+' nəfər = <b>'+meyar+' AZN</b>. Gəlir bu məbləğə bərabər və ya çox olarsa, ÜDSY təyin edilmir.</div>'+
       '<div class="abi-input-group single"><div><label>Bütün ailə üzvlərinin aylıq gəliri (AZN)</label><input type="number" id="udsy-gelir" min="0" placeholder="0"/></div></div>'+
       '<button class="abi-go-btn" onclick="udsyQGelir(this)">Nəticəni göstər</button>'
     );
@@ -5130,11 +5130,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       }
     });
 
-    // 4) Gəlir testi — ailə aztəminatlı olmalıdır
+    // 4) Gəlir testi — gəlir ehtiyac meyarından ciddi şəkildə az olmalıdır (bərabər olduqda belə imtina)
     var meyar = udsy.gelirMeyar || (UDSY_MEYAR * (parseInt(udsy.aileSay,10)||0));
-    var aztiminatli = (udsy.gelir <= meyar);
+    var aztiminatli = (udsy.gelir < meyar);
     if(!aztiminatli){
-      red.push('Aylıq gəlir ('+udsy.gelir+' AZN) ehtiyac meyarını ('+meyar+' AZN) keçir — ailə aztəminatlı sayılmır');
+      red.push('Aylıq gəlir ('+udsy.gelir+' AZN) ehtiyac meyarını ('+meyar+' AZN) keçir və ya ona bərabərdir — ÜDSY təyin edilə bilməz');
     }
 
     var senedBlok = udsy.resmiSenedler
