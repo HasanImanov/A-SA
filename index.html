@@ -3110,7 +3110,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     document.getElementById('elp-flow').innerHTML='';
     elp = {};
     elpAddBotCard(
-      '<div class="abi-q">Mərhum şəxs güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
+      '<div class="abi-q">Şəxs güzəştli şərtlərlə çalışırdı, yoxsa mülki?</div>'+
       '<div class="abi-btn-row" style="flex-direction:column;align-items:stretch;">'+
         '<button class="abi-choice-btn" style="text-align:left;margin-bottom:6px;" onclick="elpQGuzestliMulki(this,true)">Güzəştli şərtlərlə çalışırdı</button>'+
         '<button class="abi-choice-btn" style="text-align:left;" onclick="elpQGuzestliMulki(this,false)">Mülki</button>'+
@@ -3704,6 +3704,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ? ('Daxil edilən kapital (bugünkü): <b>'+kapSonraBugun+' AZN</b><br/>Hüquq ('+elp.vefat.getFullYear()+') ilinə gətirilmiş kapital: <b>'+kapSonra+' AZN</b><br/>')
       : '';
 
+    // Güzəştli siyahı üzrə işləyənlər üçün məbləğ hesablamasını XŞTMF aparır —
+    // biz yalnız hüququn yaranıb-yaranmadığını bildiririk.
+    var showAmountsElp = !elp.guzestli;
     elpAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
       'Dərəcə: <b>'+elp.derece+'%</b><br/>'+
@@ -3717,14 +3720,21 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
         : '')+
       (kapitalTetbiqOlunur ? (elpKapGeriSetiri+'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
-      (elpPensiyaVar ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+elpIndexSetiri) : '')+
+      (elpPensiyaVar
+        ? (showAmountsElp
+            ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+elpIndexSetiri)
+            : '<span style="color:var(--text-muted);">Əlillik pensiyası hüququ yaranır — məbləğin hesablanması XŞTMF-nin səlahiyyətindədir.</span>')
+        : '')+
       (catmayan>0 && !kapitalIleMinPensiya ? '<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>' : '')+
-      (elpPensiyaVar ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
+      (elpPensiyaVar && showAmountsElp ? '<div class="abi-note">Minimum pensiyanın məbləği qanunla müəyyən edilən cari göstəricidən asılıdır — növbəti addımda onu özünüz daxil edəcəksiniz.</div>' : '')
     );
 
     if(catmayan>0 && !kapitalIleMinPensiya){
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       elpShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
+    } else if(!showAmountsElp){
+      // Güzəştli: yalnız hüququn yarandığı bildirilir, məbləğ verilmir
+      elpShowFinalResult(true, 'Əlillik pensiyası hüququ <b>yaranır</b>. Məbləğin hesablanması XŞTMF-nin səlahiyyətindədir.');
     } else {
       // Əlillikdə yalnız bir hüquq sahibi (şəxsin özü) olur — bölüşdürmə sualı verilmir, birbaşa nəticə göstərilir
       var isPensiyaElp = tapilanMebleg > ABI_LIMIT;
@@ -3960,7 +3970,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
 
   function ygAskGender(){
     ygAddBotCard(
-      '<div class="abi-q">Mərhum şəxs kişidir, yoxsa qadındır?</div>'+
+      '<div class="abi-q">Şəxs kişidir, yoxsa qadındır?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQGender(this,true)">Kişi</button>'+
         '<button class="abi-choice-btn" onclick="ygQGender(this,false)">Qadın</button>'+
@@ -4105,7 +4115,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   var ABI_XARICI_OLKELER = ['Ermənistan','Belarus','Qazaxıstan','Qırğızıstan','Moldova','Tacikistan','Özbəkistan','Türkiyə'];
   function ygAskXarici(){
     ygAddBotCard(
-      '<div class="abi-q">Mərhum şəxs xaricdə işləyibmi?</div>'+
+      '<div class="abi-q">Şəxs xaricdə işləyibmi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQXarici(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQXarici(this,false)">Xeyr</button>'+
@@ -4139,7 +4149,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   // Ahıl/əlillik qulluğu — Bəli olsa, notarius təsdiqlənmiş arayış sorğulanır, yalnız o da varsa staj inputu açılır
   function ygAskAhilEarly(){
     ygAddBotCard(
-      '<div class="abi-q">Mərhum şəxs ahıl (yaşlı) şəxsə qulluq edibmi?</div>'+
+      '<div class="abi-q">Ahıl (yaşlı) şəxsə qulluq edilibmi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQAhilEarly(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQAhilEarly(this,false)">Xeyr</button>'+
@@ -4165,7 +4175,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     yg.ahilOlub = false;
     if(!yes){ ygAskElillikEarly(); return; }
     ygAddBotCard(
-      '<div class="abi-q">Qulluq dövrü mərhum şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-q">Qulluq dövrü işlədiyi dövrə təsadüf edirmi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQAhilTesaduf(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQAhilTesaduf(this,false)">Xeyr</button>'+
@@ -4238,7 +4248,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     yg.elillikOlub = false;
     if(!yes){ ygDecidePre2006Path(); return; }
     ygAddBotCard(
-      '<div class="abi-q">Qulluq dövrü mərhum şəxsin işlədiyi dövrə təsadüf edirmi?</div>'+
+      '<div class="abi-q">Qulluq dövrü işlədiyi dövrə təsadüf edirmi?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQElillikTesaduf(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQElillikTesaduf(this,false)">Xeyr</button>'+
@@ -4268,7 +4278,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function ygAskHasStaj(){
     ygAddBotCard(
-      '<div class="abi-q">Mərhumun əmək kitabçası üzrə rəsmi stajı olubmu?</div>'+
+      '<div class="abi-q">Şəxsin əmək kitabçası üzrə rəsmi stajı olubmu?</div>'+
       '<div class="abi-btn-row">'+
         '<button class="abi-choice-btn yes" onclick="ygQHasStaj(this,true)">Bəli</button>'+
         '<button class="abi-choice-btn" onclick="ygQHasStaj(this,false)">Xeyr</button>'+
@@ -4400,7 +4410,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var post2006StajTotal = abiRound2(post2006IlRaw + post2006AyRaw/12 + post2006GunRaw/365.25);
     var siyahi1Decimal = abiRound2(siyahi1IlRaw + siyahi1AyRaw/12 + siyahi1GunRaw/365.25);
     var siyahi2Decimal = abiRound2(siyahi2IlRaw + siyahi2AyRaw/12 + siyahi2GunRaw/365.25);
-    var siyahiKombine = abiRound2(siyahi1Decimal + siyahi2Decimal);
+    // "Ümumi" — eyni dövrdə həm 1, həm 2 nömrəli siyahıya aid sayılır, yalnız birləşdirilmiş (C şərti) həddə əlavə olunur
+    var siyahiUDecimal = abiRound2(siyahiUIlRaw + siyahiUAyRaw/12 + siyahiUGunRaw/365.25);
+    var siyahiKombine = abiRound2(siyahi1Decimal + siyahi2Decimal + siyahiUDecimal);
     var guzestliYas = null, guzestliTeleb = null, guzestliQaydaMetni = '';
     if(pre2006StajTotal >= 20 && siyahi1Decimal >= 10){
       guzestliYas = 52; guzestliTeleb = 20;
@@ -4411,9 +4423,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     } else {
       var minPensiya144HeddProv = abiRound2(abiGetMinPensiya(yg.vefat) * 144);
       var kapSonraProv = abiGeriKapital(kapSonraBugun, yg.vefat, abiCariIndexIl());
-      if(post2006StajTotal >= 25 && kapSonraProv >= minPensiya144HeddProv && siyahiKombine >= 12.5){
+      if((post2006StajTotal >= 25 || kapSonraProv >= minPensiya144HeddProv) && siyahiKombine >= 12.5){
         guzestliYas = 60; guzestliTeleb = 25;
-        guzestliQaydaMetni = '2006-dan sonra 25 il staj + pensiya kapitalı (hüquq ili minimumu × 144) şərti, o cümlədən 12 il 6 ay 1 və/və ya 2 nömrəli siyahı üzrə → 60 yaş';
+        guzestliQaydaMetni = '2006-dan sonra 25 il staj VƏ YA pensiya kapitalı hüquq ili minimum pensiyası × 144-dən az olmadıqda, o cümlədən 12 il 6 ay 1 və/və ya 2 nömrəli siyahı üzrə → 60 yaş';
       }
     }
     if(guzestliYas !== null){
@@ -4510,6 +4522,9 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ? ('Daxil edilən kapital (bugünkü): <b>'+kapSonraBugun+' AZN</b><br/>Hüquq ('+yg.vefat.getFullYear()+') ilinə gətirilmiş kapital: <b>'+kapSonra+' AZN</b><br/>')
       : '';
 
+    // Güzəştli siyahı üzrə işləyənlər üçün məbləğ hesablamasını XŞTMF aparır —
+    // biz yalnız hüququn yaranıb-yaranmadığını və (yaş qaydası varsa) hansı yaşda yarandığını bildiririk.
+    var showAmounts = !yg.guzestli;
     ygAddBotCard(
       '<div class="abi-q">Nəticə</div>'+
       (guzestliYas !== null ? '<span style="color:var(--text-muted);">Güzəştli yaş qaydası: '+guzestliQaydaMetni+'</span><br/>' : '')+
@@ -4527,12 +4542,19 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       'Olan kapital: <b>'+totalKapital+' AZN</b>'+
       (catmayan>0 && !kapitalIleMinPensiya
         ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
-        : ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+ygIndexSetiri))
+        : (showAmounts
+            ? ('<br/>Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+ygIndexSetiri)
+            : '<br/><span style="color:var(--text-muted);">Pensiya hüququ yaranır — məbləğin hesablanması XŞTMF-nin səlahiyyətindədir.</span>'))
     );
 
     if(catmayan>0 && !kapitalIleMinPensiya){
       // Staj tələbi ödənilmədiyi üçün birbaşa müavinət nəticəsi göstərilir, əlavə sual verilmir
       ygShowFinalResult(false, 'Staj tələbi ödənilmədiyi üçün sosial müavinət təyin olunur.');
+    } else if(!showAmounts){
+      // Güzəştli: yalnız hüququn yaranması və (varsa) tətbiq olunan yaş qaydası bildirilir, məbləğ verilmir
+      ygShowFinalResult(true, 'Pensiya hüququ <b>yaranır</b>.'+
+        (guzestliYas !== null ? ' Güzəştli yaş qaydasına əsasən hüquq yaşı: <b>'+guzestliYas+'</b> (hüquq tarixi: '+abiGunAyIl(yg.vefat)+').' : '')+
+        ' Məbləğin hesablanması XŞTMF-nin səlahiyyətindədir.');
     } else {
       // Yaşa görədə bölüşdürmə/hüquq sahibləri yoxdur — əlillik kimi şəxsin özünə şamil olunur
       var ygIsPensiya = tapilanMebleg > ABI_LIMIT;
@@ -4627,7 +4649,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     var perPerson = abiRound2(mebleg/say);
     var isPensiya = yg.stajCatmir ? false : (perPerson>ABI_LIMIT);
     var indexNotu = (!yg.stajCatmir && yg.indexlenmisMebleg && yg.indexlenmisMebleg>yg.tapilanMebleg)
-      ? ('<br/>Mərhumun indeksləşdirilmiş pensiyası ('+abiCariIndexIl()+'): <b>'+yg.indexlenmisMebleg+' AZN</b>')
+      ? ('<br/>Şəxsin indeksləşdirilmiş pensiyası ('+abiCariIndexIl()+'): <b>'+yg.indexlenmisMebleg+' AZN</b>')
       : '';
     var detail2 = 'Hüququ yaranan şəxslərin sayı: <b>'+say+'</b><br/>Adam başına düşən məbləğ: <b>'+perPerson+' AZN</b> ('+ABI_LIMIT+' AZN həddi ilə müqayisədə).'+indexNotu;
     if(yg.stajCatmir){
