@@ -18,18 +18,25 @@
     .header-text p{font-size:0.78rem;color:var(--text-muted);margin-top:1px;}
     .status-dot{width:9px;height:9px;background:#28c76f;border-radius:50%;display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-    .tabs{background:var(--white);border-bottom:2px solid var(--blue-mid);display:flex;padding:0 24px;gap:4px;}
-    .tab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:12px 20px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text-muted);transition:all 0.2s;margin-bottom:-2px;}
+    .tabs{background:var(--white);box-shadow:inset 0 -2px 0 var(--blue-mid);display:flex;align-items:stretch;padding:0 24px;gap:4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab-btn{background:none;border:none;border-bottom:3px solid transparent;padding:12px 18px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;line-height:1.3;color:var(--text-muted);transition:color 0.2s,border-color 0.2s;white-space:nowrap;flex:0 0 auto;}
     .tab-btn:hover{color:var(--blue);}
     .tab-btn.active{color:var(--blue);border-bottom:3px solid var(--blue);}
-    .tab-select-wrap{position:relative;display:inline-flex;}
-    .tab-select-wrap::after{content:'\25BC';position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:1.15rem;line-height:1;color:var(--text-muted);transition:color 0.2s;}
-    .tab-select-wrap:hover::after{color:var(--blue);}
-    .tab-select-wrap:has(.tab-select.active)::after{color:var(--blue);}
-    .tab-select{background:none;border:none;border-bottom:3px solid transparent;padding:12px 36px 12px 20px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text-muted);transition:all 0.2s;margin-bottom:-2px;outline:none;-webkit-appearance:none;appearance:none;}
+    .tab-select-wrap{position:relative;display:inline-flex;flex:0 0 auto;}
+    .tab-select-wrap::after{content:'';position:absolute;right:14px;top:50%;width:7px;height:7px;border-right:2px solid var(--text-muted);border-bottom:2px solid var(--text-muted);transform:translateY(-75%) rotate(45deg);pointer-events:none;transition:border-color 0.2s;}
+    .tab-select-wrap:hover::after{border-color:var(--blue);}
+    .tab-select-wrap:has(.tab-select.active)::after{border-color:var(--blue);}
+    .tab-select{background:none;border:none;border-bottom:3px solid transparent;padding:12px 34px 12px 18px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;line-height:1.3;color:var(--text-muted);transition:color 0.2s,border-color 0.2s;outline:none;-webkit-appearance:none;appearance:none;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    /* Seçim olmayanda select ən uzun variantın eninə görə açılmasın — yalnız başlıq (Pensiya / Sosial müavinət) qədər yer tutsun */
+    #pensiya-select:not(.active){width:112px;}
+    #sosial-select:not(.active){width:172px;}
     .tab-select:hover{color:var(--blue);}
     .tab-select.active{color:var(--blue);border-bottom:3px solid var(--blue);}
-    .tab-select option{color:var(--text);font-weight:600;}
+    .tab-select option{color:var(--text);font-weight:600;font-family:'Inter',sans-serif;}
+    .tab-select optgroup{color:var(--blue);font-weight:700;font-style:normal;font-family:'Inter',sans-serif;}
+    .tab-btn:focus-visible,.tab-select:focus-visible{color:var(--blue);background:var(--blue-pale);border-radius:8px 8px 0 0;}
+    @media(max-width:700px){.tabs{padding:0 8px;gap:0;}.tab-btn{padding:11px 12px;font-size:0.85rem;}.tab-select{padding:11px 30px 11px 12px;font-size:0.85rem;max-width:210px;}.tab-select-wrap::after{right:12px;}#pensiya-select:not(.active){width:96px;}#sosial-select:not(.active){width:152px;}}
     #tab-refiq{flex:1;display:none;flex-direction:column;}
     #tab-refiq.active{display:flex;}
     main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 0;}
@@ -108,6 +115,8 @@
     #yg-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
     #tab-udsy{flex:1;display:none;flex-direction:column;}
     #tab-udsy.active{display:flex;}
+    #tab-sc{flex:1;display:none;flex-direction:column;}
+    #tab-sc.active{display:flex;}
     .stajcalc-table{width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
     .stajcalc-table th{background:var(--blue);color:var(--white);padding:10px 12px;font-size:0.82rem;text-align:left;font-family:'Nunito',sans-serif;font-weight:700;}
     .stajcalc-table td{padding:7px 10px;border-bottom:1px solid var(--blue-pale);}
@@ -122,8 +131,8 @@
     .stajcalc-summary-box{background:var(--blue-pale);border-radius:var(--radius);padding:16px;text-align:center;}
     .stajcalc-summary-title{font-size:0.76rem;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
     .stajcalc-summary-val{font-size:1.1rem;font-weight:800;color:var(--text);}
-    #udsy-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
-    #abi-flow,#udsy-flow{display:flex;flex-direction:column;gap:16px;}
+    #udsy-main,#sc-main{flex:1;display:flex;flex-direction:column;max-width:820px;width:100%;margin:0 auto;padding:24px 16px 24px;overflow-y:auto;}
+    #abi-flow,#udsy-flow,#sc-flow{display:flex;flex-direction:column;gap:16px;}
     .abi-bubble{display:flex;gap:10px;align-items:flex-start;animation:fadeIn 0.3s ease;}
     .abi-bubble.user{flex-direction:row-reverse;}
     .abi-card{max-width:86%;padding:14px 18px;border-radius:var(--radius);font-size:0.92rem;line-height:1.6;}
@@ -171,15 +180,40 @@
   <span class="tab-select-wrap">
     <select class="tab-select" id="pensiya-select" onchange="pensiyaSelectChange(this.value)">
       <option value="" hidden>Pensiya</option>
-      <option value="abi">ABİ</option>
-      <option value="elp">ƏLİLLİK</option>
-      <option value="yg">YAŞA GÖRƏ</option>
+      <optgroup label="Təyinat">
+        <option value="abi">ABİ</option>
+        <option value="elp">Əlillik</option>
+        <option value="yg">Yaşa görə</option>
+      </optgroup>
+      <optgroup label="Yenidən hesablanma">
+        <option value="sc_alti">6 illik yenidən hesablanma</option>
+        <option value="sc_isden">İşdən azad olunma</option>
+        <option value="sc_umumi">Ümumi yenidən hesablanma</option>
+      </optgroup>
     </select>
   </span>
   <span class="tab-select-wrap">
     <select class="tab-select" id="sosial-select" onchange="sosialSelectChange(this.value)">
       <option value="" hidden>Sosial müavinət</option>
       <option value="udsy">ÜDSY</option>
+      <optgroup label="Aylıq müavinətlər">
+        <option value="sc_yasam">Yaşa görə müavinət</option>
+        <option value="sc_elilm">Əlilliyə görə müavinət</option>
+        <option value="sc_abim">ABİ müavinəti</option>
+        <option value="sc_hherbi">Hərbi qulluqçunun uşaqları</option>
+      </optgroup>
+      <optgroup label="Birdəfəlik müavinətlər">
+        <option value="sc_uanadan">Uşağın anadan olması</option>
+        <option value="sc_defn">Dəfn müavinəti</option>
+        <option value="sc_ceza">Cəzadan azad edilənlər</option>
+      </optgroup>
+      <optgroup label="Prezident təqaüdü">
+        <option value="sc_prezt">Prezident təqaüdü (veteran)</option>
+        <option value="sc_elmi">Prezident təqaüdü (elmi dərəcə)</option>
+      </optgroup>
+      <optgroup label="Sığorta">
+        <option value="sc_icbari">İcbari sığorta</option>
+      </optgroup>
     </select>
   </span>
 </div>
@@ -434,6 +468,13 @@
   <div id="udsy-main">
     <div class="arayish-title">Ünvanlı dövlət sosial yardımı (ÜDSY)</div>
     <div id="udsy-flow"></div>
+  </div>
+</div>
+
+<div id="tab-sc">
+  <div id="sc-main">
+    <div class="arayish-title" id="sc-title"></div>
+    <div id="sc-flow"></div>
   </div>
 </div>
 
@@ -868,23 +909,39 @@
 
   function switchTab(tab){
     document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===tab);});
-    ['refiq','arayish','erize','abi','elp','yg','udsy'].forEach(function(t){
+    // 'sc_<id>' — ümumi sual-cavab paneli (SC_AXINLAR), hamısı tab-sc-də göstərilir
+    var scAx = (tab.indexOf('sc_')===0) ? SC_AXINLAR[tab.slice(3)] : null;
+    var panel = scAx ? 'sc' : tab;
+    ['refiq','arayish','erize','abi','elp','yg','udsy','sc'].forEach(function(t){
       var el = document.getElementById('tab-'+t);
-      if(el) el.classList.toggle('active', t===tab);
+      if(el) el.classList.toggle('active', t===panel);
     });
     var psel = document.getElementById('pensiya-select');
     if(psel){
-      var isPensiya = (tab==='abi'||tab==='elp'||tab==='yg');
+      var isPensiya = (tab==='abi'||tab==='elp'||tab==='yg'||(!!scAx && scAx.qrup==='pensiya'));
       psel.classList.toggle('active', isPensiya);
       psel.value = isPensiya ? tab : '';
+      tabSelectFit(psel, isPensiya);
     }
     var ssel = document.getElementById('sosial-select');
     if(ssel){
-      var isSosial = (tab==='udsy');
+      var isSosial = (tab==='udsy'||(!!scAx && scAx.qrup==='sosial'));
       ssel.classList.toggle('active', isSosial);
       ssel.value = isSosial ? tab : '';
+      tabSelectFit(ssel, isSosial);
     }
     return tab;
+  }
+  // Aktiv select seçilmiş variantın mətni qədər en tutsun (native select ən uzun varianta görə açılır)
+  function tabSelectFit(sel, active){
+    if(!active){ sel.style.width = ''; return; }
+    var opt = sel.options[sel.selectedIndex];
+    var ctx = tabSelectFit._ctx || (tabSelectFit._ctx = document.createElement('canvas').getContext('2d'));
+    var cs = getComputedStyle(sel);
+    ctx.font = cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
+    var pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    sel.style.width = Math.ceil(ctx.measureText(opt ? opt.text : '').width + pad + 4)+'px';
+    sel.scrollIntoView({block:'nearest', inline:'nearest'});
   }
   function pensiyaSelectChange(v){ if(v) switchTab(v); }
   function sosialSelectChange(v){ if(v) switchTab(v); }
@@ -2594,7 +2651,8 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       abiNeticeIzahBtn+
       '<div class="abi-q">Nəticə</div>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
-      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
+      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>' : '')+
+      'Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>'+
       'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
@@ -3711,15 +3769,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<div class="abi-q">Nəticə</div>'+
       'Dərəcə: <b>'+elp.derece+'%</b><br/>'+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
-      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
+      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>' : '')+
+      'Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>'+
       'Tələb olunan minimum staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(Math.max(0,teleb)))+'</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
       (kapitalIleMinPensiya
-        ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+        ? (showAmountsElp
+            ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+            : ('<span style="color:var(--text-muted);">Staj çatmır, lakin toplanmış pensiya kapitalı hüquq ili minimum həddini ödədiyi üçün hüquq yaranır.</span><br/>'))
         : '')+
-      (kapitalTetbiqOlunur ? (elpKapGeriSetiri+'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
+      (kapitalTetbiqOlunur && showAmountsElp ? (elpKapGeriSetiri+'Tələb olunan kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b><br/>') : '')+
       (elpPensiyaVar
         ? (showAmountsElp
             ? ('Hesablanan pensiya məbləği: <b>'+tapilanMebleg+' AZN</b>'+elpIndexSetiri)
@@ -4529,17 +4590,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<div class="abi-q">Nəticə</div>'+
       (guzestliYas !== null ? '<span style="color:var(--text-muted);">Güzəştli yaş qaydası: '+guzestliQaydaMetni+'</span><br/>' : '')+
       'Yaşı: <b>'+ageObj.years+' il</b><br/>'+
-      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>' : '')+
+      (hediyyeStaj>pre2006StajTotal ? 'Hədiyyə staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(hediyyeStaj))+'</b><br/>' : '')+
+      'Ümumi staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(faktikiTotal))+'</b><br/>'+
       'Tələb olunan staj: <b>'+teleb+' il</b><br/>'+
       (catmayan>0
         ? ('Çatmayan staj: <b>'+abiFmtYMD(abiDecimalYearsToYMD(catmayan))+'</b><br/>')
         : 'Faktiki staj tələbi <b>ödəyir</b>.<br/>')+
       (kapitalIleMinPensiya
-        ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+        ? (showAmounts
+            ? ('<span style="color:var(--text-muted);">Staj çatmır, lakin 2006-dan sonrakı kapital hüquq ili minimumu × 144-ü ('+minPensiya144Hedd+' AZN) ödədiyi üçün minimum pensiya təyin olunur.</span><br/>')
+            : ('<span style="color:var(--text-muted);">Staj çatmır, lakin toplanmış pensiya kapitalı hüquq ili minimum həddini ödədiyi üçün hüquq yaranır.</span><br/>'))
         : '')+
-      ygKapGeriSetiri+
-      'Kapital: <b>'+gerekenKapital+' AZN</b><br/>'+
-      'Olan kapital: <b>'+totalKapital+' AZN</b>'+
+      (showAmounts ? (ygKapGeriSetiri+'Kapital: <b>'+gerekenKapital+' AZN</b><br/>Olan kapital: <b>'+totalKapital+' AZN</b>') : '')+
       (catmayan>0 && !kapitalIleMinPensiya
         ? ('<br/><span style="color:var(--text-muted);">Staj tələbi ödənilmədiyi üçün bu şəxs <b>sosial müavinətə</b> müraciət edə bilər.</span>')
         : (showAmounts
@@ -5378,6 +5440,593 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     udsyAskP1();
   }
 
+  // ============================================================
+  //  SC — ümumi sual-cavab axınları (excel/ qovluğundakı sual ağacları)
+  //  Hər axın: { ad, qrup:'sosial'|'pensiya', b: başlanğıc düyün, d: düyünlər }
+  //  Düyün: { q, note?, c:[[cavab, mesaj|null, növbəti düyün|null], ...] } — növbəti null = axın bitir
+  //  Özəl düyün: { ozel: funksiya, sonra:[mümkün növbəti düyünlər] } — kartı özü çəkir, scSual() ilə davam edir
+  // ============================================================
+  var sc = { id: null };
+  function scFlowEl(){ return document.getElementById('sc-flow'); }
+  function scScrollToCard(wrap){
+    requestAnimationFrame(function(){ wrap.scrollIntoView({behavior:'smooth', block:'start'}); });
+  }
+  function scAddBotCard(html){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble bot';
+    wrap.innerHTML='<div class="abi-card bot">'+html+'</div>';
+    scFlowEl().appendChild(wrap);
+    scScrollToCard(wrap);
+    return wrap.querySelector('.abi-card');
+  }
+  function scAddUserCard(text){
+    var wrap=document.createElement('div');
+    wrap.className='abi-bubble user';
+    wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
+    scFlowEl().appendChild(wrap);
+    scScrollToCard(wrap);
+  }
+  function scLockCard(cardEl){
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ el.disabled = true; el.style.opacity='0.5'; });
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.textContent = '✏️ Düzəliş et';
+    editBtn.className = 'abi-edit-btn';
+    editBtn.style.cssText = 'margin-top:10px;background:none;border:none;color:var(--blue);font-family:\'Nunito\',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;padding:4px 0;opacity:1;';
+    editBtn.onclick = function(){ scEditCard(cardEl, editBtn); };
+    cardEl.appendChild(editBtn);
+  }
+  function scEditCard(cardEl, editBtn){
+    var wrap = cardEl.closest('.abi-bubble');
+    var flow = scFlowEl();
+    while(wrap.nextSibling){ flow.removeChild(wrap.nextSibling); }
+    var interactive = cardEl.querySelectorAll('button, input, select');
+    interactive.forEach(function(el){ if(el!==editBtn){ el.disabled = false; el.style.opacity='1'; } });
+    editBtn.remove();
+    scScrollToCard(wrap);
+  }
+
+  function scStart(id){
+    var ax = SC_AXINLAR[id];
+    if(!ax) return;
+    sc = { id: id };
+    document.getElementById('sc-title').textContent = ax.ad;
+    scFlowEl().innerHTML = '';
+    scSual(ax.b);
+  }
+  function scSual(key){
+    var d = SC_AXINLAR[sc.id].d[key];
+    if(d.ozel){ d.ozel(); return; }
+    var h = '<div class="abi-q">'+d.q+'</div>'+
+      (d.note ? '<div class="abi-note" style="margin:0 0 10px;">'+d.note+'</div>' : '')+
+      '<div class="abi-btn-row">';
+    d.c.forEach(function(c, i){
+      h += '<button class="abi-choice-btn'+(i===0?' yes':'')+'" onclick="scCavab(this,\''+key+'\','+i+')">'+c[0]+'</button>';
+    });
+    scAddBotCard(h+'</div>');
+  }
+  function scCavab(btn, key, i){
+    var c = SC_AXINLAR[sc.id].d[key].c[i];
+    scLockCard(btn.closest('.abi-card'));
+    scAddUserCard(c[0]);
+    if(c[1]) scAddBotCard(c[1]);
+    if(c[2]) scSual(c[2]); else scSon();
+  }
+  function scSon(){
+    scAddBotCard(
+      '<div class="abi-q">Suallar bitdi</div>'+
+      '<button class="abi-restart-btn" onclick="scStart(sc.id)">🔄 Yenidən başla</button>'
+    );
+  }
+
+  // Bəli/Xeyr düyünü: b və x = [mesaj|null, növbəti|null]
+  function scBX(q, b, x, note){
+    var n = { q:q, c:[['Bəli', b[0], b[1]], ['Xeyr', x[0], x[1]]] };
+    if(note) n.note = note;
+    return n;
+  }
+  // Ardıcıl (bir-birindən asılı olmayan) suallar siyahısı: [sual, Bəli mesajı, Xeyr mesajı]
+  function scSiyahi(items){
+    var d = {};
+    items.forEach(function(it, i){
+      var nx = (i < items.length-1) ? 's'+(i+1) : null;
+      d['s'+i] = scBX(it[0], [it[1]||null, nx], [it[2]||null, nx]);
+    });
+    return d;
+  }
+  function scUl(arr){
+    return '<ul style="margin:6px 0 0 18px;padding:0;">'+arr.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>';
+  }
+
+  // ── Yaşa görə müavinət: doğum tarixi + cins → yaş həddinə (Qanunun 7-ci maddəsi) çatma tarixi ──
+  function scYasamAskDogum(){
+    var d65 = new Date();
+    d65.setFullYear(d65.getFullYear() - 65);
+    scAddBotCard(
+      '<div class="abi-q">Doğum tarixini daxil edin</div>'+
+      '<div class="abi-input-group single">'+
+        '<div><label>Doğum tarixi<span class="abi-required-mark">*</span></label><input type="text" class="sc-dogum" placeholder="'+abiGunAyIl(d65)+'" maxlength="10" inputmode="numeric" oninput="abiMaskDate(this)"/></div>'+
+      '</div>'+
+      '<button class="abi-go-btn" onclick="scYasamSaveDogum(this)">Davam et</button>'
+    );
+  }
+  function scYasamSaveDogum(btn){
+    var card = btn.closest('.abi-card');
+    var dogumStr = card.querySelector('.sc-dogum').value;
+    var dogum = abiParseDate(dogumStr);
+    var bugun = new Date(); bugun.setHours(0,0,0,0);
+    if(!dogum || dogum.getTime() > bugun.getTime()){ siteAlert('Tarixi gg.aa.iiii formatında düzgün daxil edin.'); return; }
+    scLockCard(card);
+    scAddUserCard('Doğum: '+dogumStr);
+    sc.dogum = dogum;
+    scAddBotCard(
+      '<div class="abi-q">Müraciət edən kişidir, yoxsa qadındır?</div>'+
+      '<div class="abi-btn-row">'+
+        '<button class="abi-choice-btn yes" onclick="scYasamCins(this,true)">Kişi</button>'+
+        '<button class="abi-choice-btn" onclick="scYasamCins(this,false)">Qadın</button>'+
+      '</div>'
+    );
+  }
+  function scYasamCins(btn, isMale){
+    scLockCard(btn.closest('.abi-card'));
+    scAddUserCard(isMale ? 'Kişi' : 'Qadın');
+    sc.cins = isMale ? 'kishi' : 'qadin';
+    var huquq = abiPensiyaYasiTarixi(sc.cins, sc.dogum);
+    var hedd = abiTelebPensiyaYasi(sc.cins, huquq);
+    var bugun = new Date(); bugun.setHours(0,0,0,0);
+    var catib = huquq.getTime() <= bugun.getTime();
+    scAddBotCard(
+      '<div class="abi-q">Yaş həddi</div>'+
+      'Hazırkı yaşı: <b>'+abiAgeAt(sc.dogum, bugun)+' il</b><br/>'+
+      'Tələb olunan yaş həddi: <b>'+hedd.il+' il'+(hedd.ay ? ' '+hedd.ay+' ay' : '')+'</b><br/>'+
+      'Yaş həddinə çatma tarixi: <b>'+abiGunAyIl(huquq)+'</b><br/>'+
+      (catib
+        ? '✅ Yaşa görə aylıq müavinətlə bağlı hüququ <b>'+abiGunAyIl(huquq)+'</b> tarixindən yaranıb.'
+        : '❌ Yaş həddinə çatmayıb — hüquq <b>'+abiGunAyIl(huquq)+'</b> tarixində yaranacaq.')
+    );
+    scSual('y4');
+  }
+
+  // ── İşdən azad olunma ilə əlaqədar yenidən hesablanma (yaşa görə / əlilliyə görə qolları) ──
+  function scIsdenDugumler(){
+    var yox = '❌ Şəxs işləməyən pensiyaçı olmadığından yenidən hesablanma aparıla bilmir.';
+    var suallar = [
+      'Şəxsin aktiv VÖEN-i varmı?',
+      'Şəxs pay torpaq mülkiyyətçisidirmi?',
+      'Şəxsin xidməti müqaviləsi varmı?',
+      'Şəxsin qüvvədə olan əmək müqaviləsi varmı?'
+    ];
+    var yasaSon =
+      '✅ Şəxs işləməyən pensiyaçıdır. Yenidən hesablanma üçün dəqiqləşdirilir:'+
+      scUl([
+        'İşləməyən pensiyaçı kateqoriyasına keçdiyi tarix',
+        'Əmək pensiyası təyinatından sonra işlədiyi ayların sayı',
+        'Əmək pensiyası təyinatından və ya sonuncu yenidən hesablanma tarixindən sonra yığılmış pensiya kapitalı'
+      ])+
+      '<div class="abi-note">Qeyd: 29.06.2022-ci il tarixindən əvvəl təyin edilmiş güzəştli şərtlərlə yaşa görə əmək pensiyasının yenidən hesablanmasında əmək pensiyasının sığorta və yığım hissələrinin hesablanmasında gözlənilən pensiya ödənişi müddəti aylarının sayı güzəştli şərtlə pensiyaya çıxma yaşı ilə Qanunun 7-ci maddəsi ilə müəyyən edilmiş pensiya yaşı arasındakı ayların sayı qədər artırılır.</div>';
+    var elilSon =
+      '✅ Yenidən hesablanma üçün dəqiqləşdirilir:'+
+      scUl([
+        'İşləməyən pensiyaçı kateqoriyasına keçdiyi tarix',
+        'Əmək pensiyası təyinatından və ya sonuncu yenidən hesablanma tarixindən sonra yığılmış pensiya kapitalı'
+      ])+
+      '<div class="abi-note">Qeyd: 01.01.2021-ci il tarixdən əvvəl təyin edilmiş pensiyanın hesablanmasında k əmsalı 192-yə bölünməklə tapılmalıdır.</div>';
+    var d = {
+      n0: { q:'Şəxs hansı əmək pensiyasını alır?', c:[['Yaşa görə əmək pensiyası', null, 'y0'], ['Əlilliyə görə əmək pensiyası', null, 'e0']] },
+      es: scBX('İşləməyən kateqoriyaya keçdiyi tarixdəki yaşına müvafiq tələb olunan sosial sığorta stajı varmı?',
+        [elilSon, null],
+        ['❌ Şəxsin işləməyən kateqoriyaya keçdiyi tarixdəki yaşına müvafiq tələb olunan sosial sığorta stajının olmaması səbəbindən əmək pensiyasının yenidən hesablanmasına hüququ yoxdur.', null])
+    };
+    suallar.forEach(function(q, i){
+      var son = (i === suallar.length-1);
+      d['y'+i] = scBX(q, [yox, null], son ? [yasaSon, null] : [null, 'y'+(i+1)]);
+      d['e'+i] = scBX(q, [yox, null], son ? [null, 'es'] : [null, 'e'+(i+1)]);
+    });
+    return d;
+  }
+
+  // ── Dövlət icbari şəxsi sığorta — hər sığortaolunan kateqoriyası üçün ölüm / əlillik / xəsarət qolu ──
+  var SC_SENED_OLUM = [
+    'Ərizə',
+    'Vərəsənin (vərəsələrin) şəxsiyyətini təsdiq edən sənəd',
+    'Sığortaolunanın ölümü haqqında şəhadətnamə',
+    'Vərəsəlik hüququ haqqında şəhadətnamə',
+    'Baş vermiş hadisə və şəxsin müvafiq sığortalı üzrə sığortaolunan hesab olunmasına dair arayış'
+  ];
+  var SC_SENED_ITKIN = SC_SENED_OLUM.concat([
+    'Sığortaolunanın itkin düşmüş hesab edilməsi barədə məhkəmənin qanuni qüvvəyə minmiş qətnaməsi',
+    'Sığortaolunanın ölmüş elan edilməsi barədə məhkəmənin qanuni qüvvəyə minmiş qətnaməsi'
+  ]);
+  var SC_SENED_HEKIM = SC_SENED_OLUM.concat(['Tibb müəssisəsinin həkim-məsləhət komissiyasının rəyi']);
+  var SC_SENED_ELIL = [
+    'Ərizə',
+    'Sığortaolunanın şəxsiyyətini təsdiq edən sənəd',
+    'TSEK-in əlillik barədə qərarı',
+    'Baş vermiş hadisə və şəxsin müvafiq sığortalı üzrə sığortaolunan hesab olunmasına dair arayış'
+  ];
+  var SC_SENED_XESARET = [
+    'Ərizə',
+    'Sığortaolunanın şəxsiyyətini təsdiq edən sənəd',
+    'Xəsarətin dərəcəsinə və səbəbinə dair arayış',
+    'Baş vermiş hadisə və şəxsin müvafiq sığortalı üzrə sığortaolunan hesab olunmasına dair arayış'
+  ];
+  function scOdenis(mebleg, senedler){
+    return '💰 <b>Ödəniş:</b> '+mebleg+'<br/><b>Tələb olunan sənədlər:</b>'+scUl(senedler);
+  }
+  // o: { note, olum:[[hal, sənədlər]], elilOn, elil:[81-100, 61-80, 31-60], xes:[ağır, az ağır, yüngül] }
+  function scIcbariQol(d, p, o){
+    var yuz = 'sığorta məbləğinin 100 faizi';
+    var olum = (o.olum.length === 1)
+      ? ['Ölüm (vərəsə müraciət edir)', scOdenis(yuz, o.olum[0][1]), null]
+      : ['Ölüm (vərəsə müraciət edir)', null, p+'o'];
+    d[p] = { q:'Müraciət hansı hal üzrədir?', c:[olum, ['Əlillik', null, p+'e'], ['Xəsarət', null, p+'x']] };
+    if(o.note) d[p].note = o.note;
+    if(o.olum.length > 1){
+      d[p+'o'] = { q:'Hansı hal baş verib?', c:o.olum.map(function(h){ return [h[0], scOdenis(yuz, h[1]), null]; }) };
+    }
+    d[p+'e'] = scBX('Əlillik məlumatları Əlillik AS-da öz əksini tapırmı?',
+      [null, o.elilOn ? p+'e1' : p+'ed'],
+      ['ℹ️ Olmasa sistemə salınmalıdır.', o.elilOn ? p+'e1' : p+'ed']);
+    if(o.elilOn){
+      d[p+'e1'] = scBX('Hərbi xidmət vəzifələrini (xidməti vəzifələri) yerinə yetirərkən və ya həqiqi hərbi xidmət (toplanış) dövründə xəsarət (yaralanma, travma, kontuziya) almasına görə əlilliyi müəyyən edilən şəxsdirmi?',
+        [null, p+'ed'], [null, p+'e2']);
+      d[p+'e2'] = scBX('Həqiqi hərbi xidmət (toplanış) dövründə xəstələnməsinə görə həqiqi hərbi xidmətə (toplanışa) yararsız hesab edilərək ehtiyata və ya istefaya buraxıldığı gündən, həmçinin ehtiyata və ya istefaya buraxıldığı gündən həqiqi hərbi xidmət (toplanış) dövründə alınmış xəsarət (yaralanma, travma, kontuziya) və ya xəstəliklə əlaqədar üç il müddətində əlilliyi müəyyən edilən şəxsdirmi?',
+        [null, p+'ed'], ['❌ Hüququ yaranmır.', null]);
+    }
+    d[p+'ed'] = { q:'Orqanizmin funksiyalarının neçə faiz pozulmasına görə əlilliyi müəyyən edilib?', c:[
+      ['81-100 faiz', scOdenis(o.elil[0], SC_SENED_ELIL), null],
+      ['61-80 faiz',  scOdenis(o.elil[1], SC_SENED_ELIL), null],
+      ['31-60 faiz',  scOdenis(o.elil[2], SC_SENED_ELIL), null]
+    ] };
+    d[p+'x'] = { q:'Xəsarətin dərəcəsi hansıdır?', c:[
+      ['Ağır xəsarət',    scOdenis(o.xes[0], SC_SENED_XESARET), null],
+      ['Az ağır xəsarət', scOdenis(o.xes[1], SC_SENED_XESARET), null],
+      ['Yüngül xəsarət',  scOdenis(o.xes[2], SC_SENED_XESARET), null]
+    ] };
+  }
+  function scIcbariDugumler(){
+    var d = {
+      n0: { q:'Sığortaolunan kimdir?', c:[
+        ['Hərbi qulluqçu', null, 'h'],
+        ['Diplomatik nümayəndəliyin / konsulluğun əməkdaşı', null, 'kv'],
+        ['Milli Məclisin deputatı', null, 'm'],
+        ['Məhkəmə və hüquq mühafizə orqanlarının işçisi', null, 'q'],
+        ['1997-ci il avqustun 2-dək — birdəfəlik ödəmə', null, 'b1']
+      ] },
+      kv: { q:'Sığortaolunan hansı vəzifədədir?', c:[
+        ['Diplomatik nümayəndəliyin rəhbəri', 'ℹ️ Sığorta məbləği: <b>11000 manat</b>', 'k'],
+        ['Diplomatik xidmət əməkdaşı', 'ℹ️ Sığorta məbləği: <b>6600 manat</b>', 'k'],
+        ['İnzibati-texniki xidmət əməkdaşı', 'ℹ️ Sığorta məbləği: <b>4400 manat</b>', 'k']
+      ] }
+    };
+    scIcbariQol(d, 'h', {
+      note: 'Sığorta məbləği: 11000 manat',
+      olum: [
+        ['Həlak olub', SC_SENED_OLUM],
+        ['Məhkəmə qaydasında ölmüş elan olunub', SC_SENED_ITKIN],
+        ['Həqiqi hərbi xidmətdə (toplanışda) olduğu zaman xəbərsiz itkin düşüb (məhkəmənin qanuni qüvvəyə minmiş qərarı var)', SC_SENED_ITKIN],
+        ['Xəsarət və ya xəstələnmə nəticəsində xidmətdən buraxıldıqdan sonra üç il müddətində ölüb', SC_SENED_HEKIM]
+      ],
+      elilOn: true,
+      elil: ['11000 manatın 80 faizi — <b>8800 manat</b>', '11000 manatın 60 faizi — <b>6600 manat</b>', '11000 manatın 40 faizi — <b>4400 manat</b>'],
+      xes: ['11000 manatın 25 faizi', '11000 manatın 15 faizi', '11000 manatın 5 faizi']
+    });
+    scIcbariQol(d, 'k', {
+      olum: [['Həlak olub', SC_SENED_OLUM]],
+      elil: ['sığorta məbləğinin 80 faizi', 'sığorta məbləğinin 60 faizi', 'sığorta məbləğinin 40 faizi'],
+      xes: ['sığorta məbləğinin 20 faizi', 'sığorta məbləğinin 15 faizi', 'sığorta məbləğinin 10 faizi']
+    });
+    scIcbariQol(d, 'm', {
+      note: 'Sığorta məbləği: 5 illik vəzifə maaşı məbləğində',
+      olum: [['Həlak olub', SC_SENED_OLUM]],
+      elil: ['sığorta məbləğinin 80 faizi', 'sığorta məbləğinin 60 faizi', 'sığorta məbləğinin 40 faizi'],
+      xes: ['sığorta məbləğinin 20 faizi', 'sığorta məbləğinin 10 faizi', 'sığorta məbləğinin 5 faizi']
+    });
+    scIcbariQol(d, 'q', {
+      note: 'Sığorta məbləği: 5 illik əmək haqqı məbləğində',
+      olum: [
+        ['Həlak olub', SC_SENED_OLUM],
+        ['Xidmətdə olduğu zaman aldığı xəsarətə (yaralanma, travma, kontuziya) görə xidmətdən çıxdıqdan sonra üç il ərzində ölüb', SC_SENED_HEKIM]
+      ],
+      elil: ['sığorta məbləğinin 80 faizi', 'sığorta məbləğinin 60 faizi', 'sığorta məbləğinin 40 faizi'],
+      xes: ['sığorta məbləğinin 20 faizi', 'sığorta məbləğinin 15 faizi', 'sığorta məbləğinin 10 faizi']
+    });
+    // 1997-ci il avqustun 2-dək olan xidmət dövrü üzrə birdəfəlik ödəmə
+    d.b1 = scBX('Əlillik məlumatları Əlillik AS-da öz əksini tapırmı?',
+      [null, 'b2'], ['ℹ️ Olmasa sistemə salınmalıdır.', 'b2'],
+      '1997-ci il avqustun 2-dək olan xidmət dövründə Azərbaycan Respublikasının ərazi bütövlüyünün, müstəqilliyinin və konstitusiya quruluşunun müdafiəsi ilə əlaqədar əlilliyi müəyyən edilmiş hərbi qulluqçulara, daxili işlər orqanlarının əməkdaşlarına və ya onların vərəsələrinə birdəfəlik ödəmə.');
+    d.b2 = scBX('sosial.gov.az saytının «Şəhid ailələri və müharibə iştirakçılarına dəstək» → «1997-ci il avqustun 2-dək xəsarət almış müharibə əlillərinə birdəfəlik ödəmə» bölməsində şəxsin məlumatları çıxırmı?',
+      ['ℹ️ Sosial agent tərəfindən şəxsə MEİS-in “Sosial ödənişlər” altsisteminin “Ərizələrə baxış” bölməsində mövcud olan məlumatlar (ödəniləcək məbləğ, ödənişi əldə edəcəyi bank və ya plastik kart və s.) təqdim edilir.', 'b3'],
+      ['ℹ️ Saytda olan məlumatlara əsasən hərbi-həkim komissiyasına xəsarəti təsdiq edən sənədlə birlikdə müraciət etməsi qeyd edilmişdirsə, müvafiq məlumat verilib xidmət yekunlaşdırılır.<br/><br/>Proaktiv təyinat olmadıqda birdəfəlik ödəmənin təyin olunması üçün sənədlər tam tərkibdə qəbul edilərək şəxsin ərizəsi ilə birlikdə skan edilib “Vətəndaşların qəbulu” altsisteminə əlavə edilir və <b>DSMF Aparata kargüzarlıq</b> edilir:'+
+        scUl([
+          'Şəxsiyyət vəsiqəsinin surəti',
+          'Əlilliyi təsdiq edən TSEK arayışının surəti',
+          'Ərizə nümayəndə vasitəsilə təqdim edildikdə — etibarnamə və ya qəyyum (himayəçi) olmasını təsdiq edən sənədin surəti'
+        ]), 'b3']);
+    d.b3 = scBX('DSMF tərəfindən təqdim edilmiş siyahıya əsasən əvvəllər Dövlət Sığorta Kommersiya Şirkətindən ödəniş almış şəxsdirmi?',
+      ['❌ Təkrar həmin ödənişi ala bilməyəcəyi izah edilir.', null], [null, 'b4']);
+    d.b4 = scBX('Vəfat etmiş şəxsin şəxsiyyət vəsiqəsi (FİN) varmı?',
+      [null, null],
+      ['ℹ️ Müvəqqəti FİN-in alınması üçün Ədliyyə Nazirliyinə yönləndirilir.<br/>Ədliyyə Nazirliyi tərəfindən vəfat etmiş şəxsə müvəqqəti FİN verildikdən sonra xəsarəti təsdiq edən sənədlərlə birlikdə Hərbi-həkim komissiyasına müraciət etməsi izah edilir.<br/>Hərbi-həkim komissiyası tərəfindən vəfat etmiş şəxsin məlumatları müvafiq altsistemə daxil edildikdən sonra DSMF Aparata kargüzarlıq edilir.', null]);
+    return d;
+  }
+
+  var SC_AXINLAR = {
+    // ───────────── PENSİYA ─────────────
+    alti: {
+      ad: '6 il və daha çox işləyən yaşa görə əmək pensiyaçılarının pensiyasının yenidən hesablanması',
+      qrup: 'pensiya', b: 'n1',
+      d: {
+        n1: scBX('Şəxsin ilkin pensiya təyinatından 6 il müddət keçibmi?', [null, 'n2'], ['❌ Şəxsin müraciət hüququ yaranmır.', null]),
+        n2: scBX('Şəxs pensiyaya çıxdıqdan sonra əmək müqaviləsinin müddəti 72 ay davam edibmi?', [null, 'n3'], ['❌ Şəxsin müraciət hüququ yaranmır.', null]),
+        n3: scBX('Şəxsin əmək müqaviləsi üzrə 72 aylıq MDSS ödənişləri həyata keçirilibmi?', ['✅ Şəxsin müraciət hüququ yaranır.', null], ['❌ Şəxsin müraciət hüququ yaranmır.', null])
+      }
+    },
+    isden: {
+      ad: 'İşdən azad olunma ilə əlaqədar əmək pensiyasının yenidən hesablanması',
+      qrup: 'pensiya', b: 'n0',
+      d: scIsdenDugumler()
+    },
+
+    // ───────────── SOSİAL MÜAVİNƏT ─────────────
+    yasam: {
+      ad: 'Yaşa görə aylıq sosial müavinət',
+      qrup: 'sosial', b: 'y1',
+      d: {
+        y1: scBX('Əmək pensiyası hüququ varmı?', ['❌ Yaşa görə aylıq müavinət almaq hüququ yoxdur.', null], [null, 'y2']),
+        y2: scBX('Aktiv əmək fəaliyyəti varmı? (aktiv VÖEN və ya əmək müqaviləsi)', ['❌ Yaşa görə aylıq müavinət almaq hüququ yoxdur.', null], [null, 'y3']),
+        y3: { ozel: scYasamAskDogum, sonra: ['y4'] },
+        y4: scBX('Müraciətiniz güzəştli şərtlərlə yaşa görə aylıq müavinət ilə bağlıdırmı?', [null, 'y5'], [null, 'y8']),
+        y5: scBX('Övladınızın əlilliyi 18 yaşından öncədirmi?', [null, 'y6'], [null, 'y8']),
+        y6: scBX('Övladınızın məlumatları Əlillik altsistemində əks olunurmu?', [null, 'y8'], [null, 'y7']),
+        y7: scBX('Övladınızın əlilliyinin 18 yaşından əvvəl olmasına dair rəsmi sənədləri təqdim edirsinizmi?', [null, 'y8'],
+          ['ℹ️ Rəsmi sənədlər təqdim edildikdən sonra və ya məlumatlar Əlillik AS-də əks olunduqdan sonra müraciət qeydə alınır.', 'y8']),
+        y8: scBX('Müraciətiniz yaşa görə aylıq müavinətin geriyə üç il ödənilməsi ilə bağlıdırmı?', [null, 'y9'], [null, 'y13']),
+        y9: scBX('Şəxsiyyət vəsiqəsi deaktiv olubmu?', [null, 'y10'], [null, 'y13']),
+        y10: scBX('Yeni ünvana qeydiyyata düşmüsünüzmü?', ['✅ Müraciət qeydə alınır.', 'y13'], [null, 'y13']),
+        y13: scBX('1-ci və ya 2-ci dərəcə əlilliyiniz varmı?',
+          ['ℹ️ Yaşa görə aylıq müavinətin məbləği 220 AZN-dir, əlilliyə görə müavinətin məbləği yüksəkdir — ən yüksəyi tövsiyə olunur və müraciət qeydə alınır.', 'y14'], [null, 'y14']),
+        y14: scBX('5 övladınız varmı?', [null, 'y15'], [null, null]),
+        y15: scBX('Övladlarınızı 8 yaşadək doğub tərbiyə etmisinizmi?', [null, 'y16'], [null, null]),
+        y16: scBX('Övladlarınızı 8 yaşadək doğub tərbiyə etdiyinizə dair inzibati ərazi nümayəndəliyindən arayış təqdim edirsinizmi?', [null, null],
+          ['❌ Müraciət qeydə alınmır. Uşaqların doğum haqqında şəhadətnaməsini və şəxsiyyət vəsiqələrini, nikah haqqında şəhadətnaməni və arayışı təqdim etməsi bildirilir.', null])
+      }
+    },
+    elilm: {
+      ad: 'Əlilliyə görə aylıq sosial müavinət',
+      qrup: 'sosial', b: 'e1',
+      d: {
+        e1: scBX('Əlillik AS-də əlillik haqqında məlumatlar mövcuddurmu?',
+          ['ℹ️ Əlillik AS-də əks olunan məlumatlar və SÖAS-də proaktiv təyinat barədə məlumat verilir. Şəxs təyin olunmuş müavinətin məbləği və ödəniş barədə məlumatlandırılır (ilkin təyinat).'+
+            '<div class="abi-note">Ümumi səbəbdən əlilliyə görə sosial müavinətin məbləği: OFP 81-100% — 300 AZN; OFP 61-80% — 250 AZN; OFP 31-60% — 180 AZN.<br/>Prezident təqaüdünün məbləği: gözdən əlilliyi olan şəxs — 350 AZN; ümumi səbəb — 250 AZN.</div>', 'e2'],
+          ['❌ Hüququ yaranmır.', null]),
+        e2: scBX('Əlilliyə görə pensiya hüququnun yoxlanması üçün müraciət olunubmu?', [null, 'e3'], ['ℹ️ Əmək pensiyası hüququnun yoxlanması üçün yönləndirilir.', null]),
+        e3: scBX('Əmək pensiyası hüququ yaranmadığı barədə məlumat verilibmi?',
+          ['✅ Şəxsə əlilliyə görə sosial müavinət almaq hüququ olduğu izah olunur. Şəxs digər növ sosial müavinət alırsa, öz seçimi ilə əlilliyə görə sosial müavinətin təyin olunması üçün müraciət edə biləcəyi izah olunur (yüksək olan məbləğin ödənildiyi bildirilir; ödənişdə olan müavinət əlilliyə görə müavinətdən yüksəkdirsə növ dəyişilmir).', 'e4'],
+          ['ℹ️ Əmək pensiyası hüququnun yoxlanması üçün yönləndirilir.', null]),
+        e4: scBX('Əlilliyə görə sosial müavinət üzrə növün dəyişilməsi üçün müraciət edirmi?',
+          ['ℹ️ Şəxsiyyət vəsiqəsi və ərizə ilə müraciət qəbul olunur (SÖAS-də aktiv sosial müavinət işi olduğu üçün VQAS üzərindən).', 'e5'], [null, 'e5']),
+        e5: scBX('Şəxsin SÖAS-də sosial müavinət üzrə aktiv işi yoxdur və proaktiv təyinat olmayıb?',
+          ['ℹ️ Müraciət ƏMAS üzərindən qəbul olunur (ərizə və şəxsiyyət vəsiqəsi).', 'e6'], [null, 'e6']),
+        e6: scBX('Şəxs OFP 81-100% olan şəxsdirmi?',
+          ['ℹ️ Şəxsə sosial müavinətdən əlavə əlilliyə görə Prezident təqaüdü alacağı izah olunur. SÖAS-də proaktiv təyinat verildikdə şifahi məlumat verilir (proaktiv olmadıqda ərizə-müraciət qəbul olunur, sosial müavinətlə eyni qayda tətbiq olunur).', 'e7'],
+          [null, 'e8']),
+        e7: scBX('OFP 81-100% olan şəxsə qulluğa görə müraciət olunubmu?',
+          ['ℹ️ Tələb olunan sənədlər və müraciət qaydası izah olunur: qulluq edəcək şəxsin və əlilliyi olan şəxsin şəxsiyyət vəsiqəsi, qohumluq əlaqəsini təsdiq edən sənəd və ya Qəyyumluq haqqında Sərəncam; qohumluq və qəyyumluq olmadıqda qulluq edəcək şəxsin Patronaj təyin olunduğu haqqında Sərəncam. Səyyar xidmətin göstərildiyi barədə məlumat verilir.', 'e8'],
+          [null, 'e8']),
+        e8: scBX('Plastik kartın hazır olub-olmaması barədə müvafiq banka müraciət edilibmi?',
+          [null, null], ['ℹ️ Müraciət olunmadığı təqdirdə aidiyyəti üzrə banka yönləndirilir.', null])
+      }
+    },
+    abim: {
+      ad: 'Ailə başçısını itirməyə görə aylıq sosial müavinət',
+      qrup: 'sosial', b: 's0',
+      d: scSiyahi([
+        ['Vəfat edən şəxsin 18 yaşınadək və ya 23 yaşdan çox olmamaqla əyani təhsil alan övladı varmı?',
+          'ℹ️ Vəfat edən şəxsin 18 yaşınadək övladı olduğu halda digər ailə üzvü — ana (ata) və ya qəyyumu tərəfindən müraciət edilə biləcəyi izah edilir.',
+          'ℹ️ Qanunvericiliyin tələbləri izah edilir.'],
+        ['18 yaşından yuxarı şəxsin özü olmadığı halda onun adından ailə üzvü müraciət edir — etibarnaməli nümayəndəsidirmi?',
+          '✅ Şəxsin etibarnaməli nümayəndəsi olduğu halda müraciət hüququ var.',
+          'ℹ️ Etibarnaməli nümayəndəsi və ya qəyyumu olmadığı halda şəxsin özünün müraciət etməsi tələb edilir.'],
+        ['23 yaşdan çox olmamaqla əyani təhsil alan övladı ölkə xaricində təhsil alırmı?',
+          'ℹ️ Əyani təhsil alması barədə tərcümə, təsdiq və apostil edilmiş arayış təqdim etməsi və şəxsin özünün müvafiq sənədlərlə müraciət etməsi barədə məlumat verilir.<br/>Xarici ölkədə əyani təhsil alan şəxs 18 yaşı tamam olduqdan sonra müraciət etdikdə təyinatın başlama tarixi 01.10.2026-cı il, bitmə tarixi isə 30.06.XXXX kimi qeyd edilir.',
+          'ℹ️ Ölkə daxilində əyani təhsil aldığı halda təhsil arayışı olmadan şəxsin özünün müvafiq sənədlərlə müraciət etməsi barədə məlumat verilir.<br/>Ölkə daxilində əyani təhsil alan 18 yaşından yuxarı şəxslərdə təyinatın başlama tarixi tədris ilinin başladığı tarixdən təhsil müddətinin sonunadək qeyd edilir.'],
+        ['MEİS-in «Sosial ödənişlər» altsistemi və Pensiya altsistemi vasitəsilə şəxsə proaktiv təyinat aparılıbmı?',
+          'ℹ️ Bu barədə şəxsə məlumat verilir və bank kartını haradan əldə edə biləcəyi izah edilir.',
+          'ℹ️ Qanunvericiliyə uyğun olaraq şəxsin hüququna baxılır. Sənəd siyahısı təqdim edilir.'],
+        ['18 yaşınadək övladlarına müavinətin təyin edilməsi ilə bağlı müvafiq sənədlər varmı?',
+          'ℹ️ Tələb olunan sənədlərin tamlığı yoxlanılır. İlkin təyinat və bərpa ƏMAS üzərindən qeydə alınır.',
+          'ℹ️ Qanunvericiliyə uyğun olaraq şəxsin müavinət almaq hüququna baxılır. Sənəd siyahısı təqdim edilir.'],
+        ['Nikah haqqında şəhadətnamə varmı?',
+          null,
+          'ℹ️ Nikah haqqında şəhadətnamə olmadığı halda müvafiq altsistemdə ata barədə məlumatlar əldə edilə bilmədiyi üçün atalığın müəyyən edilməsi ilə bağlı SÖTMF tərəfindən sənəd tələb edilir (şəxs xarici ölkədə vəfat etdiyi hallarda da). Vətəndaşa təqdim etməsi tövsiyə edilir.'],
+        ['Şəxsin pensiya hüququna baxılıbmı? (pensiya istiqaməti üzrə müraciəti varmı)',
+          'ℹ️ Sənədlər tam olduğu və pensiya hüququ olmadığı halda müraciət ƏMAS üzərindən qəbul edilir.',
+          'ℹ️ Müvafiq istiqamət üzrə hüququnun yoxlanılması məqsədi ilə yönləndirilir.'],
+        ['Şəxsin 8 yaşınadək övladı olduğu halda — rəsmi iş yeri və ya aktiv VÖEN-i varmı?',
+          'ℹ️ Rəsmi iş yeri və VÖEN olduğu halda qanunvericiliyin tələbləri izah edilir.',
+          '✅ Rəsmi iş yeri və VÖEN olmadığı halda müvafiq sənədlərlə birlikdə müraciət ƏMAS üzərindən qəbul edilir.'],
+        ['Müraciət edən qəyyum şəxsdirmi?',
+          'ℹ️ Qəyyum şəxs müraciət etdiyi halda müavinətin təyinatı şəxsin vəfat etdiyi tarixdən qeyd edilir.',
+          null]
+      ])
+    },
+    uanadan: {
+      ad: 'Uşağın anadan olmasına görə birdəfəlik müavinət',
+      qrup: 'sosial', b: 's0',
+      d: scSiyahi([
+        ['Uşaq 01.09.2019 tarixindən əvvəl doğulubmu?',
+          'ℹ️ Hazırda heç bir valideyn işləmirsə və ya aktiv VÖEN yoxdursa kargüzarlıq edilməlidir.',
+          'ℹ️ Əvvəlcə proaktiv təyinat yoxlanılır. Təyin edilə bilmədikdə Yardım masasında sorğu yaradılır. Yenə təyin edilə bilmədikdə ərizə-müraciət kargüzarlıq edilir.'],
+        ['Uşağın bir və ya hər iki valideyni AR vətəndaşı və ya DYİ olan şəxsdirmi?',
+          '✅ Müavinət hüququ var.',
+          '❌ Müavinət hüququ yoxdur.'],
+        ['Valideynlərindən biri keçmişdə sığortaolunan olmuş uşaq 01.01.2021 tarixindən sonra doğulubmu?',
+          'ℹ️ Müavinət MDSS haqları hesabına proaktiv təyin olunmalıdır.',
+          'ℹ️ Hazırda heç bir valideyn işləmirsə və ya aktiv VÖEN yoxdursa kargüzarlıq edilməlidir.'],
+        ['01.09.2019-cu il tarixindən əvvəl doğulan uşağın hazırda valideynlərindən biri və ya hər ikisi işləyirmi?',
+          'ℹ️ İşəgötürənə müraciət etməlidir.',
+          'ℹ️ Sənədlər kargüzarlıq olunmalıdır.'],
+        ['01.09.2019-cu il tarixindən əvvəl doğulan uşağın hazırda valideynlərindən birinin və ya hər ikisinin aktiv VÖEN-i varmı?',
+          'ℹ️ Şəxs özü elektron imza vasitəsilə müraciət etməlidir və ya VÖEN dondurulduqdan və ya ləğv olunduqdan sonra kargüzarlıq edilə bilər.',
+          'ℹ️ Hazırda heç bir valideyn işləmirsə sənədlər kargüzarlıq olunmalıdır.'],
+        ['Valideynlərindən biri və ya hər ikisi NMR qeydiyyatında olan uşaq 01.02.2023 tarixindən əvvəl doğulubmu?',
+          'ℹ️ Hazırda heç bir valideyn işləmirsə və ya aktiv VÖEN yoxdursa kargüzarlıq edilməlidir.',
+          'ℹ️ Proaktiv təyin olunmalıdır.'],
+        ['Valideynlərindən biri və ya hər ikisi NMR qeydiyyatında olan, 01.02.2023 tarixindən əvvəl doğulan uşağın valideynlərindən birinin və ya hər ikisinin aktiv VÖEN-i varmı?',
+          'ℹ️ Şəxs özü elektron imza vasitəsilə müraciət etməlidir və ya VÖEN dondurulduqdan və ya ləğv olunduqdan sonra kargüzarlıq edilə bilər.',
+          'ℹ️ Hazırda heç bir valideyn işləmirsə sənədlər kargüzarlıq olunmalıdır.'],
+        ['Valideynlərindən biri və ya hər ikisi NMR qeydiyyatında olan, 01.02.2023 tarixindən əvvəl doğulan uşağın valideynlərindən biri və ya hər ikisi işləyirmi?',
+          'ℹ️ İşəgötürənə müraciət etməlidir.',
+          'ℹ️ Sənədlər kargüzarlıq olunmalıdır.'],
+        ['13.02.2020 tarixindən əvvəl doğulan və müavinəti proaktiv təyin oluna bilməyən uşağın doğum haqqında arayışı itirilmişdir — valideynlərdən biri və ya hər ikisi işləyirmi və ya əvvəllər işləmişdirmi?',
+          'ℹ️ Şəxs DSMF Aparata yönləndirilməlidir.',
+          'ℹ️ Sənədlər MMMF-ə kargüzarlıq olunmalıdır.'],
+        ['13.02.2020 tarixindən sonra doğulan və müavinəti proaktiv təyin oluna bilməyən uşağın doğum haqqında arayışı itirilmişdirmi?',
+          'ℹ️ Şəxsə sosial agent tərəfindən arayış tərtib olunaraq təqdim edilməlidir (valideynlərin işləyib-işləməməsindən asılı olmayaraq).',
+          null],
+        ['Barəsində müraciət olunan uşaq 01.01.2006-cı il tarixindən əvvəl doğulmuşdurmu?',
+          '❌ Müavinət hüququ yoxdur.',
+          '✅ Müavinət hüququ var.'],
+        ['Uşaq ölkə xaricində doğulubsa — doğumu AR Ədliyyə Nazirliyinin müvafiq qeydiyyat şöbəsi tərəfindən qeydiyyata alınmışdırmı?',
+          'ℹ️ Müavinət ümumi qaydalarla təyin olunur.',
+          'ℹ️ Şəxsə uşağın doğumunu qeydiyyata aldırıb DHŞ əldə etdikdən və ya uşaq üçün şəxsiyyət vəsiqəsi əldə edildikdən sonra müraciət etməsi tövsiyə olunur.']
+      ])
+    },
+    defn: {
+      ad: 'Dəfn üçün birdəfəlik müavinət',
+      qrup: 'sosial', b: 's0',
+      d: scSiyahi([
+        ['Mərhum şəxs əmək pensiyası, sosial müavinət alan, aktiv əmək müqaviləsi olan və ya aktiv vergi ödəyicisi olan şəxsdirmi?',
+          null,
+          '❌ Müavinət təyin edilmir.'],
+        ['Şəxsin təqdim etdiyi ölüm haqqında şəhadətnamə, ölüm haqqında arayış və dəfni təşkil edən şəxs barədə bələdiyyədən arayış tamdırmı?',
+          '✅ Vətəndaşın müraciəti təmin edilir.',
+          'ℹ️ Sənədlər tam olduqdan sonra müraciət etməsi tövsiyə olunur.'],
+        ['Təqdim edilən arayış bələdiyyədəndirmi?',
+          '✅ Vətəndaşın müraciəti təmin edilir.',
+          'ℹ️ Dəfni təşkil edən şəxs barədə bələdiyyədən arayış əldə etdikdən sonra müraciət etməsi tövsiyə olunur.'],
+        ['Mərhum şəxsin vəfat tarixi 01.03.2019-cu il tarixindən əvvəldirmi?',
+          'ℹ️ Bu zaman yerli icra hakimiyyəti başçısının inzibati ərazi dairəsi üzrə və ya sahə inzibati ərazi dairəsi üzrə nümayəndəsinin arayışı tələb olunur.',
+          'ℹ️ Bələdiyyədən arayış tələb olunur.'],
+        ['Məcburi köçkün statuslu mərhum şəxs işğaldan azad edilmiş ərazidə dəfn edilibmi?',
+          'ℹ️ Bu zaman dəfni təşkil edən şəxs barədə arayışı şəxs ya bələdiyyədən, ya da müvafiq Bərpa, Tikinti və İdarəetmə Xidmətindən təqdim edə bilər.',
+          'ℹ️ Yalnız bələdiyyədən təqdim etməlidir.'],
+        ['Ölüm haqqında arayışın nömrəsi ilə ölüm haqqında şəhadətnamənin nömrəsi eynidirmi?',
+          '✅ Vətəndaşın müraciəti təmin edilir.',
+          'ℹ️ Uyğunsuzluq aradan qaldırıldıqdan sonra müraciət etməsi tövsiyə olunur.'],
+        ['Mərhum şəxs aktiv əmək müqaviləsi olan şəxsdirmi?',
+          'ℹ️ Şəxsə iş yerinə müraciət etməsi tövsiyə olunur.',
+          'ℹ️ Müavinət almaq hüququ yoxlanılır.'],
+        ['Mərhum müavinət alan, həm də işləyən şəxsdirmi?',
+          'ℹ️ Şəxsə iş yerinə müraciət etməsi tövsiyə olunur.',
+          '✅ Müraciəti təmin edilir.'],
+        ['Mərhum pensiya alan, həm də işləyən şəxsdirmi?',
+          '✅ Vətəndaşın müraciəti təmin edilir.',
+          null],
+        ['Mərhum müavinət alan, həm də aktiv vergi ödəyicisi olan şəxsdirmi?',
+          'ℹ️ Şəxsə ya VÖEN-i dondurduqdan sonra müraciət etməsi, ya da fiziki şəxs kimi müraciət etməsi tövsiyə olunur.',
+          '✅ Müraciəti təmin edilir.'],
+        ['Mərhum şəxs özü-özünü sığorta edən fiziki şəxsdirmi?',
+          'ℹ️ Bu zaman sənədlər tamdırsa VQAS üzərindən müraciət göndərilir.',
+          'ℹ️ Müavinət almaq hüququ yoxlanılır.'],
+        ['Mərhum pensiya alan şəxs Naxçıvan qeydiyyatındadırmı?',
+          'ℹ️ Müraciət Naxçıvan üzrə təmin olunur. Şəxsin müraciəti müvafiq qurum üzrə yönləndirilir.',
+          null]
+      ])
+    },
+    hherbi: {
+      ad: 'Müddətli həqiqi hərbi xidmət hərbi qulluqçularının uşaqlarına aylıq sosial müavinət',
+      qrup: 'sosial', b: 'h1',
+      d: {
+        h1: scBX('Vətəndaş həqiqi hərbi xidmətdədirmi?', [null, 'h2'], ['❌ Müavinət təyin edilmir.', null]),
+        h2: scBX('Övladı varmı?', [null, 'h3'], ['❌ Müavinət təyin edilmir.', null]),
+        h3: scBX('Övladı 18 yaşa qədərdirmi?', [null, 'h4'], ['❌ Müavinət təyin edilmir.', null]),
+        h4: scBX('Şəxsiyyət vəsiqəsi varmı?', [null, 'h5'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h5: scBX('Doğum haqqında şəhadətnaməsi varmı?', [null, 'h6'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h6: scBX('Nikah və ya atalığı təsdiq edən sənəd varmı?', [null, 'h7'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h7: scBX('SHXÇDX arayışı varmı?', [null, 'h8'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h8: scBX('Arayış elektrondurmu?',
+          ['✅ 1 illik təyin edilir. Müraciət ƏMAS üzərindən göndərilir.', null],
+          ['✅ Səfərbərlikdən blankda möhürlü arayışdırsa — 1.6 ay təyin edilir. Müraciət ƏMAS üzərindən göndərilir.', null])
+      }
+    },
+    ceza: {
+      ad: 'Cəza çəkməkdən azad edilmiş tibbi və sosial yardıma ehtiyacı olan şəxslərə birdəfəlik müavinət',
+      qrup: 'sosial', b: 'c1',
+      d: {
+        c1: scBX('Xarici vətəndaş DYİ olan şəxsdirmi?', ['✅ Hüququ yaranır.', 'c2'], ['ℹ️ MYİ olsa hüququ yaranmır.', 'c2']),
+        c2: scBX('Son 1 ildə fərqli cinayət əməlinə görə tutulubmu?', ['✅ Hüququ yaranır.', 'c3'], ['❌ Hüququ yaranmır.', 'c3']),
+        c3: scBX('Cəzaçəkmədən azad olunma cəzanın sonu ilə əlaqədardırmı?', [null, 'c6'], [null, 'c4']),
+        c4: scBX('Cəzaçəkmədən şərti azad olunubmu?', [null, 'c5'], [null, 'c6']),
+        c5: scBX('Şərti azad olma ilə bağlı məhkəmə qərarı varmı?', [null, 'c6'], ['ℹ️ Şərti azad olma ilə bağlı məhkəmə qərarı təqdim edilməlidir.', 'c6']),
+        c6: scBX('Məhkəmə hökmü varmı?', [null, 'c7'], ['ℹ️ Məhkəmə hökmü təqdim edilməlidir.', 'c7']),
+        c7: scBX('Cəza müddətindən 6 ay azaldılma varmı?', [null, 'c8'], [null, null]),
+        c8: scBX('Cəza müddətinin 6 ay azaldılması ilə bağlı məhkəmə qərarı varmı?', [null, null], ['ℹ️ Cəza müddətinin azaldılması ilə bağlı məhkəmə qərarı təqdim edilməlidir.', null])
+      }
+    },
+    icbari: {
+      ad: 'Dövlət icbari şəxsi sığorta ödənişi',
+      qrup: 'sosial', b: 'n0',
+      d: scIcbariDugumler()
+    },
+    prezt: {
+      ad: 'Müharibə veteranlarına Azərbaycan Respublikası Prezidentinin təqaüdü',
+      qrup: 'sosial', b: 'p1',
+      d: {
+        p1: scBX('Müharibə veteranı vəsiqəniz varmı? (1-ci Qarabağ müharibəsində iştirak edibsə)',
+          ['ℹ️ Prezident təqaüdünün başlanğıc tarixinin Müharibə veteranı vəsiqəsinin verilmə tarixindən olacağı bildirilir. Keçmiş dövrə görə ödəniş əldə edilməsi ilə bağlı müraciət edildikdə qurumdan arayış əldə edilməsi bildirilir (vəsiqə dublikat verilibsə, arayışda köhnə vəsiqəyə əsasən verilməsi qeydi olmalıdır).', 'p2'],
+          ['ℹ️ Vəsiqə əldə edilməsi üçün xidmət etdiyi quruma müraciət etməsi tövsiyə edilir.', 'p2']),
+        p2: scBX('2-ci Qarabağ müharibəsində iştirak etmisinizmi?',
+          ['ℹ️ Şəxsə SÖAS üzərindən proaktiv Prezident təqaüdü təyin edilmiş olmalıdır — varsa şəxsə məlumat verilir. Olmadığı halda şəxsin müharibə iştirakçısı kimi “Zəfər” altsistemində olması yoxlanılır; məlumat olduğu halda şəxsdən ərizə qəbul edilib müvafiq quruma yönləndirilir.', 'p3'],
+          [null, 'p4']),
+        p3: scBX('Müraciət keçmiş dövrə Prezident təqaüdünün təyinatı ilə bağlıdırmı? (2-ci Qarabağ müharibəsində iştirak edibsə)',
+          ['ℹ️ Şəxsə vəsiqə verilən tarixdən Prezident təqaüdünün təyin ediləcəyi bildirilir. Məhkəmə olubsa və qərar qəbul edilibsə, hökm və qərarlar təqdim edildikdə təyinatın başlanğıc tarixi 01.01.2022-ci il tarixdən olur.', 'p4'],
+          [null, 'p4']),
+        p4: scBX('Müraciət keçmiş dövrə Prezident təqaüdünün və müavinətin təyinatı ilə bağlıdırmı? (1-ci Qarabağ müharibəsində iştirak edibsə, vəsiqə 01.04.2019-cu ildən qabaq verilibsə)',
+          ['ℹ️ Şəxsə Prezident təqaüdünün hüquq yaranan tarixdən — 01.04.2019-cu il tarixdən olması, müavinət isə keçmiş dövrdə 01.04.2019-cu ildən əvvəl alınıbsa (müraciət edilibsə), alınmayan müavinətin 3 il geri dövrə ödənişinin mümkün olması haqqında məlumat verilir.', 'p5'],
+          [null, 'p5']),
+        p5: scBX('Şəxs müharibə ilə əlaqədar əlilliyi olan və ya orqanizm funksiyasının 81-100% pozulmasına görə əlilliyi təyin edilmiş şəxsdirmi?',
+          ['ℹ️ Hər iki növ təqaüd eyni vaxtda ödənilmir. Azərbaycan Respublikası Prezidentinin müharibə veteranlarına təqaüdünü və müharibə və ya 1990-cı ilin 20 Yanvar hadisələri ilə əlaqədar əlilliyi olan şəxslərə, 1941-1945-ci illər Böyük Vətən müharibəsi iştirakçılarına, İkinci Dünya müharibəsi dövründə Leninqrad şəhərinin mühasirəsi zamanı şəhərin müəssisələrində, idarə və təşkilatlarında işləmiş və “Leninqradın müdafiəsinə görə” medalı, “Leninqrad mühasirəsində yaşayan” döş nişanı ilə təltif edilmiş şəxslərə, ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə əlilliyi olan şəxslərə (gözdən əlilliyi olan şəxslər istisna olmaqla), ümumi səbəblərdən orqanizmin funksiyalarının 81-100 faiz pozulmasına görə gözdən əlilliyi olan şəxslərə Prezident təqaüdünü almaq hüququ olan şəxslərə qeyd olunan təqaüdlərdən yalnız biri — ən yüksəyi verilir.', null],
+          [null, null])
+      }
+    },
+    elmi: {
+      ad: 'Elmi dərəcəsi olan şəxslərə Azərbaycan Respublikası Prezidentinin təqaüdü',
+      qrup: 'sosial', b: 'e1',
+      d: {
+        e1: scBX('Şəxsin elmi dərəcəsi varmı?', [null, 'e2'], ['❌ Hüququ yaranmır.', null],
+          'Əmək kitabçasında müvafiq qeydiyyat aparılan əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış, elmi dərəcəsi olan, işləməyən, əmək pensiyası hüququ olan şəxslərə təyin edilir.'),
+        e2: scBX('Əmək pensiyaçısıdırmı?', [null, 'e3'], ['❌ Hüququ yaranmır.', null]),
+        e3: scBX('“Əmək pensiyaları haqqında” Qanunun 20-ci maddəsinə əsasən qulluq stajına görə əmək pensiyasına əlavələr təyin edilmiş əmək pensiyaçısıdırmı?', ['❌ Hüququ yaranmır.', null], [null, 'e4']),
+        e4: scBX('Aktiv əmək fəaliyyəti olan şəxsdirmi? (əmək müqaviləsi və ya VÖEN üzrə)', ['❌ Hüququ yaranmır.', null], [null, 'e5']),
+        e5: scBX('Əmək kitabçasında müvafiq qeydiyyat aparılan əsas iş yeri üzrə elmi müəssisə və təşkilatlarda və ya təhsil müəssisələrində azı 25 il çalışmış şəxsdirmi?', ['✅ Hüququ yaranır.', null], ['❌ Hüququ yaranmır.', null])
+      }
+    },
+    umumi: {
+      ad: 'Əmək pensiyasının ümumi yenidən hesablanması',
+      qrup: 'pensiya', b: 'u1',
+      d: {
+        u1: scBX('AVT (avtomat) qaydasında təyinat aparılıbmı?', [null, 'u2'],
+          ['ℹ️ Elektron təyinat aparılmayıbsa PAS-da əlavə olunan sığorta stajı və arxiv sənədləri yoxlanılır.', 'u3']),
+        u2: scBX('01.01.2006-cı ilədək olan dövr üzrə təqdim etdiyi sənədlər əsasında sığorta stajı avtomat qaydada qeyd olunan sığorta stajından çoxdurmu?',
+          ['ℹ️ Sənədlər kargüzarlıq olunur.', 'u3'],
+          ['ℹ️ Elektron təyinatda qeyd olunan sığorta stajı qüvvədə qalır.', 'u3']),
+        u3: scBX('Pensiya minimum pensiya məbləğindədirmi?',
+          ['ℹ️ Təqdim olunan sənədlər üzrə yenidən hesablanmadan sonra məbləğ minimum pensiya məbləğindən çox olmadığı təqdirdə ərizə qəbul olunmur.', 'u4'],
+          ['ℹ️ 01.01.2006-cı ilədək olan dövr üzrə təqdim etdiyi sənədlər əsasında sığorta stajı avtomat qaydada qeyd olunan sığorta stajından çoxdursa sənədlər kargüzarlıq olunur.', 'u4']),
+        u4: scBX('Pensiya təyin olunan zaman və ya işdən çıxan tarixə nəzərə alınmayan kapital varmı?',
+          ['ℹ️ Nəzərə alınmayan kapital mövcuddursa, hesabat təqdim olunan tarixə təkrar yaxınlaşması və yenidən hesablanma barədə məlumat verilir.', 'u5'],
+          [null, 'u5'],
+          'Pensiya təyin olunan tarixə fərdi şəxsi hesabda qeyd olunan sığorta kapitalı yoxlanılır.'),
+        u5: scBX('Elektron təyinat aparılmayıbsa — PAS-da əlavə olunan sığorta stajı, arxiv sənədləri və təqdim olunan sənədlər arasında uyğunsuzluq varmı?',
+          ['ℹ️ Əyani təhsil dövrünü təsdiq edən sənədlərin, hərbi biletin, müharibədə iştirak dövrünün və qadınlarda övladlarının doğum şəhadətnaməsinin sığorta stajına aid olması yoxlanılır.', null],
+          [null, null])
+      }
+    }
+  };
+
   // Tab ilk dəfə açılanda axını başlat
   var _abiInitDone = false;
   var _elpInitDone = false;
@@ -5390,8 +6039,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     if(t==='elp' && !_elpInitDone){ _elpInitDone = true; elpStart(); }
     if(t==='yg' && !_ygInitDone){ _ygInitDone = true; ygStart(); }
     if(t==='udsy' && !_udsyInitDone){ _udsyInitDone = true; udsyStart(); }
+    var isSc = (t.indexOf('sc_')===0 && !!SC_AXINLAR[t.slice(3)]);
+    if(isSc && sc.id !== t.slice(3)){ scStart(t.slice(3)); }
     var fbFab = document.getElementById('fb-fab');
-    if(fbFab){ fbFab.style.display = (t==='abi'||t==='elp'||t==='yg'||t==='udsy') ? 'flex' : 'none'; }
+    if(fbFab){ fbFab.style.display = (t==='abi'||t==='elp'||t==='yg'||t==='udsy'||isSc) ? 'flex' : 'none'; }
     var stajFab = document.getElementById('stajcalc-fab');
     if(stajFab){ stajFab.style.display = (t==='abi'||t==='elp'||t==='yg'||t==='udsy') ? 'flex' : 'none'; }
   };
