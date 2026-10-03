@@ -5,31 +5,33 @@ const path = require('path');
 require('dotenv').config();
 
 // ----------------------------
-// Feedback üçün Postgres bağlantısı (Render-in pulsuz Postgres bazası)
+// Feedback üçün Firebase Firestore bağlantısı
+// (əvvəllər Render-in pulsuz Postgres bazası idi — 90 gündən sonra avtomatik
+// silindiyi üçün Firestore-a (pulsuz, müddətsiz) köçürüldü)
 // ----------------------------
-const { Pool } = require('pg');
-let feedbackPool = null;
-if (process.env.DATABASE_URL) {
-  feedbackPool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-  });
-  feedbackPool.query(`
-    CREATE TABLE IF NOT EXISTS feedback (
-      id SERIAL PRIMARY KEY,
-      message TEXT NOT NULL,
-      contact TEXT,
-      page TEXT,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `).then(() => {
-    console.log('Feedback cədvəli hazırdır.');
-  }).catch(e => {
-    console.warn('Feedback cədvəli yaradıla bilmədi:', e.message);
-  });
-} else {
-  console.warn('DATABASE_URL tapılmadı — feedback funksiyası deaktivdir.');
+const admin = require('firebase-admin');
+let feedbackDb = null;
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    // Render-də FIREBASE_SERVICE_ACCOUNT env dəyişəni ya birbaşa JSON (bütöv sətir),
+    // ya da base64-lə kodlanmış JSON ola bilər — hər ikisini dəstəkləyirik.
+    let raw = process.env.FIREBASE_SERVICE_ACCOUNT;
+    let serviceAccount;
+    try {
+      serviceAccount = JSON.parse(raw);
+    } catch (e1) {
+      serviceAccount = JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
+    }
+    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    feedbackDb = admin.firestore();
+    console.log('Firebase Firestore (feedback) hazırdır.');
+  } else {
+    console.warn('FIREBASE_SERVICE_ACCOUNT tapılmadı — feedback funksiyası deaktivdir.');
+  }
+} catch (e) {
+  console.warn('Firebase Firestore başladıla bilmədi:', e.message);
 }
+const FEEDBACK_COLLECTION = 'feedback';
 
 // Sual-cavab bazası
 let QA_DATA = {};
@@ -789,7 +791,7 @@ app.post('/api/arayish-pdf', async (req, res) => {
 // FEEDBACK
 // ----------------------------
 app.post('/api/feedback', async (req, res) => {
-  if (!feedbackPool) {
+  if (!feedbackDb) {
     return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
   }
   const { message, contact, page } = req.body || {};
@@ -800,10 +802,12 @@ app.post('/api/feedback', async (req, res) => {
     return res.status(400).json({ error: 'Mesaj boş ola bilməz.' });
   }
   try {
-    await feedbackPool.query(
-      'INSERT INTO feedback (message, contact, page) VALUES ($1, $2, $3)',
-      [message.trim().slice(0, 5000), (contact || '').trim().slice(0, 300), (page || '').trim().slice(0, 300)]
-    );
+    await feedbackDb.collection(FEEDBACK_COLLECTION).add({
+      message: message.trim().slice(0, 5000),
+      contact: (contact || '').trim().slice(0, 300),
+      page: (page || '').trim().slice(0, 300),
+      created_at: admin.firestore.FieldValue.serverTimestamp()
+    });
     res.json({ ok: true });
   } catch (e) {
     console.error('Feedback yazıla bilmədi:', e.message);
@@ -813,34 +817,48 @@ app.post('/api/feedback', async (req, res) => {
 
 // Sadə admin görünüşü: /api/feedback?key=ADMIN_KEY
 app.get('/api/feedback', async (req, res) => {
-  if (!feedbackPool) {
+  if (!feedbackDb) {
     return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
   }
   if (!process.env.ADMIN_KEY || req.query.key !== process.env.ADMIN_KEY) {
     return res.status(403).json({ error: 'İcazə yoxdur.' });
   }
   try {
-    const result = await feedbackPool.query('SELECT id, message, contact, page, created_at FROM feedback ORDER BY created_at DESC LIMIT 500');
-    res.json(result.rows);
+    const snap = await feedbackDb.collection(FEEDBACK_COLLECTION)
+      .orderBy('created_at', 'desc')
+      .limit(500)
+      .get();
+    const rows = snap.docs.map(doc => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        message: d.message,
+        contact: d.contact,
+        page: d.page,
+        created_at: d.created_at && d.created_at.toDate ? d.created_at.toDate().toISOString() : new Date().toISOString()
+      };
+    });
+    res.json(rows);
   } catch (e) {
+    console.error('Feedback oxuna bilmədi:', e.message);
     res.status(500).json({ error: 'Oxuna bilmədi.' });
   }
 });
 
 // Tək feedback sil: DELETE /api/feedback/:id?key=ADMIN_KEY
 app.delete('/api/feedback/:id', async (req, res) => {
-  if (!feedbackPool) {
+  if (!feedbackDb) {
     return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
   }
   if (!process.env.ADMIN_KEY || req.query.key !== process.env.ADMIN_KEY) {
     return res.status(403).json({ error: 'İcazə yoxdur.' });
   }
-  const id = parseInt(req.params.id, 10);
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ error: 'Yanlış id.' });
   }
   try {
-    await feedbackPool.query('DELETE FROM feedback WHERE id = $1', [id]);
+    await feedbackDb.collection(FEEDBACK_COLLECTION).doc(id).delete();
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'Silinə bilmədi.' });
@@ -849,7 +867,7 @@ app.delete('/api/feedback/:id', async (req, res) => {
 
 // Bütün feedback-ləri təmizlə: DELETE /api/feedback?key=ADMIN_KEY&all=1
 app.delete('/api/feedback', async (req, res) => {
-  if (!feedbackPool) {
+  if (!feedbackDb) {
     return res.status(503).json({ error: 'Feedback xidməti hazırda əlçatan deyil.' });
   }
   if (!process.env.ADMIN_KEY || req.query.key !== process.env.ADMIN_KEY) {
@@ -859,9 +877,18 @@ app.delete('/api/feedback', async (req, res) => {
     return res.status(400).json({ error: 'Hamısını silmək üçün ?all=1 əlavə edin.' });
   }
   try {
-    await feedbackPool.query('DELETE FROM feedback');
+    const snap = await feedbackDb.collection(FEEDBACK_COLLECTION).get();
+    const batchSize = 450; // Firestore batch limiti 500-dür, ehtiyat payı saxlayırıq
+    let docs = snap.docs;
+    while (docs.length) {
+      const chunk = docs.splice(0, batchSize);
+      const batch = feedbackDb.batch();
+      chunk.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
     res.json({ ok: true });
   } catch (e) {
+    console.error('Hamısı silinə bilmədi:', e.message);
     res.status(500).json({ error: 'Silinə bilmədi.' });
   }
 });

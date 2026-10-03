@@ -107,7 +107,7 @@
 
 <script>
   var ADMIN_KEY = '';
-  var lastMaxId = 0;
+  var lastMaxTs = 0;
   var pollTimer = null;
 
   function playBeep(){
@@ -163,7 +163,7 @@
         document.getElementById('login-box').style.display = 'none';
         document.getElementById('panel').style.display = 'block';
         renderList(res.d);
-        updateLastMaxId(res.d);
+        updateLastMaxTs(res.d);
         if(isFirstLoad){ startPolling(); }
       })
       .catch(function(){
@@ -173,8 +173,8 @@
       });
   }
 
-  function updateLastMaxId(items){
-    lastMaxId = items.reduce(function(max,it){ return Math.max(max, it.id); }, lastMaxId);
+  function updateLastMaxTs(items){
+    lastMaxTs = items.reduce(function(max,it){ var t = new Date(it.created_at).getTime()||0; return Math.max(max, t); }, lastMaxTs);
   }
 
   // Panel açıq qalanda arxa planda, xəbərdarlıqsız/spinnersiz yoxlayır — təzə rəy gələndə səs çıxarır
@@ -186,12 +186,12 @@
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(items){
           if(!items) return;
-          var newMax = items.reduce(function(max,it){ return Math.max(max, it.id); }, 0);
-          if(newMax > lastMaxId){
+          var newMax = items.reduce(function(max,it){ var t = new Date(it.created_at).getTime()||0; return Math.max(max, t); }, 0);
+          if(newMax > lastMaxTs){
             playBeep();
             renderList(items);
           }
-          lastMaxId = Math.max(lastMaxId, newMax);
+          lastMaxTs = Math.max(lastMaxTs, newMax);
         })
         .catch(function(){});
     }, 15000);
@@ -214,7 +214,7 @@
         '<td class="msg-cell" data-label="Mesaj">'+escapeHtml(it.message)+'</td>'+
         '<td class="date-cell" data-label="Tarix">'+fmtDate(it.created_at)+'</td>'+
         '<td class="date-cell" data-label="Səhifə">'+(it.page ? escapeHtml(it.page) : '—')+'</td>'+
-        '<td><button class="del-btn" onclick="delOne('+it.id+')" title="Sil">🗑</button></td>'+
+        '<td><button class="del-btn" onclick="delOne(\''+String(it.id).replace(/'/g, "\\'")+'\')" title="Sil">🗑</button></td>'+
       '</tr>';
     }).join('');
   }
