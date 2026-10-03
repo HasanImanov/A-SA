@@ -34,70 +34,14 @@ try {
 }
 const FEEDBACK_COLLECTION = 'feedback';
 
-// ----------------------------
-// Sual-cavab bazası üçün Firestore bağlantısı (qa_data.json əvəzinə — admin panelindən
-// canlı əlavə/redaktə/silmə üçün, serveri yenidən başlatmadan)
-// ----------------------------
-const QA_COLLECTION = 'qa_questions';
-let qaDb = feedbackDb; // eyni Firestore layihəsi
-
-// Sual-cavab bazası (Firestore-dan yüklənir; mövcud deyilsə qa_data.json-a geri qayıdır)
+// Sual-cavab bazası
 let QA_DATA = {};
-let QA_ID_MAP = {}; // kateqoriya -> [{id, sual, cavab, nov}] — admin CRUD üçün Firestore doc id-ləri
-
-async function qaMenbeyiniYukle() {
-  QA_DATA = {};
-  QA_ID_MAP = {};
-  if (qaDb) {
-    try {
-      const snap = await qaDb.collection(QA_COLLECTION).get();
-      if (!snap.empty) {
-        snap.docs.forEach(doc => {
-          const d = doc.data();
-          const kat = d.kateqoriya || 'Ümumi suallar';
-          if (!QA_DATA[kat]) { QA_DATA[kat] = []; QA_ID_MAP[kat] = []; }
-          QA_DATA[kat].push({ sual: d.sual, cavab: d.cavab, nov: d.nov || '' });
-          QA_ID_MAP[kat].push(doc.id);
-        });
-        console.log('QA data Firestore-dan yükləndi:', Object.keys(QA_DATA).map(k => k + ': ' + QA_DATA[k].length).join(', '));
-        return;
-      }
-    } catch (e) {
-      console.warn('QA data Firestore-dan yüklənmədi:', e.message);
-    }
-  }
-  // Firestore boşdursa/əlçatan deyilsə — yerli fayla geri qayıt
-  try {
-    const qaPath = path.join(__dirname, 'qa_data.json');
-    QA_DATA = JSON.parse(fs.readFileSync(qaPath, 'utf8'));
-    console.log('QA data yerli fayldan yükləndi:', Object.keys(QA_DATA).map(k => k + ': ' + QA_DATA[k].length).join(', '));
-  } catch (e) {
-    console.warn('QA data yüklənmədi:', e.message);
-  }
-}
-
-// Qa_data.json-u Firestore-a bir dəfəlik köçürmək üçün (admin panelindən çağırılır)
-async function qaMigrasiyasiniIcraEt() {
-  if (!qaDb) throw new Error('Firestore əlçatan deyil.');
+try {
   const qaPath = path.join(__dirname, 'qa_data.json');
-  const localData = JSON.parse(fs.readFileSync(qaPath, 'utf8'));
-  let sayilan = 0;
-  for (const kateqoriya in localData) {
-    const items = localData[kateqoriya];
-    let i = 0;
-    while (i < items.length) {
-      const chunk = items.slice(i, i + 400);
-      const batch = qaDb.batch();
-      chunk.forEach(item => {
-        const ref = qaDb.collection(QA_COLLECTION).doc();
-        batch.set(ref, { kateqoriya, sual: item.sual, cavab: item.cavab, nov: item.nov || '' });
-      });
-      await batch.commit();
-      sayilan += chunk.length;
-      i += 400;
-    }
-  }
-  return sayilan;
+  QA_DATA = JSON.parse(require('fs').readFileSync(qaPath, 'utf8'));
+  console.log('QA data yükləndi:', Object.keys(QA_DATA).map(k => k + ': ' + QA_DATA[k].length).join(', '));
+} catch(e) {
+  console.warn('QA data yüklənmədi:', e.message);
 }
 
 const Fuse = require('fuse.js');
@@ -117,8 +61,17 @@ function butunSuallariHazirla() {
   return siyahi;
 }
 
-let FUZZY_DATA = [];
-let fuse = null;
+const FUZZY_DATA = butunSuallariHazirla();
+
+const fuse = new Fuse(FUZZY_DATA, {
+  keys: ['sual'],
+  threshold: 0.4,
+  includeScore: true,
+  ignoreLocation: true,
+  distance: 1000
+});
+
+console.log('Fuzzy search hazırlandı:', FUZZY_DATA.length, 'sual yükləndi');
 
 const DAYANMA_SOZLERI = new Set([
   've', 'ya', 'ki', 'bu', 'necə', 'hansı', 'üçün', 'ilə', 'də', 'da',
@@ -249,8 +202,9 @@ function kokUygunlugu(a, b) {
 // halbuki demək olar hər sualda "edilir/ediləcək" kimi başqa formalar var) süni şəkildə
 // "nadir" sayılıb yüksək çəki alır, sonra kök-uyğunluğu vasitəsilə bu şişirdilmiş çəki
 // kökün BÜTÜN digər (əslində tamam adi) formalarına da yayılır və yanlış uyğunluqlar yaradır.
-let BUTUN_SOZLER = [];
-let KLASTER_EBEVEYNI = {};
+const BUTUN_SOZLER = [...new Set(FUZZY_DATA.flatMap(item => [...item._sozSet]))];
+const KLASTER_EBEVEYNI = {};
+BUTUN_SOZLER.forEach(s => { KLASTER_EBEVEYNI[s] = s; });
 function klasterKoku(x) {
   if (KLASTER_EBEVEYNI[x] !== x) KLASTER_EBEVEYNI[x] = klasterKoku(KLASTER_EBEVEYNI[x]);
   return KLASTER_EBEVEYNI[x];
@@ -259,9 +213,26 @@ function klasterlereBirlesdir(a, b) {
   const ra = klasterKoku(a), rb = klasterKoku(b);
   if (ra !== rb) KLASTER_EBEVEYNI[ra] = rb;
 }
-let KLASTER_SUAL_SAYI = {};
-let CEMI_SUAL_SAYI = 0;
-let KLASTER_CEKISI = {};
+for (let i = 0; i < BUTUN_SOZLER.length; i++) {
+  for (let j = i + 1; j < BUTUN_SOZLER.length; j++) {
+    if (kokUygunlugu(BUTUN_SOZLER[i], BUTUN_SOZLER[j])) {
+      klasterlereBirlesdir(BUTUN_SOZLER[i], BUTUN_SOZLER[j]);
+    }
+  }
+}
+
+const KLASTER_SUAL_SAYI = {};
+FUZZY_DATA.forEach(item => {
+  const buSualinKlasterleri = new Set([...item._sozSet].map(klasterKoku));
+  buSualinKlasterleri.forEach(k => {
+    KLASTER_SUAL_SAYI[k] = (KLASTER_SUAL_SAYI[k] || 0) + 1;
+  });
+});
+const CEMI_SUAL_SAYI = FUZZY_DATA.length;
+const KLASTER_CEKISI = {};
+Object.keys(KLASTER_SUAL_SAYI).forEach(k => {
+  KLASTER_CEKISI[k] = Math.log((CEMI_SUAL_SAYI + 1) / (KLASTER_SUAL_SAYI[k] + 1)) + 1;
+});
 function sozCekisi(soz) {
   if (KLASTER_EBEVEYNI[soz] !== undefined) return KLASTER_CEKISI[klasterKoku(soz)] || 1;
   // Korpusda heç görünməyən söz (yalnız sorğuda) — ən yaxın kök-uyğun klasterin çəkisini istifadə et
@@ -271,47 +242,7 @@ function sozCekisi(soz) {
   return 1;
 }
 
-// Sual-cavab bazası dəyişəndə (admin CRUD, ya da ilk başlanğıcda) bütün fuzzy axtarış
-// indeksini (Fuse, söz-kök klasterləri, IDF-bənzər çəkilər) sıfırdan qurur.
-function rebuildQAIndex() {
-  FUZZY_DATA = butunSuallariHazirla();
-  fuse = new Fuse(FUZZY_DATA, {
-    keys: ['sual'],
-    threshold: 0.4,
-    includeScore: true,
-    ignoreLocation: true,
-    distance: 1000
-  });
-  FUZZY_DATA.forEach(item => {
-    item._sozSet = new Set(sozlereAyir(item.sual));
-  });
-
-  BUTUN_SOZLER = [...new Set(FUZZY_DATA.flatMap(item => [...item._sozSet]))];
-  KLASTER_EBEVEYNI = {};
-  BUTUN_SOZLER.forEach(s => { KLASTER_EBEVEYNI[s] = s; });
-  for (let i = 0; i < BUTUN_SOZLER.length; i++) {
-    for (let j = i + 1; j < BUTUN_SOZLER.length; j++) {
-      if (kokUygunlugu(BUTUN_SOZLER[i], BUTUN_SOZLER[j])) {
-        klasterlereBirlesdir(BUTUN_SOZLER[i], BUTUN_SOZLER[j]);
-      }
-    }
-  }
-
-  KLASTER_SUAL_SAYI = {};
-  FUZZY_DATA.forEach(item => {
-    const buSualinKlasterleri = new Set([...item._sozSet].map(klasterKoku));
-    buSualinKlasterleri.forEach(k => {
-      KLASTER_SUAL_SAYI[k] = (KLASTER_SUAL_SAYI[k] || 0) + 1;
-    });
-  });
-  CEMI_SUAL_SAYI = FUZZY_DATA.length;
-  KLASTER_CEKISI = {};
-  Object.keys(KLASTER_SUAL_SAYI).forEach(k => {
-    KLASTER_CEKISI[k] = Math.log((CEMI_SUAL_SAYI + 1) / (KLASTER_SUAL_SAYI[k] + 1)) + 1;
-  });
-
-  console.log('Fuzzy axtarış indeksi hazırlandı:', FUZZY_DATA.length, 'sual.');
-}
+console.log('Söz sayı axtarışı hazırlandı.');
 
 const app = express();
 
@@ -963,108 +894,6 @@ app.delete('/api/feedback', async (req, res) => {
   }
 });
 
-// ----------------------------
-// SUAL-CAVAB BAZASI ADMİN CRUD
-// ----------------------------
-function adminIcazesiVarmi(req) {
-  return !!process.env.ADMIN_KEY && req.query.key === process.env.ADMIN_KEY;
-}
-
-// Bütün sualları kateqoriyalara görə, Firestore id-ləri ilə qaytarır
-app.get('/api/qa', (req, res) => {
-  if (!adminIcazesiVarmi(req)) return res.status(403).json({ error: 'İcazə yoxdur.' });
-  const neticeler = [];
-  Object.keys(QA_DATA).forEach(kat => {
-    QA_DATA[kat].forEach((item, i) => {
-      neticeler.push({
-        id: (QA_ID_MAP[kat] && QA_ID_MAP[kat][i]) || null,
-        kateqoriya: kat,
-        sual: item.sual,
-        cavab: item.cavab,
-        nov: item.nov || ''
-      });
-    });
-  });
-  res.json({ qaDbActive: !!qaDb, items: neticeler, kateqoriyalar: Object.keys(QA_DATA) });
+app.listen(PORT, () => {
+  console.log(`Rəfiq server işləyir: http://localhost:${PORT}`);
 });
-
-// qa_data.json-u Firestore-a bir dəfəlik köçürür (yalnız Firestore boşdursa mənalıdır)
-app.post('/api/qa/migrate', async (req, res) => {
-  if (!adminIcazesiVarmi(req)) return res.status(403).json({ error: 'İcazə yoxdur.' });
-  try {
-    const sayi = await qaMigrasiyasiniIcraEt();
-    await qaMenbeyiniYukle();
-    rebuildQAIndex();
-    res.json({ ok: true, sayi });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// Yeni sual əlavə et
-app.post('/api/qa', async (req, res) => {
-  if (!adminIcazesiVarmi(req)) return res.status(403).json({ error: 'İcazə yoxdur.' });
-  if (!qaDb) return res.status(503).json({ error: 'Firestore əlçatan deyil.' });
-  const { kateqoriya, sual, cavab, nov } = req.body || {};
-  if (!kateqoriya || !sual || !cavab) {
-    return res.status(400).json({ error: 'Kateqoriya, sual və cavab mütləqdir.' });
-  }
-  try {
-    await qaDb.collection(QA_COLLECTION).add({
-      kateqoriya: String(kateqoriya).trim(),
-      sual: String(sual).trim(),
-      cavab: String(cavab).trim(),
-      nov: (nov || '').trim()
-    });
-    await qaMenbeyiniYukle();
-    rebuildQAIndex();
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'Əlavə edilə bilmədi: ' + e.message });
-  }
-});
-
-// Mövcud sualı redaktə et
-app.put('/api/qa/:id', async (req, res) => {
-  if (!adminIcazesiVarmi(req)) return res.status(403).json({ error: 'İcazə yoxdur.' });
-  if (!qaDb) return res.status(503).json({ error: 'Firestore əlçatan deyil.' });
-  const { kateqoriya, sual, cavab, nov } = req.body || {};
-  if (!kateqoriya || !sual || !cavab) {
-    return res.status(400).json({ error: 'Kateqoriya, sual və cavab mütləqdir.' });
-  }
-  try {
-    await qaDb.collection(QA_COLLECTION).doc(req.params.id).set({
-      kateqoriya: String(kateqoriya).trim(),
-      sual: String(sual).trim(),
-      cavab: String(cavab).trim(),
-      nov: (nov || '').trim()
-    });
-    await qaMenbeyiniYukle();
-    rebuildQAIndex();
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'Yadda saxlanıla bilmədi: ' + e.message });
-  }
-});
-
-// Sualı sil
-app.delete('/api/qa/:id', async (req, res) => {
-  if (!adminIcazesiVarmi(req)) return res.status(403).json({ error: 'İcazə yoxdur.' });
-  if (!qaDb) return res.status(503).json({ error: 'Firestore əlçatan deyil.' });
-  try {
-    await qaDb.collection(QA_COLLECTION).doc(req.params.id).delete();
-    await qaMenbeyiniYukle();
-    rebuildQAIndex();
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'Silinə bilmədi: ' + e.message });
-  }
-});
-
-(async () => {
-  await qaMenbeyiniYukle();
-  rebuildQAIndex();
-  app.listen(PORT, () => {
-    console.log(`Rəfiq server işləyir: http://localhost:${PORT}`);
-  });
-})();

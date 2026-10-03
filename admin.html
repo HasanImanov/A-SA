@@ -45,33 +45,6 @@
   #empty-state .big{font-size:2.2rem;margin-bottom:10px;}
   #loading{text-align:center;color:var(--text-muted);padding:40px;font-size:0.9rem;}
 
-  /* Tabs */
-  .tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:2px solid var(--blue-pale);}
-  .tab-btn{background:none;border:none;padding:10px 16px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;}
-  .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
-
-  /* QA panel */
-  .qa-banner{background:#fff6e0;border:1.5px solid #f0c75e;border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:0.88rem;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
-  .qa-filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-  .qa-filters select, .qa-filters input{border:1.5px solid var(--blue-mid);border-radius:10px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:0.85rem;}
-  .qa-filters input{flex:1;min-width:180px;}
-  .qa-card{background:var(--white);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;}
-  .qa-card .qa-kat{color:var(--blue);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;}
-  .qa-card .qa-sual{font-weight:600;margin-bottom:6px;}
-  .qa-card .qa-cavab{color:var(--text-muted);font-size:0.86rem;white-space:pre-wrap;margin-bottom:10px;}
-  .qa-card .qa-actions{display:flex;gap:8px;}
-
-  /* Modal */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,30,50,0.45);z-index:200;align-items:center;justify-content:center;padding:16px;}
-  .modal-overlay.show{display:flex;}
-  .modal-box{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;}
-  .modal-box h3{font-family:'Nunito',sans-serif;color:var(--blue);margin:0 0 14px;}
-  .modal-box label{display:block;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;color:var(--text-muted);margin:12px 0 4px;}
-  .modal-box input, .modal-box select, .modal-box textarea{width:100%;border:1.5px solid var(--blue-mid);border-radius:10px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:0.88rem;box-sizing:border-box;}
-  .modal-box textarea{resize:vertical;min-height:80px;}
-  .modal-box .modal-actions{display:flex;gap:10px;margin-top:18px;}
-  .modal-box .modal-error{color:var(--danger);font-size:0.82rem;min-height:18px;margin-top:6px;}
-
   /* Mobil görünüş: cədvəl kartlara çevrilir */
   @media (max-width: 680px){
     .wrap{padding:18px 12px 50px;}
@@ -103,83 +76,31 @@
   </div>
 
   <div id="panel">
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-btn-feedback" onclick="switchAdminTab('feedback')">💬 Rəylər</button>
-      <button class="tab-btn" id="tab-btn-qa" onclick="switchAdminTab('qa')">❓ Suallar</button>
-    </div>
-
-    <div id="tab-feedback">
-      <div class="toolbar">
-        <span class="count-badge" id="count-badge">0 rəy</span>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" onclick="loadFeedback()">↻ Yenilə</button>
-          <button class="btn btn-danger" onclick="clearAll()">Hamısını sil</button>
-        </div>
-      </div>
-      <div id="loading" style="display:none;">Yüklənir...</div>
-      <div style="overflow-x:auto;">
-        <table class="fb-table" id="fb-table" style="display:none;">
-          <thead>
-            <tr>
-              <th>Ad Soyad</th>
-              <th>Mesaj</th>
-              <th>Tarix</th>
-              <th>Səhifə</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="list"></tbody>
-        </table>
-      </div>
-      <div id="empty-state" style="display:none;">
-        <div class="big">📭</div>
-        Hələ heç bir rəy yoxdur.
+    <div class="toolbar">
+      <span class="count-badge" id="count-badge">0 rəy</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="loadFeedback()">↻ Yenilə</button>
+        <button class="btn btn-danger" onclick="clearAll()">Hamısını sil</button>
       </div>
     </div>
-
-    <div id="tab-qa" style="display:none;">
-      <div id="qa-migrate-banner" class="qa-banner" style="display:none;">
-        <span>⚠️ Suallar hələ Firestore-a köçürülməyib — əlavə/redaktə etməzdən əvvəl bir dəfəlik köçür.</span>
-        <button class="btn btn-ghost" onclick="qaMigrate()">Sualları Firestore-a köçür</button>
-      </div>
-      <div class="toolbar">
-        <span class="count-badge" id="qa-count-badge">0 sual</span>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost" onclick="loadQA()">↻ Yenilə</button>
-          <button class="btn btn-ghost" style="background:var(--blue);color:#fff;" onclick="openQAModal()">+ Yeni sual</button>
-        </div>
-      </div>
-      <div class="qa-filters">
-        <select id="qa-kat-filter" onchange="renderQAList()"><option value="">Bütün kateqoriyalar</option></select>
-        <input id="qa-search" type="text" placeholder="Sualda axtar..." oninput="renderQAList()"/>
-      </div>
-      <div id="qa-loading" style="display:none;">Yüklənir...</div>
-      <div id="qa-list"></div>
-      <div id="qa-empty-state" style="display:none;">
-        <div class="big">❓</div>
-        Heç bir sual tapılmadı.
-      </div>
+    <div id="loading" style="display:none;">Yüklənir...</div>
+    <div style="overflow-x:auto;">
+      <table class="fb-table" id="fb-table" style="display:none;">
+        <thead>
+          <tr>
+            <th>Ad Soyad</th>
+            <th>Mesaj</th>
+            <th>Tarix</th>
+            <th>Səhifə</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="list"></tbody>
+      </table>
     </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="qa-modal-overlay">
-  <div class="modal-box">
-    <h3 id="qa-modal-title">Yeni sual</h3>
-    <input type="hidden" id="qa-form-id"/>
-    <label>Kateqoriya</label>
-    <input id="qa-form-kat" type="text" list="qa-kat-list" placeholder="məs. Əmək pensiyaları"/>
-    <datalist id="qa-kat-list"></datalist>
-    <label>Növ (ixtiyari)</label>
-    <input id="qa-form-nov" type="text" placeholder="məs. ABİ ilə bağlı suallar"/>
-    <label>Sual</label>
-    <textarea id="qa-form-sual"></textarea>
-    <label>Cavab</label>
-    <textarea id="qa-form-cavab" style="min-height:140px;"></textarea>
-    <div class="modal-error" id="qa-modal-error"></div>
-    <div class="modal-actions">
-      <button class="btn" style="background:var(--blue);color:#fff;flex:1;" onclick="saveQA()">Yadda saxla</button>
-      <button class="btn btn-ghost" onclick="closeQAModal()">Ləğv et</button>
+    <div id="empty-state" style="display:none;">
+      <div class="big">📭</div>
+      Hələ heç bir rəy yoxdur.
     </div>
   </div>
 </div>
@@ -322,152 +243,6 @@
       .then(function(d){
         if(d.ok){ loadFeedback(); }
         else { alert(d.error || 'Silinə bilmədi.'); }
-      })
-      .catch(function(){ alert('Şəbəkə xətası.'); });
-  }
-
-  // ----------------------------
-  // Suallar (QA) paneli
-  // ----------------------------
-  var QA_ITEMS = [];
-  var qaLoadedOnce = false;
-
-  function switchAdminTab(tab){
-    document.getElementById('tab-btn-feedback').classList.toggle('active', tab==='feedback');
-    document.getElementById('tab-btn-qa').classList.toggle('active', tab==='qa');
-    document.getElementById('tab-feedback').style.display = tab==='feedback' ? 'block' : 'none';
-    document.getElementById('tab-qa').style.display = tab==='qa' ? 'block' : 'none';
-    if(tab==='qa' && !qaLoadedOnce){ qaLoadedOnce = true; loadQA(); }
-  }
-
-  function loadQA(){
-    document.getElementById('qa-loading').style.display = 'block';
-    document.getElementById('qa-list').innerHTML = '';
-    document.getElementById('qa-empty-state').style.display = 'none';
-    fetch('/api/qa?key='+encodeURIComponent(ADMIN_KEY))
-      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
-      .then(function(res){
-        document.getElementById('qa-loading').style.display = 'none';
-        if(!res.ok){ alert(res.d.error || 'Suallar yüklənə bilmədi.'); return; }
-        QA_ITEMS = res.d.items || [];
-        var migrated = QA_ITEMS.length===0 || QA_ITEMS.every(function(it){ return it.id; });
-        document.getElementById('qa-migrate-banner').style.display = (res.d.qaDbActive && !migrated) ? 'flex' : 'none';
-        var katSel = document.getElementById('qa-kat-filter');
-        var katList = document.getElementById('qa-kat-list');
-        var kateqoriyalar = res.d.kateqoriyalar || [];
-        var curVal = katSel.value;
-        katSel.innerHTML = '<option value="">Bütün kateqoriyalar</option>' +
-          kateqoriyalar.map(function(k){ return '<option value="'+escapeHtml(k)+'">'+escapeHtml(k)+'</option>'; }).join('');
-        katSel.value = curVal;
-        katList.innerHTML = kateqoriyalar.map(function(k){ return '<option value="'+escapeHtml(k)+'">'; }).join('');
-        renderQAList();
-      })
-      .catch(function(){
-        document.getElementById('qa-loading').style.display = 'none';
-        alert('Şəbəkə xətası.');
-      });
-  }
-
-  function renderQAList(){
-    var kat = document.getElementById('qa-kat-filter').value;
-    var q = document.getElementById('qa-search').value.trim().toLowerCase();
-    var filtered = QA_ITEMS.filter(function(it){
-      if(kat && it.kateqoriya !== kat) return false;
-      if(q && it.sual.toLowerCase().indexOf(q) === -1 && it.cavab.toLowerCase().indexOf(q) === -1) return false;
-      return true;
-    });
-    document.getElementById('qa-count-badge').textContent = filtered.length+' sual';
-    var listEl = document.getElementById('qa-list');
-    if(filtered.length===0){
-      listEl.innerHTML = '';
-      document.getElementById('qa-empty-state').style.display = 'block';
-      return;
-    }
-    document.getElementById('qa-empty-state').style.display = 'none';
-    listEl.innerHTML = filtered.map(function(it, idx){
-      var realIdx = QA_ITEMS.indexOf(it);
-      return '<div class="qa-card">'+
-        '<div class="qa-kat">'+escapeHtml(it.kateqoriya)+(it.nov ? ' · '+escapeHtml(it.nov) : '')+'</div>'+
-        '<div class="qa-sual">'+escapeHtml(it.sual)+'</div>'+
-        '<div class="qa-cavab">'+escapeHtml(it.cavab)+'</div>'+
-        '<div class="qa-actions">'+
-          (it.id ? '<button class="btn btn-ghost" onclick="openQAModal('+realIdx+')">✏️ Redaktə et</button>' : '')+
-          (it.id ? '<button class="btn btn-danger" onclick="deleteQA('+realIdx+')">🗑 Sil</button>' : '<span style="color:var(--text-muted);font-size:0.8rem;">Köçürülməyib — redaktə üçün əvvəlcə Firestore-a köçür</span>')+
-        '</div>'+
-      '</div>';
-    }).join('');
-  }
-
-  function openQAModal(idx){
-    document.getElementById('qa-modal-error').textContent = '';
-    if(typeof idx === 'number'){
-      var it = QA_ITEMS[idx];
-      document.getElementById('qa-modal-title').textContent = 'Sualı redaktə et';
-      document.getElementById('qa-form-id').value = it.id;
-      document.getElementById('qa-form-kat').value = it.kateqoriya;
-      document.getElementById('qa-form-nov').value = it.nov || '';
-      document.getElementById('qa-form-sual').value = it.sual;
-      document.getElementById('qa-form-cavab').value = it.cavab;
-    } else {
-      document.getElementById('qa-modal-title').textContent = 'Yeni sual';
-      document.getElementById('qa-form-id').value = '';
-      document.getElementById('qa-form-kat').value = document.getElementById('qa-kat-filter').value || '';
-      document.getElementById('qa-form-nov').value = '';
-      document.getElementById('qa-form-sual').value = '';
-      document.getElementById('qa-form-cavab').value = '';
-    }
-    document.getElementById('qa-modal-overlay').classList.add('show');
-  }
-
-  function closeQAModal(){
-    document.getElementById('qa-modal-overlay').classList.remove('show');
-  }
-
-  function saveQA(){
-    var id = document.getElementById('qa-form-id').value;
-    var kateqoriya = document.getElementById('qa-form-kat').value.trim();
-    var nov = document.getElementById('qa-form-nov').value.trim();
-    var sual = document.getElementById('qa-form-sual').value.trim();
-    var cavab = document.getElementById('qa-form-cavab').value.trim();
-    if(!kateqoriya || !sual || !cavab){
-      document.getElementById('qa-modal-error').textContent = 'Kateqoriya, sual və cavab mütləqdir.';
-      return;
-    }
-    var url = id ? ('/api/qa/'+id+'?key='+encodeURIComponent(ADMIN_KEY)) : ('/api/qa?key='+encodeURIComponent(ADMIN_KEY));
-    var method = id ? 'PUT' : 'POST';
-    fetch(url, {
-      method: method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kateqoriya: kateqoriya, nov: nov, sual: sual, cavab: cavab })
-    })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d.ok){ closeQAModal(); loadQA(); }
-        else { document.getElementById('qa-modal-error').textContent = d.error || 'Yadda saxlanıla bilmədi.'; }
-      })
-      .catch(function(){ document.getElementById('qa-modal-error').textContent = 'Şəbəkə xətası.'; });
-  }
-
-  function deleteQA(idx){
-    var it = QA_ITEMS[idx];
-    if(!it || !it.id) return;
-    if(!confirm('Bu sualı silmək istədiyinizə əminsiniz?')) return;
-    fetch('/api/qa/'+it.id+'?key='+encodeURIComponent(ADMIN_KEY), { method: 'DELETE' })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d.ok){ loadQA(); }
-        else { alert(d.error || 'Silinə bilmədi.'); }
-      })
-      .catch(function(){ alert('Şəbəkə xətası.'); });
-  }
-
-  function qaMigrate(){
-    if(!confirm('qa_data.json-dakı bütün sualları Firestore-a köçürmək istədiyinizə əminsiniz? (Bir dəfəlik əməliyyatdır)')) return;
-    fetch('/api/qa/migrate?key='+encodeURIComponent(ADMIN_KEY), { method: 'POST' })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d.ok){ alert(d.sayi+' sual köçürüldü.'); loadQA(); }
-        else { alert(d.error || 'Köçürülə bilmədi.'); }
       })
       .catch(function(){ alert('Şəbəkə xətası.'); });
   }
