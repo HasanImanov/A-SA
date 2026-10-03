@@ -9,7 +9,8 @@ require('dotenv').config();
 // (əvvəllər Render-in pulsuz Postgres bazası idi — 90 gündən sonra avtomatik
 // silindiyi üçün Firestore-a (pulsuz, müddətsiz) köçürüldü)
 // ----------------------------
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 let feedbackDb = null;
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -22,8 +23,8 @@ try {
     } catch (e1) {
       serviceAccount = JSON.parse(Buffer.from(raw, 'base64').toString('utf8'));
     }
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-    feedbackDb = admin.firestore();
+    initializeApp({ credential: cert(serviceAccount) });
+    feedbackDb = getFirestore();
     console.log('Firebase Firestore (feedback) hazırdır.');
   } else {
     console.warn('FIREBASE_SERVICE_ACCOUNT tapılmadı — feedback funksiyası deaktivdir.');
@@ -806,7 +807,7 @@ app.post('/api/feedback', async (req, res) => {
       message: message.trim().slice(0, 5000),
       contact: (contact || '').trim().slice(0, 300),
       page: (page || '').trim().slice(0, 300),
-      created_at: admin.firestore.FieldValue.serverTimestamp()
+      created_at: FieldValue.serverTimestamp()
     });
     res.json({ ok: true });
   } catch (e) {
