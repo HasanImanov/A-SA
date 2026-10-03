@@ -5445,6 +5445,11 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   //  Hər axın: { ad, qrup:'sosial'|'pensiya', b: başlanğıc düyün, d: düyünlər }
   //  Düyün: { q, note?, c:[[cavab, mesaj|null, növbəti düyün|null], ...] } — növbəti null = axın bitir
   //  Özəl düyün: { ozel: funksiya, sonra:[mümkün növbəti düyünlər] } — kartı özü çəkir, scSual() ilə davam edir
+  //  Mesajın ilk işarəsi növünü bildirir:
+  //    ❌ imtina səbəbi — dərhal göstərilmir, axın dayanmır (suallar davam edir), sonda nəticədə sadalanır
+  //    ⛔ imtina səbəbi — axın elə burada bitir (davamı mənasız olan hallar)
+  //    ✅ müsbət nəticə — dərhal göstərilmir, imtina səbəbi yoxdursa sonda göstərilir
+  //    digər (ℹ️, 💰) — məlumat, dərhal göstərilir
   // ============================================================
   var sc = { id: null };
   function scFlowEl(){ return document.getElementById('sc-flow'); }
@@ -5465,6 +5470,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     wrap.innerHTML='<div class="abi-card user">'+text+'</div>';
     scFlowEl().appendChild(wrap);
     scScrollToCard(wrap);
+    return wrap;
   }
   function scLockCard(cardEl){
     var interactive = cardEl.querySelectorAll('button, input, select');
@@ -5507,17 +5513,53 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
     scAddBotCard(h+'</div>');
   }
   function scCavab(btn, key, i){
-    var c = SC_AXINLAR[sc.id].d[key].c[i];
+    var d = SC_AXINLAR[sc.id].d[key];
+    var c = d.c[i];
     scLockCard(btn.closest('.abi-card'));
-    scAddUserCard(c[0]);
-    if(c[1]) scAddBotCard(c[1]);
-    if(c[2]) scSual(c[2]); else scSon();
+    var u = scAddUserCard(c[0]);
+    var m = c[1], nx = c[2];
+    if(m){
+      var tip = m.charAt(0);
+      if(tip === '❌' || tip === '⛔'){
+        u._scV = { t:'red', q:d.q, a:c[0], m:m.slice(1).trim() };
+        // ❌ axını dayandırmır: bu cavabın davamı yoxdursa, digər cavabın apardığı suala keçilir
+        if(tip === '❌' && !nx){
+          for(var j=0; j<d.c.length && !nx; j++){ if(j !== i) nx = d.c[j][2]; }
+        }
+      } else if(tip === '✅'){
+        u._scV = { t:'ok', m:m.slice(1).trim() };
+      } else {
+        scAddBotCard(m);
+      }
+    }
+    if(nx) scSual(nx); else scSon();
   }
+  // Nəticə — imtina səbəbləri və müsbət nəticələr axındakı cavab kartlarından toplanır
+  var SC_UMUMI_RED = /^((Şəxsin müraciət |Müavinət |Yaşa görə aylıq müavinət almaq )?hüququ (yaranmır|yoxdur)|Müavinət təyin edilmir)\.?$/i;
+  var SC_UMUMI_OK = /^((Şəxsin müraciət |Müavinət |Yaşa görə aylıq müavinətlə bağlı )?hüququ (yaranır|var))\.?$/i;
   function scSon(){
-    scAddBotCard(
-      '<div class="abi-q">Suallar bitdi</div>'+
-      '<button class="abi-restart-btn" onclick="scStart(sc.id)">🔄 Yenidən başla</button>'
-    );
+    var red = [], ok = [];
+    Array.prototype.forEach.call(scFlowEl().children, function(w){
+      var v = w._scV;
+      if(!v) return;
+      if(v.t === 'red') red.push(v);
+      else if(!SC_UMUMI_OK.test(v.m) && ok.indexOf(v.m) === -1) ok.push(v.m);
+    });
+    var varOk = Array.prototype.some.call(scFlowEl().children, function(w){ return w._scV && w._scV.t === 'ok'; });
+    var h;
+    if(red.length){
+      h = '<div class="abi-result" style="background:#fdf1f0;color:#c0392b;border:1.5px solid #f1c0ba;">❌ Hüququ yaranmır</div>'+
+        '<div style="margin-top:12px;"><b>Səbəblər:</b>'+
+        scUl(red.map(function(v){
+          return '<b>'+v.q+'</b> — '+v.a+(SC_UMUMI_RED.test(v.m) ? '' : '<br/>'+v.m);
+        }))+'</div>';
+    } else if(varOk){
+      h = '<div class="abi-result pensiya">✅ Hüququ yaranır</div>'+
+        (ok.length ? '<div style="margin-top:12px;">'+ok.join('<br/>')+'</div>' : '');
+    } else {
+      h = '<div class="abi-q">Suallar bitdi</div>';
+    }
+    scAddBotCard(h+'<br/><button class="abi-restart-btn" onclick="scStart(sc.id)">🔄 Yenidən başla</button>');
   }
 
   // Bəli/Xeyr düyünü: b və x = [mesaj|null, növbəti|null]
@@ -5570,7 +5612,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
   }
   function scYasamCins(btn, isMale){
     scLockCard(btn.closest('.abi-card'));
-    scAddUserCard(isMale ? 'Kişi' : 'Qadın');
+    var u = scAddUserCard(isMale ? 'Kişi' : 'Qadın');
     sc.cins = isMale ? 'kishi' : 'qadin';
     var huquq = abiPensiyaYasiTarixi(sc.cins, sc.dogum);
     var hedd = abiTelebPensiyaYasi(sc.cins, huquq);
@@ -5580,11 +5622,12 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       '<div class="abi-q">Yaş həddi</div>'+
       'Hazırkı yaşı: <b>'+abiAgeAt(sc.dogum, bugun)+' il</b><br/>'+
       'Tələb olunan yaş həddi: <b>'+hedd.il+' il'+(hedd.ay ? ' '+hedd.ay+' ay' : '')+'</b><br/>'+
-      'Yaş həddinə çatma tarixi: <b>'+abiGunAyIl(huquq)+'</b><br/>'+
-      (catib
-        ? '✅ Yaşa görə aylıq müavinətlə bağlı hüququ <b>'+abiGunAyIl(huquq)+'</b> tarixindən yaranıb.'
-        : '❌ Yaş həddinə çatmayıb — hüquq <b>'+abiGunAyIl(huquq)+'</b> tarixində yaranacaq.')
+      'Yaş həddinə çatma tarixi: <b>'+abiGunAyIl(huquq)+'</b>'
     );
+    var heddMetn = hedd.il+' il'+(hedd.ay ? ' '+hedd.ay+' ay' : '');
+    u._scV = catib
+      ? { t:'ok', m:'Yaş həddinə ('+heddMetn+') <b>'+abiGunAyIl(huquq)+'</b> tarixində çatıb.' }
+      : { t:'red', q:'Yaş həddi ('+heddMetn+')', a:'çatmayıb', m:'Yaş həddinə <b>'+abiGunAyIl(huquq)+'</b> tarixində çatacaq.' };
     scSual('y4');
   }
 
@@ -5672,7 +5715,7 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       d[p+'e1'] = scBX('Hərbi xidmət vəzifələrini (xidməti vəzifələri) yerinə yetirərkən və ya həqiqi hərbi xidmət (toplanış) dövründə xəsarət (yaralanma, travma, kontuziya) almasına görə əlilliyi müəyyən edilən şəxsdirmi?',
         [null, p+'ed'], [null, p+'e2']);
       d[p+'e2'] = scBX('Həqiqi hərbi xidmət (toplanış) dövründə xəstələnməsinə görə həqiqi hərbi xidmətə (toplanışa) yararsız hesab edilərək ehtiyata və ya istefaya buraxıldığı gündən, həmçinin ehtiyata və ya istefaya buraxıldığı gündən həqiqi hərbi xidmət (toplanış) dövründə alınmış xəsarət (yaralanma, travma, kontuziya) və ya xəstəliklə əlaqədar üç il müddətində əlilliyi müəyyən edilən şəxsdirmi?',
-        [null, p+'ed'], ['❌ Hüququ yaranmır.', null]);
+        [null, p+'ed'], ['⛔ Hüququ yaranmır.', null]);
     }
     d[p+'ed'] = { q:'Orqanizmin funksiyalarının neçə faiz pozulmasına görə əlilliyi müəyyən edilib?', c:[
       ['81-100 faiz', scOdenis(o.elil[0], SC_SENED_ELIL), null],
@@ -5943,10 +5986,10 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
         h1: scBX('Vətəndaş həqiqi hərbi xidmətdədirmi?', [null, 'h2'], ['❌ Müavinət təyin edilmir.', null]),
         h2: scBX('Övladı varmı?', [null, 'h3'], ['❌ Müavinət təyin edilmir.', null]),
         h3: scBX('Övladı 18 yaşa qədərdirmi?', [null, 'h4'], ['❌ Müavinət təyin edilmir.', null]),
-        h4: scBX('Şəxsiyyət vəsiqəsi varmı?', [null, 'h5'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
-        h5: scBX('Doğum haqqında şəhadətnaməsi varmı?', [null, 'h6'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
-        h6: scBX('Nikah və ya atalığı təsdiq edən sənəd varmı?', [null, 'h7'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
-        h7: scBX('SHXÇDX arayışı varmı?', [null, 'h8'], ['ℹ️ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h4: scBX('Şəxsiyyət vəsiqəsi varmı?', [null, 'h5'], ['❌ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h5: scBX('Doğum haqqında şəhadətnaməsi varmı?', [null, 'h6'], ['❌ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h6: scBX('Nikah və ya atalığı təsdiq edən sənəd varmı?', [null, 'h7'], ['❌ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
+        h7: scBX('SHXÇDX arayışı varmı?', [null, 'h8'], ['❌ Sənəd təqdim edildikdən sonra müraciət edilməlidir.', null]),
         h8: scBX('Arayış elektrondurmu?',
           ['✅ 1 illik təyin edilir. Müraciət ƏMAS üzərindən göndərilir.', null],
           ['✅ Səfərbərlikdən blankda möhürlü arayışdırsa — 1.6 ay təyin edilir. Müraciət ƏMAS üzərindən göndərilir.', null])
@@ -5956,14 +5999,18 @@ ch.push(new P({alignment:A.CENTER, spacing:{before:0,after:0,line:22}, indent:{l
       ad: 'Cəza çəkməkdən azad edilmiş tibbi və sosial yardıma ehtiyacı olan şəxslərə birdəfəlik müavinət',
       qrup: 'sosial', b: 'c1',
       d: {
-        c1: scBX('Xarici vətəndaş DYİ olan şəxsdirmi?', ['✅ Hüququ yaranır.', 'c2'], ['ℹ️ MYİ olsa hüququ yaranmır.', 'c2']),
-        c2: scBX('Son 1 ildə fərqli cinayət əməlinə görə tutulubmu?', ['✅ Hüququ yaranır.', 'c3'], ['❌ Hüququ yaranmır.', 'c3']),
+        c1: { q:'Müraciət edən şəxs kimdir?', c:[
+          ['AR vətəndaşı', '✅ Hüququ yaranır.', 'c2'],
+          ['Daimi yaşamaq icazəsi (DYİ) olan xarici vətəndaş', '✅ Hüququ yaranır.', 'c2'],
+          ['Müvəqqəti yaşamaq icazəsi (MYİ) olan xarici vətəndaş', '❌ MYİ ilə hüququ yaranmır.', 'c2']
+        ] },
+        c2: scBX('Son 1 ildə fərqli cinayət əməlinə görə tutulubmu?', ['❌ Hüququ yaranmır.', 'c3'], [null, 'c3']),
         c3: scBX('Cəzaçəkmədən azad olunma cəzanın sonu ilə əlaqədardırmı?', [null, 'c6'], [null, 'c4']),
         c4: scBX('Cəzaçəkmədən şərti azad olunubmu?', [null, 'c5'], [null, 'c6']),
-        c5: scBX('Şərti azad olma ilə bağlı məhkəmə qərarı varmı?', [null, 'c6'], ['ℹ️ Şərti azad olma ilə bağlı məhkəmə qərarı təqdim edilməlidir.', 'c6']),
-        c6: scBX('Məhkəmə hökmü varmı?', [null, 'c7'], ['ℹ️ Məhkəmə hökmü təqdim edilməlidir.', 'c7']),
+        c5: scBX('Şərti azad olma ilə bağlı məhkəmə qərarı varmı?', [null, 'c6'], ['❌ Şərti azad olma ilə bağlı məhkəmə qərarı təqdim edilməlidir.', 'c6']),
+        c6: scBX('Məhkəmə hökmü varmı?', [null, 'c7'], ['❌ Məhkəmə hökmü təqdim edilməlidir.', 'c7']),
         c7: scBX('Cəza müddətindən 6 ay azaldılma varmı?', [null, 'c8'], [null, null]),
-        c8: scBX('Cəza müddətinin 6 ay azaldılması ilə bağlı məhkəmə qərarı varmı?', [null, null], ['ℹ️ Cəza müddətinin azaldılması ilə bağlı məhkəmə qərarı təqdim edilməlidir.', null])
+        c8: scBX('Cəza müddətinin 6 ay azaldılması ilə bağlı məhkəmə qərarı varmı?', [null, null], ['❌ Cəza müddətinin azaldılması ilə bağlı məhkəmə qərarı təqdim edilməlidir.', null])
       }
     },
     icbari: {
